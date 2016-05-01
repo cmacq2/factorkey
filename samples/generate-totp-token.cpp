@@ -4,7 +4,7 @@
 #include <QtDebug>
 
 /**
- * Example to generate a TOTP token using default settings.
+ * Example to generate a Google Authenticator style TOTP token using default settings.
  * Usage:
  *   $ generate-totp-token-sample mysecretkey
  *
@@ -23,11 +23,23 @@ int main(int argc, const char** argv)
         // secret = QString::fromUtf8(argv[1]);
         secret = QString::fromLocal8Bit(argv[1]);
     }
-
-    const otp::Algorithm& algorithm = otp::hmacAlgorithm(); /* use default hashing algorithm */
-    const otp::Key& keyEncoder = otp::createKey(); /* use default text codec for encoding the key */
-    const otp::Message& message = otp::totpMessage(); /* use default epoch and default time step */
-    const otp::Encoder& encoder = otp::otpEncoder(); /* use default length and default locale */
+    /*
+     * Use default hashing algorithm
+     */
+    const otp::Algorithm& algorithm = otp::hmacAlgorithm();
+    /*
+     * Use 'Google Authenticator' key format (i.e. base 32). See section #5 of RFC 3548:
+     * https://tools.ietf.org/html/rfc3548#section-5
+     */
+    const otp::Key& keyEncoder = otp::keyForAuthenticator();
+    /*
+     * Use default epoch and default time step
+     */
+    const otp::Message& message = otp::totpMessage();
+    /*
+     * Use default length and default locale
+     */
+    const otp::Encoder& encoder = otp::otpEncoder();
 
     qDebug() << "Token is:" << otp::token(secret, message, keyEncoder, algorithm, encoder);
     return 0;

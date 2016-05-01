@@ -384,6 +384,32 @@ namespace otp
         return d->writeSecret(secret);
     }
 
+    bool GenericTokenParameters::secretEncodingType(EncodingType& type)
+    {
+        Q_D(TokenParameters);
+        int v;
+        if(lookupNumericValue<int>(d, Storage::OTP_KEY_ENCODING_TYPE, v, (int) EncodingType::Unknown))
+        {
+            switch((EncodingType) v)
+            {
+                case EncodingType::Text:
+                case EncodingType::Base32:
+                case EncodingType::Unknown:
+                    type = (EncodingType) v;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        return false;
+    }
+
+    bool GenericTokenParameters::setSecretEncodingType(const EncodingType& type)
+    {
+        Q_D(TokenParameters);
+        return d->storage()->writeParam(Storage::OTP_KEY_ENCODING_TYPE, QVariant((int) type));
+    }
+
     bool GenericTokenParameters::secretEncoding(QTextCodec ** codec) const
     {
         Q_D(const TokenParameters);
@@ -518,12 +544,21 @@ namespace otp
 
         virtual bool key(Key& key) const
         {
-            QTextCodec * codec = nullptr;
-            GenericTokenParameters * p = qobject_cast<GenericTokenParameters *>(params());
-            if(p && p->secretEncoding(&codec))
+            GenericOTPParameters * p = qobject_cast<GenericOTPParameters *>(params());
+            EncodingType type;
+            if(p && p->secretEncodingType(type))
             {
-                key = Key(otp::createKey(codec));
-                return true;
+                switch(type)
+                {
+                    case EncodingType::Unknown:
+                    case EncodingType::Base32:
+                        key = otp::keyForAuthenticator();
+                        return true;
+                    case EncodingType::Text:
+                        return forCodec(key);
+                    default:
+                        return false;
+                }
             }
             return false;
         }
@@ -570,6 +605,18 @@ namespace otp
             if(p && p->hashAlgorithm(a))
             {
                 hash = a;
+                return true;
+            }
+            return false;
+        }
+    protected:
+        bool forCodec(Key& key) const
+        {
+            QTextCodec * codec = nullptr;
+            GenericTokenParameters * p = qobject_cast<GenericTokenParameters *>(params());
+            if(p && p->secretEncoding(&codec))
+            {
+                key = Key(otp::keyForCodec(codec));
                 return true;
             }
             return false;

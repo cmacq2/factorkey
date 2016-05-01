@@ -21,7 +21,9 @@ namespace otp
     static const quint64 DEFAULT_TIMESTEP_MSEC = 30000U;
     static const qint64 DEFAULT_EPOCH = 0;
 
-    Key createKey(const QTextCodec * codec = nullptr);
+    Key keyForCodec(const QTextCodec * codec = nullptr);
+    Key keyForAuthenticator(void);
+
     Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
     Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec = 0);
     Message totpMessage(qint64 epoch = 0, quint64 windowDurationMSec = 0);

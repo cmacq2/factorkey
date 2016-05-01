@@ -44,13 +44,19 @@ namespace otp
         TokenParameters(TokenParametersPrivate * d, QObject * parent = 0);
     };
 
+    enum EncodingType : int {
+        Text, Base32, Unknown
+    };
+
     class GenericTokenParameters: public TokenParameters
     {
         Q_OBJECT
     public:
         bool setSecretEncoding(const QTextCodec * codec);
         bool setHashAlgorithm(const QCryptographicHash::Algorithm& hash);
+        bool setSecretEncodingType(const EncodingType& type);
 
+        bool secretEncodingType(EncodingType& type);
         bool secretEncoding(QTextCodec ** codec) const;
         bool hashAlgorithm(QCryptographicHash::Algorithm& hash) const;
         virtual ~GenericTokenParameters();

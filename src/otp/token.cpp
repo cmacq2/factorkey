@@ -1,21 +1,35 @@
 #include "token.h"
+
+#include "base32.h"
+
 #include <QMessageAuthenticationCode>
+#include <QtDebug>
 
 namespace otp
 {
     Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
     {
-        return Algorithm([&hash](const QByteArray& k, const QByteArray& m) -> QByteArray
+        return Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
         {
             return hmac(k, m, hash);
         });
     }
 
-    Key createKey(const QTextCodec * codec)
+    Key keyForCodec(const QTextCodec * codec)
     {
         return Key([codec](const QString& key) -> QByteArray
         {
             return codec ? codec->fromUnicode(key) : key.toUtf8();
+        });
+    }
+
+    Key keyForAuthenticator(void)
+    {
+        return Key([](const QString& key) -> QByteArray
+        {
+            bool ok = false;
+            QByteArray result = otp::base32::decode(key, &ok);
+            return ok ? result : QByteArray();
         });
     }
 
@@ -77,10 +91,16 @@ namespace otp
 
     QByteArray hotpTokenMessage(quint64 counter)
     {
-        auto length = 16;
         QByteArray result;
-        result.reserve(length);
-        return result.setNum(counter, 16).rightJustified(length, '0', true);
+        result.resize(8);
+        char * data = result.data();
+        for(int i = 0; i < 8; ++i)
+        {
+            data[7 - i] = counter & 0xFF;
+            counter = counter >> 8;
+        }
+        qDebug() << "hotpTokenMessage ==" << result.toHex();
+        return result;
     }
 
     QString encodeDummyFormat(const QByteArray& token)
@@ -90,6 +110,7 @@ namespace otp
 
     QString encodeOTPToken(const QByteArray& token, const QLocale& locale, uint length)
     {
+        qDebug() << "encode otp token :: raw token hex:" << token.toHex();
         return encodeOTPToken(hotpTokenValue(token), locale, length);
     }
 
@@ -155,25 +176,33 @@ namespace otp
         if(length > 0)
         {
             /*
-             * Truncate the HMAC down to (at most) 8 bytes long sequence.
+             * Truncate the HMAC down to (at most) 4 bytes long sequence.
              * The last nibble is interpreted as the starting index of the sequence within the HMAC.
              * This should yield values between 0 and 15 for the offset.
              */
+            qDebug() << "hotpTokenValue(): token length:" << length << "mid offset" << (0x0F & token.at(length - 1)) << "sizeof():" << sizeof(quint32);
             auto truncated = token.mid(0x0F & token.at(length - 1), sizeof(quint32));
+            qDebug() << "hotpTokenValue(): selected:" << truncated.toHex();
 
             /*
              * Interpret the (at most) 4 byte truncated sequence as a (big endian) unsigned integer.
-             * To avoid endianness issues, use hex encoding -> hex decoding.
+             * Mask out the high order bit.
+             * Code adapted from the HOTP spec. Refer to section 5.4 of RFC 4226.
+             * See: https://tools.ietf.org/html/rfc4226#section-5.4
              */
-            auto ok = false;
-            auto hexed = truncated.toHex();
-
-            /* mask out the high order bit as per HOTP spec */
-            quint32 value = hexed.toULong(&ok, 16) &  0x7FFFFFFFU;
-
-            if(ok)
+            const char * tokenResult = truncated.constData();
+            switch(truncated.size())
             {
-                return value;
+                case 0:
+                    return 0U;
+                case 1:
+                    return tokenResult[0] & 0xFF;
+                case 2:
+                    return ((tokenResult[0] & 0x7F) << 8) | (tokenResult[1] & 0xFF);
+                case 3:
+                    return ((tokenResult[0] & 0x7F) << 16) | ((tokenResult[1] & 0xFF) << 8) | (tokenResult[2] & 0xFF);
+                case 4:
+                    return ((tokenResult[0] & 0x7F) << 24) | ((tokenResult[1] & 0xFF) << 16) | ((tokenResult[2] & 0xFF) << 8) | (tokenResult[3] & 0xFF);
             }
         }
         return 0;
@@ -184,7 +213,9 @@ namespace otp
         QMessageAuthenticationCode mac(hash);
         mac.setKey(key);
         mac.addData(message);
-        return mac.result();
+        QByteArray a = mac.result();
+        qDebug() << "hmac :: key =" << key.toHex() << "algo =" << hash <<  "hashing output (hex):" << a.toHex();
+        return a;
     }
 
     QString token(const QByteArray& key, const QByteArray& message,
@@ -197,6 +228,9 @@ namespace otp
     QString token(const QString& password,
                   const Message& message, const Key& key, const Algorithm& algorithm, const Encoder& encoder)
     {
-        return token(key(password), message(), algorithm, encoder);
+        QByteArray k = key(password);
+        QByteArray m = message();
+        qDebug() << "token :: key =" << k.toHex() << "message =" << m.toHex();
+        return token(k, m, algorithm, encoder);
     }
 }
