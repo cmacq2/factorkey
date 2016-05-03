@@ -19,7 +19,7 @@ static void result(const char * testCase, qint64 now, quint64 count)
 
 void TOTPCounterTest::testSample_data(void)
 {
-    static qint64 corpus[15] {
+    static qint64 corpus[5] {
         0,
         15,
         otp::DEFAULT_TIMESTEP_MSEC - 5,
