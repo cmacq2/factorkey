@@ -27,6 +27,10 @@ add_test(totp-counter totp-counter)
 add_executable(totp-counter totp-counter.cpp ${token_UUT_SRCS})
 target_link_libraries(totp-counter Qt5::Core Qt5::Test)
 
+add_test(rfc4226-hotp-compat rfc4226-hotp-compat)
+add_executable(rfc4226-hotp-compat rfc4226-hotp-compat.cpp ${token_UUT_SRCS})
+target_link_libraries(rfc4226-hotp-compat Qt5::Core Qt5::Test)
+
 add_test(sailotp-hotp-compat sailotp-hotp-compat)
 add_executable(sailotp-hotp-compat sailotp-hotp-compat.cpp ${token_UUT_SRCS})
 target_link_libraries(sailotp-hotp-compat Qt5::Core Qt5::Test)
