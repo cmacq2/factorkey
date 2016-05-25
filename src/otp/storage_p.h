@@ -24,6 +24,24 @@ namespace otp
         virtual bool poll(void);
     };
 
+    class StorageProviderPrivate
+    {
+    public:
+        virtual bool open(void);
+        virtual bool close(void);
+        virtual bool contains(const QString& entry);
+        virtual bool entries(QStringList&);
+        virtual Storage * lookup(const QString& entry);
+        virtual Storage * create(const QString& entry, OTPTokenType type);
+        virtual ~StorageProviderPrivate();
+    protected:
+        virtual Storage * doLookup(const QString&);
+        virtual Storage * doCreate(const QString&, OTPTokenType);
+        virtual bool isOpened(void);
+        virtual bool openBackend(void);
+        virtual bool closeBackend(void);
+    };
+
     namespace internal
     {
         class WalletManager;

@@ -8,13 +8,13 @@ namespace otp
     {
         static QChar pad(void)
         {
-            static QChar _pad = QLatin1Char('=');
+            static const QChar _pad = QLatin1Char('=');
             return _pad;
         }
 
         QChar encodeByte(int idx)
         {
-            static QChar alphabet[32] =
+            static const QChar alphabet[32] =
             {
                 QLatin1Char('A'),
                 QLatin1Char('B'),

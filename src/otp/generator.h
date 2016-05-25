@@ -20,9 +20,6 @@ namespace otp
     {
         Q_OBJECT
     public:
-//         static TokenParameters * createNew(OTPTokenType type, Storage * store, QObject * parent = 0);
-//         static TokenParameters * createNew(OTPTokenType type, const QString& entryId, Storage * store, QObject * parent = 0);
-//         static TokenParameters * loadExisting(const QString& entryId, Storage * store, QObject * parent = 0);
         bool resync(void);
         bool commit(void);
         bool setSecret(const QString& key);
@@ -37,14 +34,14 @@ namespace otp
     private:
         Q_DISABLE_COPY(TokenParameters)
         QScopedPointer<TokenParametersPrivate> const d_ptr;
-//         static TokenParameters * forDptr(TokenParametersPrivate * d, QObject * parent = 0);
     protected:
         Q_DECLARE_PRIVATE(TokenParameters)
     protected:
         TokenParameters(TokenParametersPrivate * d, QObject * parent = 0);
     };
 
-    enum EncodingType : int {
+    enum EncodingType : int
+    {
         Text, Base32, Unknown
     };
 

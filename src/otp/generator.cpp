@@ -38,83 +38,12 @@ namespace otp
         }
     }
 
-//     static QString typeToString(OTPTokenType type)
-//     {
-//         auto l  = QLocale::c();
-//         return l.toString((int) type);
-//     }
-
-//     static bool typeOf(const QMap<QString, QString>& params, OTPTokenType& type);
-
     class TokenParametersPrivate
     {
     public:
         TokenParametersPrivate(Storage * store): m_storage(store) {}
-//         TokenParametersPrivate(OTPTokenType type, const QString& entryId, Storage * store):
-//         m_type(type), m_entryId(entryId), m_storage(store)
-//         {
-//             set(Storage::OTP_TOKEN_TYPE, typeToString(type));
-//         }
-
-//         TokenParametersPrivate(OTPTokenType type, const QString& entryId, Storage * store, QMap<QString,QString>& params):
-//             m_type(type), m_entryId(entryId), m_storage(store), m_params(params)
-//         {
-//             set(Storage::OTP_TOKEN_TYPE, typeToString(type));
-//             m_sync = true;
-//         }
-
-    public:
-
-//         static TokenParametersPrivate * createNew(OTPTokenType type, const QString& entryId, Storage * store)
-//         {
-//             if(entryId.isNull() || entryId.isEmpty() || !store || store->contains(entryId))
-//             {
-//                 return nullptr;
-//             }
-//             return new TokenParametersPrivate(type, entryId, store);
-//         }
-//
-//         static TokenParametersPrivate * createNew(OTPTokenType type, Storage * store)
-//         {
-//             if(!store)
-//             {
-//                 return nullptr;
-//             }
-//
-//             QString entryId;
-//             do {
-//                 auto uuid = QUuid::createUuid();
-//                 entryId = uuid.toString();
-//             }
-//             while (store->contains(entryId));
-//
-//             return new TokenParametersPrivate(type, entryId, store);
-//         }
-//
-//         static TokenParametersPrivate * loadExisting(const QString& entryId, Storage * store)
-//         {
-//             if(entryId.isNull() || entryId.isEmpty())
-//             {
-//                 return nullptr;
-//             }
-//
-//             QMap<QString,QString> params;
-//             OTPTokenType type;
-//             if(store && store->readParams(entryId, params) && typeOf(params, type))
-//             {
-//                 return new TokenParametersPrivate(type, entryId, store, params);
-//             }
-//
-//             return nullptr;
-//         }
-
     public:
         virtual ~TokenParametersPrivate() {}
-
-//         OTPTokenType type(void) const
-//         {
-//             return m_storage->type();
-//         }
 
         bool setCodec(const QString& key, const QTextCodec * codec)
         {
@@ -188,58 +117,10 @@ namespace otp
             return false;
         }
 
-//         QString id(void) const
-//         {
-//             return m_storage->entryId(); //m_entryId;
-//         }
-
         Storage * storage(void) const
         {
             return m_storage;
         }
-
-//         bool set(const QString& key, const QVariant& value)
-//         {
-//             return m_storage->writeParam(key, value);
-//             //m_params.insert(key, value);
-//         }
-//
-//         bool resync(void)
-//         {
-//             return m_storage->poll();
-//         }
-//
-//         bool commitParams()
-//         {
-//             return m_storage->commit();
-//         }
-        /*
-            m_sync = false;
-            QMap<QString,QString> params;
-            for(const QString& k: names)
-            {
-                if(m_params.contains(k))
-                {
-                    params.insert(k, m_params.value(k));
-                }
-            }
-            return m_storage->writeParams(id(), m_params);
-        }
-
-        bool readParams(void)
-        {
-            if(!m_sync)
-            {
-                m_sync = m_storage->readParams(id(), m_params);
-            }
-            return m_sync;
-        }
-
-        bool resync(void)
-        {
-            m_sync = false;
-            return readParams();
-        }*/
 
     private:
         Storage * const m_storage;
@@ -271,30 +152,6 @@ namespace otp
     {
         return var.toUInt(ok);
     }
-/*
-    static bool typeOf(const QMap<QString, QString>& params, OTPTokenType& type)
-    {
-        if(params.contains(Storage::OTP_TOKEN_TYPE))
-        {
-            bool ok = false;
-            auto v = convertToNumeric<int>(Storage::OTP_TOKEN_TYPE, &ok);
-            if(ok)
-            {
-                switch((OTPTokenType) v)
-                {
-                    case HOTP:
-                    case TOTP:
-                    case SteamGuard:
-                    case DummyHMAC:
-                        type = (OTPTokenType) v;
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        }
-        return false;
-    }*/
 
     template<typename T>
     static bool lookupNumericValue(const TokenParametersPrivate * p, const QString& key, T& value, const T& defaultValue = 0)
@@ -850,40 +707,6 @@ namespace otp
                 return nullptr;
         }
     }
-
-//     static TokenParameters * forDptr(TokenParametersPrivate * d, QObject * parent)
-//     {
-//         if(!d)
-//         {
-//             return nullptr;
-//         }
-//
-//         switch(d->type())
-//         {
-//             case otp::OTPTokenType::HOTP: return new HOTPTokenParameters(d, parent);
-//             case otp::OTPTokenType::TOTP: return new TOTPTokenParameters(d, parent);
-//             case otp::OTPTokenType::SteamGuard: return new SteamGuardParameters(d, parent);
-//             case otp::OTPTokenType::DummyHMAC: return new DummyParameters(d, parent);
-//             default:
-//                 delete d;
-//                 return nullptr;
-//         }
-//     }
-
-//     TokenParameters * TokenParameters::createNew(OTPTokenType type, Storage * store, QObject * parent)
-//     {
-//         return forDptr(TokenParametersPrivate::createNew(type, store), parent);
-//     }
-//
-//     TokenParameters * TokenParameters::createNew(OTPTokenType type, const QString& entryId, Storage * store, QObject * parent)
-//     {
-//         return forDptr(TokenParametersPrivate::createNew(type, entryId, store), parent);
-//     }
-//
-//     TokenParameters * TokenParameters::loadExisting(const QString& entryId, Storage * store, QObject * parent)
-//     {
-//         return forDptr(TokenParametersPrivate::loadExisting(entryId, store), parent);
-//     }
 
     static TokenGeneratorPrivate * forParams(TokenParameters * p)
     {
