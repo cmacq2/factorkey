@@ -1,5 +1,5 @@
 
-#include "otp/token.h"
+#include "otp/oath/oath.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -14,7 +14,7 @@ private Q_SLOTS:
 
 static void result(const char * testCase, qint64 now, quint64 count)
 {
-    QTest::newRow(qPrintable(QLatin1String(testCase))) << otp::DEFAULT_EPOCH << now << otp::DEFAULT_TIMESTEP_MSEC << count;
+    QTest::newRow(qPrintable(QLatin1String(testCase))) << otp::oath::DEFAULT_EPOCH << now << otp::oath::DEFAULT_TIMESTEP_MSEC << count;
 }
 
 void TOTPCounterTest::testSample_data(void)
@@ -22,10 +22,10 @@ void TOTPCounterTest::testSample_data(void)
     static qint64 corpus[5] {
         0,
         15,
-        otp::DEFAULT_TIMESTEP_MSEC - 5,
+        otp::oath::DEFAULT_TIMESTEP_MSEC - 5,
 
-        otp::DEFAULT_TIMESTEP_MSEC,
-        otp::DEFAULT_TIMESTEP_MSEC + 25
+        otp::oath::DEFAULT_TIMESTEP_MSEC,
+        otp::oath::DEFAULT_TIMESTEP_MSEC + 25
     };
 
     QTest::addColumn<qint64>("epoch");
@@ -49,7 +49,7 @@ void TOTPCounterTest::testSample(void)
     QFETCH(qint64, now);
     QFETCH(quint64, step);
 
-    QTEST(otp::countTokens(now, epoch, step), "counter");
+    QTEST(otp::oath::countTokens(now, epoch, step), "counter");
 }
 
 QTEST_APPLESS_MAIN(TOTPCounterTest)

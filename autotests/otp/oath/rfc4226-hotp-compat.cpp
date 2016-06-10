@@ -1,6 +1,7 @@
 
-#include "otp/base32.h"
-#include "otp/token.h"
+#include "otp/base32/base32.h"
+#include "otp/oath/oath.h"
+#include "otp/oath/token.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -13,37 +14,30 @@ private Q_SLOTS:
     void testSample(void);
     void testSample_data(void);
 private:
-    otp::Key m_key;
-    otp::Algorithm m_algo;
-    otp::Encoder m_encoder;
+    otp::token::Key m_key;
+    otp::token::Algorithm m_algo;
+    otp::token::Encoder m_encoder;
 };
 
 void RFC4226TestVectorCompatTest::initTestCase(void)
 {
-    m_key = otp::keyForAuthenticator();
-    m_algo = otp::hmacAlgorithm();
-    m_encoder = otp::otpEncoder();
+    m_key = otp::oath::keyForAuthenticator();
+    m_algo = otp::oath::hmacAlgorithm();
+    m_encoder = otp::oath::oathEncoder();
 }
-
-// static void result(quint64 counter, const char * expected, int l)
-// {
-//
-//     qDebug() << "secret is:" << secret;
-//     QTest::newRow(qPrintable(QStringLiteral("RFC 4226 test vector, counter value = %1").arg(counter))) << secret << counter << QString::fromLocal8Bit(output);
-// }
 
 void RFC4226TestVectorCompatTest::testSample(void)
 {
 
     QFETCH(QString, secret);
     QFETCH(quint64, counter);
-    const otp::Message msg([counter](void) -> QByteArray
+    const otp::token::Message msg([counter](void) -> QByteArray
     {
-        return otp::hotpTokenMessage(counter);
+        return otp::oath::hotpTokenMessage(counter);
     });
 
 
-    QTEST(otp::token(otp::base32::recode(secret), msg, m_key, m_algo, m_encoder), "rfc-test-vector");
+    QTEST(otp::token::token(otp::base32::recode(secret), msg, m_key, m_algo, m_encoder), "rfc-test-vector");
 }
 
 static void result(int k, const QString& secret, const char * expected)
@@ -78,7 +72,6 @@ void RFC4226TestVectorCompatTest::testSample_data(void)
     for(int k = 0; k < 10; ++k)
     {
         result(k, secret, corpus[k]);
-//         result((quint64) k, corpus[k], 6);
     }
 }
 

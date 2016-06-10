@@ -1,5 +1,6 @@
 
-#include "otp/token.h"
+#include "otp/oath/oath.h"
+#include "otp/otp.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -12,11 +13,11 @@ private Q_SLOTS:
     void testSample(void);
     void testSample_data(void);
 private:
-    otp::Encoder m_uut;
+    otp::token::Encoder m_uut;
 };
 
 
-static void result(const char* caseName, const QByteArray& token, const QString& raw, QChar zeroDigit, int length = otp::DEFAULT_OTP_LENGTH)
+static void result(const char* caseName, const QByteArray& token, const QString& raw, QChar zeroDigit, int length = otp::oath::DEFAULT_OTP_LENGTH)
 {
     QTest::newRow(qPrintable(QLatin1String(caseName))) << token << length << raw.rightJustified(length, zeroDigit);
 }
@@ -81,7 +82,7 @@ void DefaultEncoderSamplesTest::testSample_data(void)
 
 void DefaultEncoderSamplesTest::initTestCase(void)
 {
-    m_uut = otp::otpEncoder();
+    m_uut = otp::oath::oathEncoder();
 }
 
 void DefaultEncoderSamplesTest::testSample(void)

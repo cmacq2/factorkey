@@ -1,4 +1,4 @@
-#include "otp/token.h"
+#include "otp/otp.h"
 
 #include <QString>
 #include <QtDebug>
@@ -26,21 +26,21 @@ int main(int argc, const char** argv)
     /*
      * Use default hashing algorithm
      */
-    const otp::Algorithm& algorithm = otp::hmacAlgorithm();
+    const otp::token::Algorithm& algorithm = otp::oath::hmacAlgorithm();
     /*
      * Use 'Google Authenticator' key format (i.e. base 32). See section #5 of RFC 3548:
      * https://tools.ietf.org/html/rfc3548#section-5
      */
-    const otp::Key& keyEncoder = otp::keyForAuthenticator();
+    const otp::token::Key& keyEncoder = otp::oath::keyForAuthenticator();
     /*
      * Use default epoch and default time step
      */
-    const otp::Message& message = otp::totpMessage();
+    const otp::token::Message& message = otp::oath::totpMessage();
     /*
      * Use default length and default locale
      */
-    const otp::Encoder& encoder = otp::otpEncoder();
+    const otp::token::Encoder& encoder = otp::oath::oathEncoder();
 
-    qDebug() << "Token is:" << otp::token(secret, message, keyEncoder, algorithm, encoder);
+    qDebug() << "Token is:" << otp::token::token(secret, message, keyEncoder, algorithm, encoder);
     return 0;
 }

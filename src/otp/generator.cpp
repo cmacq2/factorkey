@@ -1,5 +1,8 @@
 #include "generator.h"
-#include "token.h"
+#include "token/token.h"
+#include "oath/oath.h"
+#include "steam/steam.h"
+#include "otp.h"
 
 namespace otp
 {
@@ -351,7 +354,7 @@ namespace otp
     bool GenericOTPParameters::tokenLength(uint& length) const
     {
         Q_D(const TokenParameters);
-        return lookupNumericValue<uint>(d, Storage::OTP_ENCODER_TOKEN_LENGTH, length, DEFAULT_OTP_LENGTH);
+        return lookupNumericValue<uint>(d, Storage::OTP_ENCODER_TOKEN_LENGTH, length, otp::oath::DEFAULT_OTP_LENGTH);
     }
 
     bool GenericOTPParameters::setTokenLength(uint length)
@@ -389,7 +392,7 @@ namespace otp
             return m_params->commit();
         }
 
-        virtual bool message(Message&) const
+        virtual bool message(otp::token::Message&) const
         {
             return false;
         }
@@ -399,7 +402,7 @@ namespace otp
             return m_params->secret(secret);
         }
 
-        virtual bool key(Key& key) const
+        virtual bool key(otp::token::Key& key) const
         {
             GenericOTPParameters * p = qobject_cast<GenericOTPParameters *>(params());
             EncodingType type;
@@ -409,7 +412,7 @@ namespace otp
                 {
                     case EncodingType::Unknown:
                     case EncodingType::Base32:
-                        key = otp::keyForAuthenticator();
+                        key = otp::oath::keyForAuthenticator();
                         return true;
                     case EncodingType::Text:
                         return forCodec(key);
@@ -426,13 +429,13 @@ namespace otp
             return p ? p->tokenLocale(locale): false;
         }
 
-        virtual bool encoder(Encoder& encoder) const
+        virtual bool encoder(otp::token::Encoder& encoder) const
         {
             QLocale l;
             uint length;
             if(locale(l) && tokenLength(length))
             {
-                encoder = Encoder(otpEncoder(length, l));
+                encoder = otp::token::Encoder(otp::oath::oathEncoder(length, l));
                 return true;
             }
             return false;
@@ -444,12 +447,12 @@ namespace otp
             return p ? p->tokenLength(value): false;
         }
 
-        bool algorithm(Algorithm& algo) const
+        bool algorithm(otp::token::Algorithm& algo) const
         {
             QCryptographicHash::Algorithm h;
             if(hash(h))
             {
-                algo = Algorithm(hmacAlgorithm(h));
+                algo = otp::token::Algorithm(otp::oath::hmacAlgorithm(h));
                 return true;
             }
             return false;
@@ -467,13 +470,13 @@ namespace otp
             return false;
         }
     protected:
-        bool forCodec(Key& key) const
+        bool forCodec(otp::token::Key& key) const
         {
             QTextCodec * codec = nullptr;
             GenericTokenParameters * p = qobject_cast<GenericTokenParameters *>(params());
             if(p && p->secretEncoding(&codec))
             {
-                key = Key(otp::keyForCodec(codec));
+                key = otp::token::Key(otp::token::keyForCodec(codec));
                 return true;
             }
             return false;
@@ -531,26 +534,23 @@ namespace otp
     {
     public:
         DummyTokenGeneratorPrivate(DummyParameters * p) : TokenGeneratorPrivate(p) {}
-        bool message(Message& message) const
+        bool message(otp::token::Message& message) const
         {
             DummyParameters * p = qobject_cast<DummyParameters *>(params());
             QString str;
             QTextCodec * codec = nullptr;
             if(p && p->tokenMessage(str) && p->tokenMessageEncoding(&codec))
             {
-                message = codec ? dummyMessage(str, codec) : Message([str](void) -> QByteArray
-                {
-                    return str.toUtf8();
-                });
+                message = otp::token::textMessage(str, codec);
                 return true;
             }
 
             return false;
         }
 
-        bool encoder(Encoder& encoder) const
+        bool encoder(otp::token::Encoder& encoder) const
         {
-            encoder = Encoder(encodeDummyFormat);
+            encoder = otp::token::Encoder(otp::encodeDummyFormat);
             return true;
         }
     };
@@ -578,15 +578,15 @@ namespace otp
     {
     public:
         HOTPTokenGeneratorPrivate(HOTPTokenParameters * p) : TokenGeneratorPrivate(p) {}
-        bool message(Message& message) const
+        bool message(otp::token::Message& message) const
         {
             quint64 count;
             HOTPTokenParameters * p = qobject_cast<HOTPTokenParameters *>(params());
             if(p && p->tokenCounter(count))
             {
-                message = Message([count](void) -> QByteArray
+                message = otp::token::Message([count](void) -> QByteArray
                 {
-                    return hotpTokenMessage(count);
+                    return otp::oath::hotpTokenMessage(count);
                 });
                 return true;
             }
@@ -615,7 +615,7 @@ namespace otp
     bool TOTPTokenParameters::tokenTimeStep(quint64 & timeStepMSec) const
     {
         Q_D(const TokenParameters);
-        return lookupNumericValue<quint64>(d, Storage::TOTP_TOKEN_TIMESTEP, timeStepMSec, DEFAULT_TIMESTEP_MSEC);
+        return lookupNumericValue<quint64>(d, Storage::TOTP_TOKEN_TIMESTEP, timeStepMSec, otp::oath::DEFAULT_TIMESTEP_MSEC);
     }
 
     bool TOTPTokenParameters::setTokenTimeStep(quint64 timeStepMSec)
@@ -627,7 +627,7 @@ namespace otp
     bool TOTPTokenParameters::tokenEpoch(qint64 & epoch) const
     {
         Q_D(const TokenParameters);
-        return lookupNumericValue<qint64>(d, Storage::TOTP_TOKEN_EPOCH, epoch, DEFAULT_EPOCH);
+        return lookupNumericValue<qint64>(d, Storage::TOTP_TOKEN_EPOCH, epoch, otp::oath::DEFAULT_EPOCH);
     }
 
     bool TOTPTokenParameters::setTokenEpoch(const QDateTime& epoch)
@@ -645,14 +645,14 @@ namespace otp
     {
     public:
         TOTPTokenGeneratorPrivate(TOTPTokenParameters * p) : TokenGeneratorPrivate(p) {}
-        bool message(Message& message) const
+        bool message(otp::token::Message& message) const
         {
             TOTPTokenParameters * p = qobject_cast<TOTPTokenParameters *>(params());
             qint64 epoch;
             quint64 ival;
             if(p && p->tokenEpoch(epoch) && p->tokenTimeStep(ival))
             {
-                message = totpMessage(epoch, ival);
+                message = otp::oath::totpMessage(epoch, ival);
                 return true;
             }
 
@@ -677,16 +677,16 @@ namespace otp
             return true;
         }
 
-        bool encoder(Encoder& encoder) const
+        bool encoder(otp::token::Encoder& encoder) const
         {
-            QString(* func)(const QByteArray&) = otp::encodeSteamGuardToken;
-            encoder = Encoder(func);
+            QString(* func)(const QByteArray&) = otp::steam::encodeSteamGuardToken;
+            encoder = otp::token::Encoder(func);
             return true;
         }
 
-        bool message(Message& message) const
+        bool message(otp::token::Message& message) const
         {
-            message = totpMessage(0, DEFAULT_TIMESTEP_MSEC);
+            message = otp::oath::totpMessage(0, otp::oath::DEFAULT_TIMESTEP_MSEC);
             return true;
         }
     };
@@ -744,15 +744,15 @@ namespace otp
         Q_D(TokenGenerator);
         QString token;
         QString secret;
-        Key key;
-        Encoder encoder;
-        Message message;
-        Algorithm algo;
+        otp::token::Key key;
+        otp::token::Encoder encoder;
+        otp::token::Message message;
+        otp::token::Algorithm algo;
 
         if(d && d->ensureStorage() && d->secret(secret) &&  d->message(message) &&
             d->key(key) && d->algorithm(algo) && d->encoder(encoder))
         {
-            token = otp::token(secret, message, key, algo, encoder);
+            token = otp::token::token(secret, message, key, algo, encoder);
             if(d->updateStorage())
             {
                 value = token;

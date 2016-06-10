@@ -1,4 +1,4 @@
-#include "otp/base32.h"
+#include "otp/base32/base32.h"
 
 #include <QTest>
 #include <QtDebug>

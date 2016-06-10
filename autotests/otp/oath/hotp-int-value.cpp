@@ -1,5 +1,5 @@
 
-#include "otp/token.h"
+#include "otp/oath/oath.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -71,7 +71,7 @@ void HOTPIntValueTest::testSample_data(void)
 void HOTPIntValueTest::testSample(void)
 {
     QFETCH(QByteArray, token);
-    QTEST(otp::hotpTokenValue(token), "tokenValue");
+    QTEST(otp::oath::hotpTokenValue(token), "tokenValue");
 }
 
 QTEST_APPLESS_MAIN(HOTPIntValueTest)

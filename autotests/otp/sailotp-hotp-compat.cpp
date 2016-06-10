@@ -1,6 +1,9 @@
 
-#include "otp/token.h"
-#include "otp/base32.h"
+#include "otp/token/token.h"
+#include "otp/base32/base32.h"
+#include "otp/oath/oath.h"
+#include "otp/steam/steam.h"
+#include "otp/otp.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -15,17 +18,17 @@ private Q_SLOTS:
     void testHOTPDefault(void);
     void testHOTPDefault_data(void);
 private:
-    void test(const otp::Encoder& encoder);
+    void test(const otp::token::Encoder& encoder);
     void setupDataColumns(void);
 private:
-    otp::Key m_key;
-    otp::Algorithm m_algo;
+    otp::token::Key m_key;
+    otp::token::Algorithm m_algo;
 };
 
 void SailOTPHOTPCompatTest::initTestCase(void)
 {
-    m_key = otp::keyForAuthenticator();
-    m_algo = otp::hmacAlgorithm();
+    m_key = otp::oath::keyForAuthenticator();
+    m_algo = otp::oath::hmacAlgorithm();
 }
 
 void SailOTPHOTPCompatTest::setupDataColumns(void)
@@ -35,22 +38,21 @@ void SailOTPHOTPCompatTest::setupDataColumns(void)
     QTest::addColumn<QString>("sailotp");
 }
 
-void SailOTPHOTPCompatTest::test(const otp::Encoder& encoder)
+void SailOTPHOTPCompatTest::test(const otp::token::Encoder& encoder)
 {
     QFETCH(QString, secret);
     QFETCH(quint64, counter);
-    const otp::Message msg([counter](void) -> QByteArray
+    const otp::token::Message msg([counter](void) -> QByteArray
     {
-       return otp::hotpTokenMessage(counter);
+       return otp::oath::hotpTokenMessage(counter);
     });
 
-    qDebug() << "test:: key is:"<< secret;
     if(secret.endsWith(QLatin1Char('=')))
     {
         QEXPECT_FAIL("", "SailOTP does something odd when padding is involved", Continue);
     }
 
-    QTEST(otp::token(secret, msg, m_key, m_algo, encoder), "sailotp");
+    QTEST(otp::token::token(secret, msg, m_key, m_algo, encoder), "sailotp");
 }
 
 static void result(const char* caseName, const QString& secret, const quint64 counter, const QString& expected)
@@ -60,16 +62,16 @@ static void result(const char* caseName, const QString& secret, const quint64 co
 
 void SailOTPHOTPCompatTest::testSteam(void)
 {
-    const otp::Encoder e([](const QByteArray& t) -> QString
+    const otp::token::Encoder e([](const QByteArray& t) -> QString
     {
-        return otp::encodeSteamGuardToken(t);
+        return otp::steam::encodeSteamGuardToken(t);
     });
     test(e);
 }
 
 void SailOTPHOTPCompatTest::testHOTPDefault(void)
 {
-    const otp::Encoder e = otp::otpEncoder();
+    const otp::token::Encoder e = otp::oath::oathEncoder();
     test(e);
 }
 

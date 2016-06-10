@@ -1,7 +1,5 @@
 #include "base32.h"
 
-#include <QtDebug>
-
 namespace otp
 {
     namespace base32
@@ -255,7 +253,6 @@ namespace otp
                     capacity = determineCapacity(size, 2, 1);
                     break;
                 default:
-                    qDebug() << "decode() bailed, capacity/size don't line up properly; capacity =" << capacity << "size =" << size << "encoded size was:" << encoded.size();
                     * ok = false;
                     return result;
             }
@@ -269,7 +266,6 @@ namespace otp
             {
                 if(!decode(input, k, size, i, capacity, output))
                 {
-                    qDebug() << "decode() failed partway!";
                     * ok = false;
                     return QByteArray();
                 }
