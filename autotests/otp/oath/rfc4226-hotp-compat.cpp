@@ -21,7 +21,7 @@ private:
 
 void RFC4226TestVectorCompatTest::initTestCase(void)
 {
-    m_key = otp::oath::keyForAuthenticator();
+    m_key = otp::token::keyForBase32();
     m_algo = otp::oath::hmacAlgorithm();
     m_encoder = otp::oath::oathEncoder();
 }

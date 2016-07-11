@@ -10,28 +10,31 @@
 
 namespace otp
 {
-    class StorageProviderPrivate;
-
-    class StorageProvider : public QObject
+    namespace storage
     {
-    public:
-        Q_OBJECT
+        class StorageProviderPrivate;
 
-        bool open(void);
-        bool close(void);
+        class StorageProvider : public QObject
+        {
+        public:
+            Q_OBJECT
 
-        bool contains(const QString& entryId);
-        bool entries(QStringList& entries);
+            bool open(void);
+            bool close(void);
 
-        Storage * lookup(const QString & entryId);
-        Storage * create(const QString & entryId, OTPTokenType type);
+            bool contains(const QString& entryId);
+            bool entries(QStringList& entries);
 
-        ~StorageProvider();
-    private:
-        Q_DISABLE_COPY(StorageProvider)
-        const QScopedPointer<StorageProviderPrivate> d_ptr;
-        Q_DECLARE_PRIVATE(StorageProvider)
-        StorageProvider(StorageProviderPrivate * d, QObject * parent = 0);
-    };
+            Storage * lookup(const QString & entryId);
+            Storage * create(const QString & entryId, OTPTokenType type);
+
+            ~StorageProvider();
+        private:
+            Q_DISABLE_COPY(StorageProvider)
+            const QScopedPointer<StorageProviderPrivate> d_ptr;
+            Q_DECLARE_PRIVATE(StorageProvider)
+            StorageProvider(StorageProviderPrivate * d, QObject * parent = 0);
+        };
+    }
 }
 #endif

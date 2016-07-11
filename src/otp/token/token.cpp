@@ -1,9 +1,21 @@
 #include "token.h"
+#include "../base32/base32.h"
+
+#include <QMessageAuthenticationCode>
 
 namespace otp
 {
     namespace token
     {
+        Key keyForBase32(void)
+        {
+            return Key([](const QString& key) -> QByteArray
+            {
+                bool ok = false;
+                QByteArray result = otp::base32::decode(key, &ok);
+                return ok ? result : QByteArray();
+            });
+        }
 
         Key keyForCodec(const QTextCodec * codec)
         {

@@ -2,7 +2,6 @@
 #define FACTORKEY_TOKEN_H
 
 #include <QByteArray>
-#include <QCryptographicHash>
 #include <QDateTime>
 #include <QLocale>
 #include <QString>
@@ -20,6 +19,8 @@ namespace otp
         typedef std::function<QByteArray()> Message;
 
         Key keyForCodec(const QTextCodec * codec = nullptr);
+        Key keyForBase32(void);
+
         Message textMessage(const QString& message, const QTextCodec * codec = nullptr);
 
         QString token(const QByteArray& key,

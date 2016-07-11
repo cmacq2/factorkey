@@ -1,4 +1,4 @@
-#include "otp/otp.h"
+#include "otp/oath/token.h"
 
 #include <QString>
 #include <QtDebug>
@@ -31,7 +31,7 @@ int main(int argc, const char** argv)
      * Use 'Google Authenticator' key format (i.e. base 32). See section #5 of RFC 3548:
      * https://tools.ietf.org/html/rfc3548#section-5
      */
-    const otp::token::Key& keyEncoder = otp::oath::keyForAuthenticator();
+    const otp::token::Key& keyEncoder = otp::token::keyForBase32();
     /*
      * Use default epoch and default time step
      */

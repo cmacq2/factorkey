@@ -1,5 +1,5 @@
 
-set(base32_UUT_SRCS ../../../src/otp/base32/base32.h $<TARGET_OBJECTS:Base32>)
+set(base32_UUT_SRCS $<TARGET_OBJECTS:Base32>)
 
 add_test(base32-byte-coding base32-byte-coding)
 add_executable(base32-byte-coding base32-byte-coding.cpp ${base32_UUT_SRCS})

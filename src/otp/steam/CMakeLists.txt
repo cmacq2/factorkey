@@ -1,6 +1,9 @@
 
 
-set(steam_Imported_Headers ../oath/oath.h)
-set(Steam_SRCS steam.cpp ${steam_Imported_Headers})
+set(Steam_SRCS steam.cpp)
 add_library(Steam OBJECT ${Steam_SRCS})
 set_public_target_object_vars(Steam Qt5::Core)
+
+set(SteamGenerator_SRCS generator.cpp)
+add_library(SteamGenerator OBJECT ${SteamGenerator_SRCS})
+set_public_target_object_vars(SteamGenerator Qt5::Core)

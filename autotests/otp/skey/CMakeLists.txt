@@ -1,5 +1,5 @@
 
-set(skey_UUT_SRCS ../../../src/otp/skey/skey.h $<TARGET_OBJECTS:SKey>)
+set(skey_UUT_SRCS $<TARGET_OBJECTS:SKey>)
 
 add_test(skey-token-value skey-token-value)
 add_executable(skey-token-value skey-token-value.cpp ${skey_UUT_SRCS})

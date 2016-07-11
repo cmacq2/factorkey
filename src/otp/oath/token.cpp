@@ -1,30 +1,10 @@
 #include "token.h"
 #include "oath.h"
 
-#include "../base32/base32.h"
-
 namespace otp
 {
     namespace oath
     {
-        otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
-        {
-            return otp::token::Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
-            {
-                return oath::hmac(k, m, hash);
-            });
-        }
-
-        otp::token::Key keyForAuthenticator(void)
-        {
-            return otp::token::Key([](const QString& key) -> QByteArray
-            {
-                bool ok = false;
-                QByteArray result = otp::base32::decode(key, &ok);
-                return ok ? result : QByteArray();
-            });
-        }
-
         otp::token::Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec)
         {
             return totpMessage(epoch.toMSecsSinceEpoch(), windowDurationMSec);
@@ -53,6 +33,14 @@ namespace otp
             return otp::token::Encoder([length, locale](const QByteArray& token) -> QString
             {
                 return oath::encodeOTPToken(token, locale, length);
+            });
+        }
+
+        otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
+        {
+            return otp::token::Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
+            {
+                return hmac(k, m, hash);
             });
         }
     }

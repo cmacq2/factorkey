@@ -1,6 +1,6 @@
 
 #include "otp/oath/oath.h"
-#include "otp/otp.h"
+#include "otp/oath/token.h"
 
 #include <QTest>
 #include <QtDebug>

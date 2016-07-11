@@ -1,9 +1,10 @@
 
-#include "otp/token/token.h"
 #include "otp/base32/base32.h"
+#include "otp/token/token.h"
 #include "otp/oath/oath.h"
 #include "otp/steam/steam.h"
-#include "otp/otp.h"
+
+#include "otp/oath/token.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -27,7 +28,7 @@ private:
 
 void SailOTPHOTPCompatTest::initTestCase(void)
 {
-    m_key = otp::oath::keyForAuthenticator();
+    m_key = otp::token::keyForBase32();
     m_algo = otp::oath::hmacAlgorithm();
 }
 

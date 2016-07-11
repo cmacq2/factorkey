@@ -18,8 +18,6 @@ namespace otp
         otp::token::Encoder oathEncoder(uint length = 0);
 
 
-        otp::token::Key keyForAuthenticator(void);
-
         otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
     }
 }
