@@ -18,6 +18,7 @@ namespace otp
         const QString Storage::DUMMY_TOKEN_MESSAGE_VALUE   = QLatin1String("dummy.message.value");
         const QString Storage::DUMMY_TOKEN_MESSAGE_CHARSET = QLatin1String("dummy.message.charset");
 
+        Storage::Storage(StoragePrivate * d, QObject * parent): QObject(parent), d_ptr(d) {}
         Storage::~Storage() {}
 
         const QString Storage::entryId(void) const

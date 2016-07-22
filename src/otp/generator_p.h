@@ -97,7 +97,6 @@ namespace otp
                     }
                     else
                     {
-
                         bool ok = false;
                         auto v = convertToNumeric<T>(val, &ok);
                         if(ok)

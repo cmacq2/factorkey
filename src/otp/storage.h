@@ -12,10 +12,11 @@ namespace otp
     {
         enum class OTPTokenType: int
         {
-            HOTP = 0,
-            TOTP = 1,
-            SteamGuard = 2,
-            DummyHMAC = 3
+            DummyHMAC = 0,
+            HOTP = 1,
+            TOTP = 2,
+            SteamGuard = 3,
+            SKey = 4
         };
 
         class StoragePrivate;
@@ -52,11 +53,11 @@ namespace otp
             bool poll(void);
 
             ~Storage();
+            Storage(StoragePrivate * d, QObject * parent = 0);
         private:
             Q_DISABLE_COPY(Storage)
             const QScopedPointer<StoragePrivate> d_ptr;
             Q_DECLARE_PRIVATE(Storage)
-            Storage(StoragePrivate * d, QObject * parent = 0);
         };
     }
 }

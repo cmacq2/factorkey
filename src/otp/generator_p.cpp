@@ -276,7 +276,7 @@ namespace otp
 
         bool TokenGeneratorPrivate::updateStorage(void)
         {
-            return m_params->commit();
+            return true;
         }
 
         bool TokenGeneratorPrivate::message(otp::token::Message&) const
