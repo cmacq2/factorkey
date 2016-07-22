@@ -11,14 +11,18 @@ namespace otp
 {
     namespace oath
     {
-        otp::token::Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec = 0);
-        otp::token::Message totpMessage(qint64 epoch = 0, quint64 windowDurationMSec = 0);
+        namespace token
+        {
+            otp::token::Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec = 0);
+            otp::token::Message totpMessage(qint64 epoch = 0, quint64 windowDurationMSec = 0);
+            otp::token::Message totpMessage(qint64 currentMSec, qint64 epoch, quint64 windowDurationMSec);
 
-        otp::token::Encoder oathEncoder(uint length, const QLocale& locale);
-        otp::token::Encoder oathEncoder(uint length = 0);
+            otp::token::Encoder oathEncoder(uint length, const QLocale& locale);
+            otp::token::Encoder oathEncoder(uint length = 0);
 
 
-        otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
+            otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
+        }
     }
 }
 

@@ -46,6 +46,7 @@ namespace otp
                 Q_OBJECT
             public:
                 static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, QObject * parent = 0);
+                static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, qint64 currentMSec, QObject * parent = 0);
                 static TOTPTokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
             public:
                 bool setTokenEpoch(qint64 unixTime);

@@ -26,7 +26,7 @@ int main(int argc, const char** argv)
     /*
      * Use default hashing algorithm
      */
-    const otp::token::Algorithm& algorithm = otp::oath::hmacAlgorithm();
+    const otp::token::Algorithm& algorithm = otp::oath::token::hmacAlgorithm();
     /*
      * Use 'Google Authenticator' key format (i.e. base 32). See section #5 of RFC 3548:
      * https://tools.ietf.org/html/rfc3548#section-5
@@ -35,11 +35,11 @@ int main(int argc, const char** argv)
     /*
      * Use default epoch and default time step
      */
-    const otp::token::Message& message = otp::oath::totpMessage();
+    const otp::token::Message& message = otp::oath::token::totpMessage();
     /*
      * Use default length and default locale
      */
-    const otp::token::Encoder& encoder = otp::oath::oathEncoder();
+    const otp::token::Encoder& encoder = otp::oath::token::oathEncoder();
 
     qDebug() << "Token is:" << otp::token::token(secret, message, keyEncoder, algorithm, encoder);
     return 0;

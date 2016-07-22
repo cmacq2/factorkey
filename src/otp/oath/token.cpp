@@ -5,43 +5,54 @@ namespace otp
 {
     namespace oath
     {
-        otp::token::Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec)
+        namespace token
         {
-            return totpMessage(epoch.toMSecsSinceEpoch(), windowDurationMSec);
-        }
-
-        otp::token::Message totpMessage(qint64 epoch, quint64 windowDurationMSec)
-        {
-            return otp::token::Message([epoch, windowDurationMSec](void) -> QByteArray
+            otp::token::Message totpMessage(const QDateTime& epoch, quint64 windowDurationMSec)
             {
-                return oath::hotpTokenMessage(oath::countTokens(epoch, windowDurationMSec));
-            });
-        }
+                return totpMessage(epoch.toMSecsSinceEpoch(), windowDurationMSec);
+            }
 
-        otp::token::Encoder oathEncoder(uint length, const QLocale& locale)
-        {
-            return otp::token::Encoder([length, locale](const QByteArray& token) -> QString
+            otp::token::Message totpMessage(qint64 epoch, quint64 windowDurationMSec)
             {
-                return oath::encodeOTPToken(token, locale, length);
-            });
-        }
+                return otp::token::Message([epoch, windowDurationMSec](void) -> QByteArray
+                {
+                    return oath::hotpTokenMessage(oath::countTokens(epoch, windowDurationMSec));
+                });
+            }
 
-        otp::token::Encoder oathEncoder(uint length)
-        {
-            QLocale locale = QLocale::c();
-            locale.setNumberOptions(QLocale::OmitGroupSeparator);
-            return otp::token::Encoder([length, locale](const QByteArray& token) -> QString
+            otp::token::Message totpMessage(qint64 currentMSec, qint64 epoch, quint64 windowDurationMSec)
             {
-                return oath::encodeOTPToken(token, locale, length);
-            });
-        }
+                return otp::token::Message([currentMSec, epoch, windowDurationMSec](void) -> QByteArray
+                {
+                    return oath::hotpTokenMessage(oath::countTokens(currentMSec, epoch, windowDurationMSec));
+                });
+            }
 
-        otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
-        {
-            return otp::token::Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
+            otp::token::Encoder oathEncoder(uint length, const QLocale& locale)
             {
-                return hmac(k, m, hash);
-            });
+                return otp::token::Encoder([length, locale](const QByteArray& token) -> QString
+                {
+                    return oath::encodeOTPToken(token, locale, length);
+                });
+            }
+
+            otp::token::Encoder oathEncoder(uint length)
+            {
+                QLocale locale = QLocale::c();
+                locale.setNumberOptions(QLocale::OmitGroupSeparator);
+                return otp::token::Encoder([length, locale](const QByteArray& token) -> QString
+                {
+                    return oath::encodeOTPToken(token, locale, length);
+                });
+            }
+
+            otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
+            {
+                return otp::token::Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
+                {
+                    return hmac(k, m, hash);
+                });
+            }
         }
     }
 }

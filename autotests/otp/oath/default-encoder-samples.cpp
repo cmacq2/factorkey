@@ -82,7 +82,7 @@ void DefaultEncoderSamplesTest::testSample_data(void)
 
 void DefaultEncoderSamplesTest::initTestCase(void)
 {
-    m_uut = otp::oath::oathEncoder();
+    m_uut = otp::oath::token::oathEncoder();
 }
 
 void DefaultEncoderSamplesTest::testSample(void)

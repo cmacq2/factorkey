@@ -24,7 +24,7 @@ namespace otp
 
                 bool algorithm(otp::token::Algorithm& algo) const
                 {
-                    algo = otp::oath::hmacAlgorithm(QCryptographicHash::Sha1);
+                    algo = otp::oath::token::hmacAlgorithm(QCryptographicHash::Sha1);
                     return true;
                 }
 
@@ -37,7 +37,7 @@ namespace otp
 
                 bool message(otp::token::Message& message) const
                 {
-                    message = otp::oath::totpMessage(0, otp::oath::DEFAULT_TIMESTEP_MSEC);
+                    message = otp::oath::token::totpMessage(0, otp::oath::DEFAULT_TIMESTEP_MSEC);
                     return true;
                 }
             };

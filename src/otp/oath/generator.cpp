@@ -116,7 +116,7 @@ namespace otp
                 QCryptographicHash::Algorithm h;
                 if(params && params->hashAlgorithm(h))
                 {
-                    algo =  otp::oath::hmacAlgorithm(h);
+                    algo =  otp::oath::token::hmacAlgorithm(h);
                     return true;
                 }
                 return false;
@@ -128,7 +128,7 @@ namespace otp
                 uint length;
                 if(p && p->tokenLocale(l) && p->tokenLength(length))
                 {
-                    encoder = otp::token::Encoder(otp::oath::oathEncoder(length, l));
+                    encoder = otp::token::Encoder(otp::oath::token::oathEncoder(length, l));
                     return true;
                 }
                 return false;
@@ -184,7 +184,8 @@ namespace otp
             class TOTPTokenGeneratorPrivate: public otp::generator::TokenGeneratorPrivate
             {
             public:
-                TOTPTokenGeneratorPrivate(otp::oath::generator::TOTPTokenParameters * p) : otp::generator::TokenGeneratorPrivate(p) {}
+                TOTPTokenGeneratorPrivate(otp::oath::generator::TOTPTokenParameters * p, bool overrideNow = false, qint64 currentMSec = 0) :
+                    otp::generator::TokenGeneratorPrivate(p), m_overrideNow(overrideNow), m_currentMSec(currentMSec) {}
                 bool message(otp::token::Message& message) const
                 {
                     auto p = qobject_cast<otp::oath::generator::TOTPTokenParameters *>(params());
@@ -192,7 +193,7 @@ namespace otp
                     quint64 ival;
                     if(p && p->tokenEpoch(epoch) && p->tokenTimeStep(ival))
                     {
-                        message = otp::oath::totpMessage(epoch, ival);
+                        message = m_overrideNow ? otp::oath::token::totpMessage(m_currentMSec, epoch, ival): otp::oath::token::totpMessage(epoch, ival);
                         return true;
                     }
 
@@ -209,11 +210,20 @@ namespace otp
                     auto p = qobject_cast<otp::oath::generator::TOTPTokenParameters *>(params());
                     return oathTokenEncoder(p, encoder);
                 }
+
+            private:
+                bool m_overrideNow;
+                qint64 m_currentMSec;
             };
 
             otp::generator::TokenGenerator * TOTPTokenParameters::generator(TOTPTokenParameters * params, QObject * parent)
             {
                 return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(params), parent);
+            }
+
+            otp::generator::TokenGenerator * TOTPTokenParameters::generator(TOTPTokenParameters * params, qint64 currentMSec, QObject * parent)
+            {
+                return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(params, true, currentMSec), parent);
             }
         }
     }
