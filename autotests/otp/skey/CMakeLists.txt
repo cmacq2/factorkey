@@ -5,6 +5,14 @@ add_test(skey-token-value skey-token-value)
 add_executable(skey-token-value skey-token-value.cpp ${skey_UUT_SRCS})
 target_link_libraries(skey-token-value Qt5::Core Qt5::Test)
 
+add_test(skey-parse-challenge skey-parse-challenge)
+add_executable(skey-parse-challenge skey-parse-challenge.cpp ${skey_UUT_SRCS})
+target_link_libraries(skey-parse-challenge Qt5::Core Qt5::Test)
+
+add_test(skey-format-challenge skey-format-challenge)
+add_executable(skey-format-challenge skey-format-challenge.cpp ${skey_UUT_SRCS})
+target_link_libraries(skey-format-challenge Qt5::Core Qt5::Test)
+
 add_test(skey-validate-seed skey-validate-seed)
 add_executable(skey-validate-seed skey-validate-seed.cpp ${skey_UUT_SRCS})
 target_link_libraries(skey-validate-seed Qt5::Core Qt5::Test)

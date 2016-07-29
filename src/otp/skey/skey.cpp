@@ -121,7 +121,7 @@ namespace otp
             });
         }
 
-        SKeyDictionary * defaultDictionary(void)
+        DefaultDictionary * defaultDictionary(void)
         {
             QStringList words;
             internal::populateRFC2289Dictionary(words);
@@ -199,7 +199,7 @@ namespace otp
 
             for(const auto& c: seed)
             {
-                if(c.isSpace())
+                if(c == QLatin1Char(' '))
                 {
                     return SKeySeedError::Invalid;
                 }
@@ -297,7 +297,6 @@ namespace otp
             return result;
         }
 
-
         QByteArray sKey(const QByteArray& key, const QByteArray& seed, const QCryptographicHash::Algorithm& hash, quint64 rounds)
         {
             QByteArray result(seed);
@@ -316,6 +315,69 @@ namespace otp
             }
 
             return initial;
+        }
+
+        bool formatSKeyChallenge(const QCryptographicHash::Algorithm& hash, const QString& seed, const quint64 rounds, QString& challenge)
+        {
+            if(validateSKeySeed(seed) == SKeySeedError::Conformant)
+            {
+                QLocale c = QLocale::c();
+                QString formatted;
+                switch(hash)
+                {
+                    case QCryptographicHash::Md4:
+                        formatted = QLatin1String("otp-md4 ") + c.toString(rounds) + QLatin1Char(' ') + seed;
+                        break;
+                    case QCryptographicHash::Md5:
+                        formatted = QLatin1String("otp-md5 ") + c.toString(rounds) + QLatin1Char(' ') + seed;
+                        break;
+                    case QCryptographicHash::Sha1:
+                        formatted = QLatin1String("otp-sha1 ") + c.toString(rounds) + QLatin1Char(' ') + seed;
+                        break;
+                    default:
+                        return false;
+                }
+                challenge = formatted;
+                return true;
+            }
+            return false;
+        }
+
+        bool parseSKeyChallenge(const QString& challenge, QCryptographicHash::Algorithm& hash, QString& seed, quint64& rounds)
+        {
+            QStringList components = challenge.split(QLatin1Char(' '), QString::SkipEmptyParts);
+            QLocale c = QLocale::c();
+            if(components.size() == 3)
+            {
+                bool ok = false;
+                quint64 parsedRounds = c.toULongLong(components.at(1), &ok);
+                if(ok && validateSKeySeed(components.at(2)) != SKeySeedError::Invalid)
+                {
+                    QString type = components.at(0);
+                    if(type == QLatin1String("otp-md4"))
+                    {
+                        hash = QCryptographicHash::Md4;
+                        rounds = parsedRounds;
+                        seed = components.at(2);
+                        return true;
+                    }
+                    if(type == QLatin1String("otp-md5"))
+                    {
+                        hash = QCryptographicHash::Md5;
+                        rounds = parsedRounds;
+                        seed = components.at(2);
+                        return true;
+                    }
+                    if(type == QLatin1String("otp-sha1"))
+                    {
+                        hash = QCryptographicHash::Sha1;
+                        rounds = parsedRounds;
+                        seed = components.at(2);
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 }

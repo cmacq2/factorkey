@@ -5,34 +5,37 @@ namespace otp
 {
     namespace skey
     {
-        otp::token::Algorithm skeyAlgorithm(quint64 rounds, const QCryptographicHash::Algorithm& hash)
+        namespace token
         {
-            return otp::token::Algorithm([hash, rounds](const QByteArray& k, const QByteArray& s) -> QByteArray
+            otp::token::Algorithm skeyAlgorithm(quint64 rounds, const QCryptographicHash::Algorithm& hash)
             {
-                return skey::sKey(k, s, hash, rounds);
-            });
-        }
+                return otp::token::Algorithm([hash, rounds](const QByteArray& k, const QByteArray& s) -> QByteArray
+                {
+                    return otp::skey::sKey(k, s, hash, rounds);
+                });
+            }
 
-        otp::token::Encoder sKeyEncoder(const QSharedPointer<SKeyDictionary> dict, const QCryptographicHash::Algorithm& hash)
-        {
-            return otp::token::Encoder([hash, dict](const QByteArray& token) -> QString
+            otp::token::Encoder sKeyEncoder(const QSharedPointer<otp::skey::SKeyDictionary> dict, const QCryptographicHash::Algorithm& hash)
             {
-                QStringList words = encodeSKeyWords(sKeyTokenValue(token, hash), dict);
-                QString format(QStringLiteral("%1 %2 %3 %4 %5 %6"));
-                return format.
-                    arg(words.at(0)).
-                    arg(words.at(1)).
-                    arg(words.at(2)).
-                    arg(words.at(3)).
-                    arg(words.at(4)).
-                    arg(words.at(5));
-            });
-        }
+                return otp::token::Encoder([hash, dict](const QByteArray& token) -> QString
+                {
+                    QStringList words = otp::skey::encodeSKeyWords(otp::skey::sKeyTokenValue(token, hash), dict.data());
+                    QString format(QStringLiteral("%1 %2 %3 %4 %5 %6"));
+                    return format.
+                        arg(words.at(0)).
+                        arg(words.at(1)).
+                        arg(words.at(2)).
+                        arg(words.at(3)).
+                        arg(words.at(4)).
+                        arg(words.at(5));
+                });
+            }
 
-        otp::token::Encoder defaultSKeyEncoder(const QCryptographicHash& hash)
-        {
-            QSharedPointer<SKeyDictionary> dict(defaultDictionary());
-            return sKeyEncoder(dict, hash);
+            otp::token::Encoder defaultSKeyEncoder(const QCryptographicHash::Algorithm& hash)
+            {
+                QSharedPointer<otp::skey::DefaultDictionary> dict(otp::skey::defaultDictionary());
+                return sKeyEncoder(dict, hash);
+            }
         }
     }
 }

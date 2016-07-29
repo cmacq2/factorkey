@@ -1,3 +1,6 @@
+#ifndef FACTORKEY_SKEY_WORDS_H
+#define FACTORKEY_SKEY_WORDS_H
+
 #include <QStringList>
 
 namespace otp
@@ -10,3 +13,5 @@ namespace otp
         }
     }
 }
+
+#endif

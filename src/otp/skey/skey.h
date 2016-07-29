@@ -69,7 +69,7 @@ namespace otp
 
         SKeyWordComparator defaultWordComparator(void);
 
-        SKeyDictionary * defaultDictionary(void);
+        DefaultDictionary * defaultDictionary(void);
 
         QStringList encodeSKeyWords(quint64 value, const SKeyDictionary * dict);
         quint64 decodeSKeyWords(const QStringList& words, const SKeyDictionary * dict, bool * ok);
@@ -91,6 +91,10 @@ namespace otp
                         const QByteArray& seed,
                         const QCryptographicHash::Algorithm& hash,
                         quint64 rounds);
+
+        bool formatSKeyChallenge(const QCryptographicHash::Algorithm& hash, const QString& seed, const quint64 rounds, QString& challenge);
+
+        bool parseSKeyChallenge(const QString& challenge, QCryptographicHash::Algorithm& hash, QString& seed, quint64& rounds);
     }
 
 }
