@@ -5,19 +5,6 @@ namespace otp
 {
     namespace storage
     {
-        const QString Storage::OTP_TOKEN_TYPE              = QLatin1String("otp.token.type");
-        const QString Storage::OTP_TOKEN_NAME              = QLatin1String("otp.token.name");
-        const QString Storage::OTP_ENCODER_TOKEN_LOCALE    = QLatin1String("otp.encoder.locale");
-        const QString Storage::OTP_ENCODER_TOKEN_LENGTH    = QLatin1String("otp.encoder.length");
-        const QString Storage::OTP_KEY_ENCODING_CHARSET    = QLatin1String("otp.key.charset");
-        const QString Storage::OTP_KEY_ENCODING_TYPE       = QLatin1String("otp.key.type");
-        const QString Storage::OTP_HMAC_HASH_ALGORITHM     = QLatin1String("otp.hmac.hash");
-        const QString Storage::HOTP_TOKEN_COUNTER          = QLatin1String("hotp.counter");
-        const QString Storage::TOTP_TOKEN_EPOCH            = QLatin1String("totp.epoch");
-        const QString Storage::TOTP_TOKEN_TIMESTEP         = QLatin1String("totp.timestep");
-        const QString Storage::DUMMY_TOKEN_MESSAGE_VALUE   = QLatin1String("dummy.message.value");
-        const QString Storage::DUMMY_TOKEN_MESSAGE_CHARSET = QLatin1String("dummy.message.charset");
-
         Storage::Storage(StoragePrivate * d, QObject * parent): QObject(parent), d_ptr(d) {}
         Storage::~Storage() {}
 

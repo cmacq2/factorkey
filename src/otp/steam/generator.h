@@ -19,6 +19,8 @@ namespace otp
                 virtual ~SteamGuardParameters();
             protected:
                 SteamGuardParameters(otp::generator::TokenParametersPrivate * d, QObject * parent = 0);
+            private:
+                static const bool isRegistered;
             };
         }
     }

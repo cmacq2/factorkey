@@ -14,6 +14,9 @@ namespace otp
             {
                 Q_OBJECT
             public:
+                static const QString DUMMY_TOKEN_MESSAGE_VALUE;
+                static const QString DUMMY_TOKEN_MESSAGE_CHARSET;
+            public:
                 static otp::generator::TokenGenerator * generator(DummyParameters * params, QObject * parent = 0);
                 static DummyParameters * create(otp::storage::Storage * store, QObject * parent = 0);
             public:
@@ -26,6 +29,8 @@ namespace otp
                 virtual ~DummyParameters();
             protected:
                 DummyParameters(otp::generator::TokenParametersPrivate * d, QObject * parent = 0);
+            private:
+                static const bool isRegistered;
             };
 
         }

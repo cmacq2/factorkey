@@ -12,9 +12,12 @@ namespace otp
         {
             SteamGuardParameters::SteamGuardParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::TokenParameters(d, parent) {}
             SteamGuardParameters::~SteamGuardParameters() {}
+
+            const bool SteamGuardParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::SteamGuard, create);
+
             SteamGuardParameters * SteamGuardParameters::create(otp::storage::Storage * store, QObject * parent)
             {
-                return store && store->type() == otp::storage::OTPTokenType::SteamGuard ? new SteamGuardParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
+                return isRegistered && store && store->type() == otp::storage::OTPTokenType::SteamGuard ? new SteamGuardParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
             }
 
             class SteamGuardTokenGeneratorPrivate: public otp::generator::TokenGeneratorPrivate

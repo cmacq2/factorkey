@@ -12,6 +12,8 @@
 #include <QString>
 #include <QTextCodec>
 
+#include <functional>
+
 namespace otp
 {
     namespace generator
@@ -19,10 +21,26 @@ namespace otp
         class TokenParametersPrivate;
         class TokenGeneratorPrivate;
 
+        enum EncodingType : int
+        {
+            Text, Base32, Unknown
+        };
+
         class TokenParameters: public QObject
         {
             Q_OBJECT
         public:
+            static const QString OTP_TOKEN_TYPE;
+            static const QString OTP_TOKEN_NAME;
+            static const QString OTP_KEY_ENCODING_CHARSET;
+            static const QString OTP_KEY_ENCODING_TYPE;
+        public:
+            typedef std::function<TokenParameters*(otp::storage::Storage*, QObject*)> ConstructorFunction;
+            bool setSecretEncoding(const QTextCodec * codec);
+            bool setSecretEncodingType(const EncodingType& type);
+            bool secretEncodingType(EncodingType& type);
+            bool secretEncoding(QTextCodec ** codec) const;
+
             bool resync(void);
             bool commit(void);
             bool setSecret(const QString& key);
@@ -40,24 +58,17 @@ namespace otp
         protected:
             Q_DECLARE_PRIVATE(TokenParameters)
         protected:
+            static bool registerType(otp::storage::OTPTokenType type, const ConstructorFunction& ctor);
             TokenParameters(TokenParametersPrivate * d, QObject * parent = 0);
-        };
-
-        enum EncodingType : int
-        {
-            Text, Base32, Unknown
         };
 
         class GenericTokenParameters: public TokenParameters
         {
             Q_OBJECT
         public:
-            bool setSecretEncoding(const QTextCodec * codec);
+            static const QString OTP_HMAC_HASH_ALGORITHM;
+        public:
             bool setHashAlgorithm(const QCryptographicHash::Algorithm& hash);
-            bool setSecretEncodingType(const EncodingType& type);
-
-            bool secretEncodingType(EncodingType& type);
-            bool secretEncoding(QTextCodec ** codec) const;
             bool hashAlgorithm(QCryptographicHash::Algorithm& hash) const;
             virtual ~GenericTokenParameters();
         protected:

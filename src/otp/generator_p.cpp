@@ -213,7 +213,8 @@ namespace otp
                 }
                 else
                 {
-                    QTextCodec * cdc = QTextCodec::codecForName(val.toString().toUtf8());
+                    auto name = val.toString().toUtf8();
+                    QTextCodec * cdc = QTextCodec::codecForName(name);
                     if(cdc)
                     {
                         *codec = cdc;
@@ -291,7 +292,7 @@ namespace otp
 
         bool TokenGeneratorPrivate::key(otp::token::Key& key) const
         {
-            auto p = qobject_cast<otp::generator::GenericTokenParameters *>(params());
+            auto p = params();
             EncodingType type;
             if(p && p->secretEncodingType(type))
             {
@@ -323,7 +324,7 @@ namespace otp
         bool TokenGeneratorPrivate::forCodec(otp::token::Key& key) const
         {
             QTextCodec * codec = nullptr;
-            GenericTokenParameters * p = qobject_cast<GenericTokenParameters *>(params());
+            auto p = params();
             if(p && p->secretEncoding(&codec))
             {
                 key = otp::token::Key(otp::token::keyForCodec(codec));

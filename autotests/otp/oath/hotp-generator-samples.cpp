@@ -41,11 +41,11 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QFETCH(quint64, counter);
 
     QMap<QString, QVariant> map;
-    map.insert(otp::storage::Storage::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    map.insert(otp::storage::Storage::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    map.insert(otp::storage::Storage::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    map.insert(otp::storage::Storage::OTP_ENCODER_TOKEN_LENGTH, QVariant());
-    map.insert(otp::storage::Storage::HOTP_TOKEN_COUNTER, counter);
+    map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
+    map.insert(otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
+    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
+    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
+    map.insert(otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
 
     auto stub = new HOTPStoragePrivate(secret, map);
     auto storage = new otp::storage::Storage(stub);
@@ -59,15 +59,15 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QList<bool> commitResult;
     QList<enum otp::storage::OTPTokenType> typeResult;
     QList<QList<QVariant>> paramWrites;
-    stubs::storage::expect_param(paramWrites, true, otp::storage::Storage::HOTP_TOKEN_COUNTER, counter + 1);
+    stubs::storage::expect_param(paramWrites, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter + 1);
 
     QList<QList<QVariant>> paramReads;
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::HOTP_TOKEN_COUNTER, counter);
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::OTP_ENCODER_TOKEN_LENGTH, QVariant());
-    stubs::storage::expect_param(paramReads, true, otp::storage::Storage::HOTP_TOKEN_COUNTER, counter);
+    stubs::storage::expect_param(paramReads, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
+    stubs::storage::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
+    stubs::storage::expect_param(paramReads, true, otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
+    stubs::storage::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
+    stubs::storage::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
+    stubs::storage::expect_param(paramReads, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
 
     stub->check_read_param(paramReads);
     stub->check_write_param(paramWrites);
@@ -79,7 +79,7 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     stub->check_no_exists();
     stub->check_commit(commitResult << true);
 
-    const QVariant resultingCounter = stub->rawStorage().value(otp::storage::Storage::HOTP_TOKEN_COUNTER);
+    const QVariant resultingCounter = stub->rawStorage().value(otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER);
     QCOMPARE(resultingCounter.type(), QVariant::ULongLong);
     QCOMPARE(resultingCounter.toULongLong(), counter + 1);
 

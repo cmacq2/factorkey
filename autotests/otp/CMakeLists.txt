@@ -6,7 +6,6 @@ add_subdirectory(generator)
 add_subdirectory(storage)
 
 set(base32_UUT_SRCS $<TARGET_OBJECTS:Base32>)
-set(skey_UUT_SRCS $<TARGET_OBJECTS:SKey>)
 set(oath_UUT_SRCS $<TARGET_OBJECTS:OATH>)
 set(oath_token_UUT_SRCS $<TARGET_OBJECTS:OATH_TOKEN>)
 set(token_UUT_SRCS $<TARGET_OBJECTS:TOKEN>)
