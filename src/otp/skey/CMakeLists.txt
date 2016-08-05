@@ -7,3 +7,6 @@ set(SKeyToken_SRCS token.cpp)
 add_library(SKeyToken OBJECT ${SKeyToken_SRCS})
 set_public_target_object_vars(SKeyToken Qt5::Core)
 
+set(SKeyGenerator_SRCS generator.cpp)
+add_library(SKeyGenerator OBJECT ${SKeyGenerator_SRCS})
+set_public_target_object_vars(SKeyGenerator Qt5::Core)

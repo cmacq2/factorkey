@@ -4,7 +4,6 @@
 
 #include "../token/token.h"
 #include <QCryptographicHash>
-#include <QSharedPointer>
 
 namespace otp
 {
@@ -16,8 +15,9 @@ namespace otp
         {
             otp::token::Algorithm sKeyAlgorithm(quint64 rounds, const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
 
-            otp::token::Encoder defaultSKeyEncoder(const QCryptographicHash::Algorithm& hash);
-            otp::token::Encoder sKeyEncoder(const QSharedPointer<otp::skey::SKeyDictionary> dict, const QCryptographicHash::Algorithm& hash);
+            otp::token::Encoder defaultWordsEncoder(const QCryptographicHash::Algorithm& hash);
+            otp::token::Encoder wordsEncoder(const QCryptographicHash::Algorithm& hash, const otp::skey::SKeyDictionary * dict);
+            otp::token::Encoder hexEncoder(const QCryptographicHash::Algorithm& hash);
         }
     }
 }
