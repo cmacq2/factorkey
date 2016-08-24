@@ -2,7 +2,6 @@
 add_subdirectory(base32)
 add_subdirectory(oath)
 add_subdirectory(skey)
-add_subdirectory(generator)
 add_subdirectory(storage)
 
 set(base32_UUT_SRCS $<TARGET_OBJECTS:Base32>)

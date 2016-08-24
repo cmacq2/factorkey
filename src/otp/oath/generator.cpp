@@ -1,5 +1,6 @@
 #include "generator.h"
 #include "../generator_p.h"
+#include "../util/localeconversion.h"
 #include "oath.h"
 #include "token.h"
 
@@ -30,7 +31,7 @@ namespace otp
                     {
                         const QString str = val.toString();
                         QLocale l;
-                        if(otp::generator::internal::stringToLocale(str, l))
+                        if(otp::util::stringToLocale(str, l))
                         {
                             locale = l;
                             return true;
@@ -43,7 +44,7 @@ namespace otp
             bool GenericOTPParameters::setTokenLocale(const QLocale& locale)
             {
                 Q_D(otp::generator::TokenParameters);
-                d->storage()->writeParam(OTP_ENCODER_TOKEN_LOCALE, QVariant(otp::generator::internal::localeToString(locale)));
+                d->storage()->writeParam(OTP_ENCODER_TOKEN_LOCALE, QVariant(otp::util::localeToString(locale)));
                 return true;
             }
 

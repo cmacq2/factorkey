@@ -46,17 +46,6 @@ namespace otp
 
         namespace internal
         {
-            struct LocaleTriplet {
-                QLocale::Language language;
-                QLocale::Script script;
-                QLocale::Country country;
-            };
-            QString localeToString(const QLocale& locale);
-            QString localeToString(const struct LocaleTriplet& locale);
-            bool stringToLocale(const QString& string, QLocale& locale);
-            bool stringToLocale(const QString& string, struct LocaleTriplet& out);
-
-
             template<typename T>
             inline T convertToNumeric(const QVariant& var, bool * ok);
 

@@ -1,4 +1,4 @@
-#include "otp/generator_p.h"
+#include "otp/util/localeconversion.h"
 
 #include <QLocale>
 #include <QString>

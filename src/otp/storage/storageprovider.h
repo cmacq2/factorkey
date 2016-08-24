@@ -16,8 +16,8 @@ namespace otp
 
         class StorageProvider : public QObject
         {
-        public:
             Q_OBJECT
+        public:
 
             bool open(void);
             bool close(void);
@@ -33,6 +33,7 @@ namespace otp
             Q_DISABLE_COPY(StorageProvider)
             const QScopedPointer<StorageProviderPrivate> d_ptr;
             Q_DECLARE_PRIVATE(StorageProvider)
+        protected:
             StorageProvider(StorageProviderPrivate * d, QObject * parent = 0);
         };
     }

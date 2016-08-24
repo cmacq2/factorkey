@@ -39,9 +39,12 @@ set(token_UUT_SRCS $<TARGET_OBJECTS:TOKEN>)
 set(storage_STUB_SRCS $<TARGET_OBJECTS:DummyStorage>)
 set(generator_UUT_SRCS $<TARGET_OBJECTS:GENERATOR>)
 set(skey_generator_UUT_SRCS $<TARGET_OBJECTS:SKeyGenerator>)
+set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
+set(util_UUT_SRCS $<TARGET_OBJECTS:Util>)
 
 add_test(skey-generator-samples skey-generator-samples)
 add_executable(skey-generator-samples skey-generator-samples
      ${skey_UUT_SRCS} ${base32_UUT_SRCS} ${skey_token_UUT_SRCS} ${token_UUT_SRCS}
-     ${generator_UUT_SRCS} ${skey_generator_UUT_SRCS} ${storage_STUB_SRCS})
-target_link_libraries(skey-generator-samples Qt5::Core Qt5::Test KF5::Wallet)
+     ${generator_UUT_SRCS} ${skey_generator_UUT_SRCS} ${storage_UUT_SRCS}
+     ${util_UUT_SRCS} ${storage_STUB_SRCS})
+target_link_libraries(skey-generator-samples Qt5::Core Qt5::Test)

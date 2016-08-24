@@ -1,7 +1,7 @@
 #ifndef FACTORKEY_AUTOTESTS_STUBBED_STORAGE_H
 #define FACTORKEY_AUTOTESTS_STUBBED_STORAGE_H
 
-#include "otp/storage_p.h"
+#include "otp/storage/storage_p.h"
 
 #include <QList>
 #include <QMap>

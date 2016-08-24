@@ -1,7 +1,7 @@
 #ifndef FACTORKEY_GENERATOR_H
 #define FACTORKEY_GENERATOR_H
 
-#include "storage.h"
+#include "storage/storage.h"
 
 #include <QByteArray>
 #include <QCryptographicHash>
