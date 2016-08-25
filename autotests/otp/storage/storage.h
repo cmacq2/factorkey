@@ -3,8 +3,8 @@
 
 #include "otp/storage/storage_p.h"
 
+#include <QHash>
 #include <QList>
-#include <QMap>
 #include <QSignalSpy>
 #include <QString>
 #include <QVariant>
@@ -20,7 +20,7 @@ namespace stubs
             QString m_entryId;
             otp::storage::OTPTokenType m_type;
             QString m_password;
-            QMap<QString,QVariant> m_map;
+            QHash<QString,QVariant> m_map;
         private:
             void init(void);
         private:
@@ -48,7 +48,7 @@ namespace stubs
             QSignalSpy * spy_type(void) const;
             QSignalSpy * spy_entryId(void) const;
         public:
-            const QMap<QString,QVariant>& rawStorage(void) const;
+            const QHash<QString,QVariant>& rawStorage(void) const;
         protected:
             virtual bool allowWriteParam(void) const;
             virtual bool allowReadParam(void) const;
@@ -82,9 +82,9 @@ namespace stubs
             void notify_commit(bool ok);
             void notify_poll(bool ok);
         public:
-            DummyStoragePrivate(const QString& entryId, otp::storage::OTPTokenType type, const QString& password, const QMap<QString,QVariant>& preset, QObject * parent = nullptr);
+            DummyStoragePrivate(const QString& entryId, otp::storage::OTPTokenType type, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr);
             DummyStoragePrivate(const QString& entryId,  otp::storage::OTPTokenType type, const QString& password, QObject * parent = nullptr);
-            DummyStoragePrivate(otp::storage::OTPTokenType type, const QString& password, const QMap<QString,QVariant>& preset, QObject * parent = nullptr);
+            DummyStoragePrivate(otp::storage::OTPTokenType type, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr);
             DummyStoragePrivate(otp::storage::OTPTokenType type, const QString& password, QObject * parent = nullptr);
             virtual ~DummyStoragePrivate();
         public:
@@ -120,12 +120,11 @@ namespace stubs
             void check_poll(const QList<bool>& callArgs) const;
             void check_no_exists(void) const;
             void check_exists(const QList<bool>& callArgs) const;
+        public:
+            static QList<QList<QVariant>>& expect_token_type(QList<QList<QVariant>>& callStack, bool status, enum otp::storage::OTPTokenType type);
+            static QList<QList<QVariant>>& expect_password(QList<QList<QVariant>>& callStack, bool status, const QString& secret);
+            static QList<QList<QVariant>>& expect_param(QList<QList<QVariant>>& callStack, bool status, const QString& param, const QVariant& value);
         };
-
-        QList<QList<QVariant>>& expect_token_type(QList<QList<QVariant>>& callStack, bool status, enum otp::storage::OTPTokenType type);
-        QList<QList<QVariant>>& expect_password(QList<QList<QVariant>>& callStack, bool status, const QString& secret);
-        QList<QList<QVariant>>& expect_param(QList<QList<QVariant>>& callStack, bool status, const QString& param, const QVariant& value);
-
     }
 }
 

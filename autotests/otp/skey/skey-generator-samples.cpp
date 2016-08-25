@@ -8,11 +8,11 @@
 class SKeyStoragePrivate: public stubs::storage::DummyStoragePrivate
 {
 public:
-    SKeyStoragePrivate(const QString& entryId, const QString& password, const QMap<QString,QVariant>& preset, QObject * parent = nullptr):
+    SKeyStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
     stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password, preset, parent) {}
     SKeyStoragePrivate(const QString& entryId, const QString& password, QObject * parent = nullptr):
     stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password, parent) {}
-    SKeyStoragePrivate(const QString& password, const QMap<QString,QVariant>& preset, QObject * parent = nullptr):
+    SKeyStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
     stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::SKey, password, preset, parent) {}
     SKeyStoragePrivate(const QString& password, QObject * parent = nullptr):
     stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::SKey, password, parent) {}
@@ -38,7 +38,7 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     QFETCH(QString, secret);
     QFETCH(QString, challenge);
 
-    QMap<QString, QVariant> map;
+    QHash<QString, QVariant> map;
     map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Text);
     map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_CHARSET, QVariant());
     map.insert(otp::skey::generator::SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME, QVariant());
@@ -56,12 +56,12 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
 
     QList<enum otp::storage::OTPTokenType> typeResult;
     QList<QList<QVariant>> paramReads;
-    stubs::storage::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Text);
-    stubs::storage::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_CHARSET, QVariant());
-    stubs::storage::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_ENCODING_TYPE, (int) tokenFormat);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Text);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_CHARSET, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_ENCODING_TYPE, (int) tokenFormat);
     if(tokenFormat == otp::skey::generator::SKeyEncodingType::Words)
     {
-        stubs::storage::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME, dictionaryValue);
+        stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME, dictionaryValue);
     }
 
     stub->check_read_param(paramReads);

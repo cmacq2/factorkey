@@ -26,7 +26,7 @@ namespace stubs
         DummyStoragePrivate::DummyStoragePrivate(const QString& entryId,
                             otp::storage::OTPTokenType type,
                             const QString& password,
-                            const QMap<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset)
+                            const QHash<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset)
         {
             init();
         }
@@ -48,7 +48,7 @@ namespace stubs
         DummyStoragePrivate::DummyStoragePrivate(
                             otp::storage::OTPTokenType type,
                             const QString& password,
-                            const QMap<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_type(type), m_password(password), m_map(preset)
+                            const QHash<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_type(type), m_password(password), m_map(preset)
         {
             init();
         }
@@ -74,7 +74,7 @@ namespace stubs
             m_spy_entryId = new QSignalSpy(this, &DummyStoragePrivate::notify_entryId);
         }
 
-        const QMap<QString,QVariant>& DummyStoragePrivate::rawStorage(void) const
+        const QHash<QString,QVariant>& DummyStoragePrivate::rawStorage(void) const
         {
             return m_map;
         }
@@ -375,7 +375,7 @@ namespace stubs
             check_type(empty);
         }
 
-        QList<QList<QVariant>>& expect_token_type(QList<QList<QVariant>>& callStack, bool status, enum otp::storage::OTPTokenType type)
+        QList<QList<QVariant>>& DummyStoragePrivate::expect_token_type(QList<QList<QVariant>>& callStack, bool status, enum otp::storage::OTPTokenType type)
         {
             QList<QVariant> args;
             args << status << QVariant::fromValue(type);
@@ -433,7 +433,7 @@ namespace stubs
             check_read_token_type(empty);
         }
 
-        QList<QList<QVariant>>& expect_password(QList<QList<QVariant>>& callStack, bool status, const QString& password)
+        QList<QList<QVariant>>& DummyStoragePrivate::expect_password(QList<QList<QVariant>>& callStack, bool status, const QString& password)
         {
             QList<QVariant> args;
             args << status << password;
@@ -484,7 +484,7 @@ namespace stubs
             check_password(callArgs, spy_readPassword(), "readPassword() should be spied on by a valid QSignalSpy");
         }
 
-        QList<QList<QVariant>>& expect_param(QList<QList<QVariant>>& callStack, bool status, const QString& param, const QVariant& value)
+        QList<QList<QVariant>>& DummyStoragePrivate::expect_param(QList<QList<QVariant>>& callStack, bool status, const QString& param, const QVariant& value)
         {
             QList<QVariant> args;
             args << status << param << value;
