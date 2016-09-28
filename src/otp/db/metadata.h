@@ -2,9 +2,11 @@
 #define FACTORKEY_METADATA_DB_H
 
 #include "../storage/storage.h"
+#include "metadb.h"
+#include "metadatastoragehandler.h"
 
-#include <functional>
-
+#include <QScopedPointer>
+#include <QSharedPointer>
 #include <QHash>
 #include <QString>
 #include <QVariant>
@@ -15,32 +17,35 @@ namespace otp
     {
         namespace db
         {
-            class MetadataStorageHandler
-            {
+
+            class Metadata {
             public:
-                virtual ~MetadataStorageHandler() = 0;
-                virtual otp::storage::OTPTokenType type(void) const;
-            protected:
-                virtual bool writeTokenType(const otp::storage::OTPTokenType&) = 0;
-                virtual bool writeParam(const QString&, const QVariant&) =0;
-                virtual bool fetchMetaData(QHash<QString,QVariant>&) = 0;
-            };
+                Metadata(const QString& entryId, QSharedPointer<MetadataDbManager> db);
 
-            typedef std::function<MetadataStorageHandler*()> MetadataHandlerConstructorFunction;
-            bool registerMetadataHandlerType(otp::storage::OTPTokenType type, const MetadataHandlerConstructorFunction& ctor);
-            MetadataStorageHandler * createMetadataHandler(const otp::storage::OTPTokenType type);
+                bool readTokenType(otp::storage::OTPTokenType& type) const;
+                bool readParam(const QString& param, QVariant& value) const;
 
-            class MetadataDbManager
-            {
-            public:
-                static const QString METADATA_FOLDER;
-                MetadataDbManager();
-                virtual ~MetadataDbManager();
-                bool isOpened(void) const;
-                bool open(void);
-                bool close(void);
+                bool writeTokenType(const otp::storage::OTPTokenType& type);
+                bool writeParam(const QString& param, const QVariant& value);
 
+                bool remove(void);
+                bool commit(void);
+                bool poll(void);
             private:
+                bool establishTokenType(otp::storage::OTPTokenType& type);
+                bool createHandler(const otp::storage::OTPTokenType& type);
+                bool convertHandler(MetadataStorageHandler * newHandler);
+                bool containsType(const QHash<QString,QVariant>& data) const;
+                bool haveType(void) const;
+                bool typeWritten(void) const;
+            private:
+                const QString& m_entryId;
+                otp::storage::OTPTokenType m_typeRead;
+                otp::storage::OTPTokenType m_typeWrite;
+                QHash<QString, QVariant> m_dataRead;
+                QHash<QString, QVariant> m_dataWrite;
+                QSharedPointer<MetadataStorageHandler> m_typeHandler;
+                QSharedPointer<MetadataDbManager> m_dbManager;
             };
         }
     }

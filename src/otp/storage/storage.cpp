@@ -5,6 +5,8 @@ namespace otp
 {
     namespace storage
     {
+
+        const QString Storage::OTP_TOKEN_TYPE = QLatin1String("otp.token.type");
         Storage::Storage(StoragePrivate * d, QObject * parent): QObject(parent), d_ptr(d) {}
         Storage::~Storage() {}
 

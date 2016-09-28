@@ -1,4 +1,5 @@
 #include "storage.h"
+#include "otp/storage/util.h"
 
 #include <QtDebug>
 #include <QTest>
@@ -13,12 +14,7 @@ namespace stubs
         {
             static bool register_meta_types(void)
             {
-                static auto type = qRegisterMetaType<enum otp::storage::OTPTokenType>();
-                bool result = (bool) type;
-                if(!result)
-                {
-                    qWarning() << "Failed to register meta types! Some signal/slot spying functionality may not work as expected.";
-                }
+                static bool result = otp::storage::checkOTPTokenTypeIsMetaType();
                 return result;
             }
         }

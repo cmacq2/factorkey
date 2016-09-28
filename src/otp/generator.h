@@ -30,7 +30,6 @@ namespace otp
         {
             Q_OBJECT
         public:
-            static const QString OTP_TOKEN_TYPE;
             static const QString OTP_TOKEN_NAME;
             static const QString OTP_KEY_ENCODING_CHARSET;
             static const QString OTP_KEY_ENCODING_TYPE;

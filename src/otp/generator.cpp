@@ -15,7 +15,6 @@ namespace otp
 {
     namespace generator
     {
-        const QString TokenParameters::OTP_TOKEN_TYPE = QLatin1String("otp.token.type");
         const QString TokenParameters::OTP_TOKEN_NAME = QLatin1String("otp.token.name");
         const QString TokenParameters::OTP_KEY_ENCODING_CHARSET = QLatin1String("otp.key.charset");
         const QString TokenParameters::OTP_KEY_ENCODING_TYPE = QLatin1String("otp.key.type");

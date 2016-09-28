@@ -25,6 +25,8 @@ namespace otp
         {
             Q_OBJECT
         public:
+            static const QString OTP_TOKEN_TYPE;
+        public:
             const QString entryId(void) const;
             OTPTokenType type(void) const;
             bool readPassword(QString& secret) const;
