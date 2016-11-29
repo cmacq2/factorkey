@@ -3,6 +3,7 @@
 #include "../util/localeconversion.h"
 #include "oath.h"
 #include "token.h"
+#include "parameters.h"
 
 namespace otp
 {
@@ -13,14 +14,11 @@ namespace otp
             GenericOTPParameters::GenericOTPParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::GenericTokenParameters(d, parent) {}
             GenericOTPParameters::~GenericOTPParameters() {}
 
-            const QString GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE = QLatin1String("otp.encoder.locale");
-            const QString GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH = QLatin1String("otp.encoder.length");
-
             bool GenericOTPParameters::tokenLocale(QLocale& locale) const
             {
                 Q_D(const otp::generator::TokenParameters);
                 QVariant val;
-                if(d->lookup(OTP_ENCODER_TOKEN_LOCALE, val))
+                if(d->lookup(otp::oath::parameters::generic::LOCALE, val))
                 {
                     if(val.isNull())
                     {
@@ -44,27 +42,25 @@ namespace otp
             bool GenericOTPParameters::setTokenLocale(const QLocale& locale)
             {
                 Q_D(otp::generator::TokenParameters);
-                d->storage()->writeParam(OTP_ENCODER_TOKEN_LOCALE, QVariant(otp::util::localeToString(locale)));
+                d->storage()->writeParam(otp::oath::parameters::generic::LOCALE, QVariant(otp::util::localeToString(locale)));
                 return true;
             }
 
             bool GenericOTPParameters::tokenLength(uint& length) const
             {
                 Q_D(const otp::generator::TokenParameters);
-                return otp::generator::internal::lookupNumericValue<uint>(d, OTP_ENCODER_TOKEN_LENGTH, length, otp::oath::DEFAULT_OTP_LENGTH);
+                return otp::generator::internal::lookupNumericValue<uint>(d, otp::oath::parameters::generic::LENGTH, length, otp::oath::DEFAULT_OTP_LENGTH);
             }
 
             bool GenericOTPParameters::setTokenLength(uint length)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->storage()->writeParam(OTP_ENCODER_TOKEN_LENGTH, QVariant(length));
+                return d->storage()->writeParam(otp::oath::parameters::generic::LENGTH, QVariant(length));
             }
 
             HOTPTokenParameters::HOTPTokenParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : GenericOTPParameters(d, parent) {}
             HOTPTokenParameters::~HOTPTokenParameters() {}
 
-
-            const QString HOTPTokenParameters::HOTP_TOKEN_COUNTER = QLatin1String("hotp.counter");
             const bool HOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::HOTP, create);
 
             HOTPTokenParameters * HOTPTokenParameters::create(otp::storage::Storage * store, QObject * parent)
@@ -75,21 +71,18 @@ namespace otp
             bool HOTPTokenParameters::tokenCounter(quint64 & count) const
             {
                 Q_D(const otp::generator::TokenParameters);
-                return otp::generator::internal::lookupNumericValue<quint64>(d, HOTP_TOKEN_COUNTER, count);
+                return otp::generator::internal::lookupNumericValue<quint64>(d, otp::oath::parameters::hotp::COUNTER, count);
             }
 
             bool HOTPTokenParameters::setTokenCounter(quint64 count)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->storage()->writeParam(HOTP_TOKEN_COUNTER, QVariant(count));
+                return d->storage()->writeParam(otp::oath::parameters::hotp::COUNTER, QVariant(count));
             }
 
             TOTPTokenParameters::TOTPTokenParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : GenericOTPParameters(d, parent) {}
             TOTPTokenParameters::~TOTPTokenParameters() {}
 
-
-            const QString TOTPTokenParameters::TOTP_TOKEN_EPOCH = QLatin1String("totp.epoch");
-            const QString TOTPTokenParameters::TOTP_TOKEN_TIMESTEP = QLatin1String("totp.timestep");
             const bool TOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::TOTP, create);
 
             TOTPTokenParameters * TOTPTokenParameters::create(otp::storage::Storage * store, QObject * parent)
@@ -100,19 +93,19 @@ namespace otp
             bool TOTPTokenParameters::tokenTimeStep(quint64 & timeStepMSec) const
             {
                 Q_D(const otp::generator::TokenParameters);
-                return otp::generator::internal::lookupNumericValue<quint64>(d, TOTP_TOKEN_TIMESTEP, timeStepMSec, otp::oath::DEFAULT_TIMESTEP_MSEC);
+                return otp::generator::internal::lookupNumericValue<quint64>(d, otp::oath::parameters::totp::TIMESTEP, timeStepMSec, otp::oath::DEFAULT_TIMESTEP_MSEC);
             }
 
             bool TOTPTokenParameters::setTokenTimeStep(quint64 timeStepMSec)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->storage()->writeParam(TOTP_TOKEN_TIMESTEP, QVariant(timeStepMSec));
+                return d->storage()->writeParam(otp::oath::parameters::totp::TIMESTEP, QVariant(timeStepMSec));
             }
 
             bool TOTPTokenParameters::tokenEpoch(qint64 & epoch) const
             {
                 Q_D(const otp::generator::TokenParameters);
-                return otp::generator::internal::lookupNumericValue<qint64>(d, TOTP_TOKEN_EPOCH, epoch, otp::oath::DEFAULT_EPOCH);
+                return otp::generator::internal::lookupNumericValue<qint64>(d, otp::oath::parameters::totp::EPOCH, epoch, otp::oath::DEFAULT_EPOCH);
             }
 
             bool TOTPTokenParameters::setTokenEpoch(const QDateTime& epoch)
@@ -123,7 +116,7 @@ namespace otp
             bool TOTPTokenParameters::setTokenEpoch(qint64 unixTime)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->storage()->writeParam(TOTP_TOKEN_EPOCH, QVariant(unixTime));
+                return d->storage()->writeParam(otp::oath::parameters::totp::EPOCH, QVariant(unixTime));
             }
 
             bool algorithm(const otp::generator::GenericTokenParameters * params, otp::token::Algorithm& algo)

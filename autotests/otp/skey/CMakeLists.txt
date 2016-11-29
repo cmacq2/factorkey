@@ -43,8 +43,21 @@ set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
 set(util_UUT_SRCS $<TARGET_OBJECTS:Util>)
 
 add_test(skey-generator-samples skey-generator-samples)
-add_executable(skey-generator-samples skey-generator-samples
+add_executable(skey-generator-samples skey-generator-samples.cpp
      ${skey_UUT_SRCS} ${base32_UUT_SRCS} ${skey_token_UUT_SRCS} ${token_UUT_SRCS}
      ${generator_UUT_SRCS} ${skey_generator_UUT_SRCS} ${storage_UUT_SRCS}
      ${util_UUT_SRCS} ${storage_STUB_SRCS})
 target_link_libraries(skey-generator-samples Qt5::Core Qt5::Test)
+
+set(skey_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:SKey_MetaDB>)
+set(MetadataDB_UUT_SRCS $<TARGET_OBJECTS:MetadataDB>)
+set(MetadataDBSanityTest_SRCS $<TARGET_OBJECTS:MetadataDBSanityTest>)
+
+set(SharedParameters_UUT_SRCS $<TARGET_OBJECTS:SharedParameters>)
+set(SKeyParameters_UUT_SRCS $<TARGET_OBJECTS:SKeyParameters>)
+
+add_test(skey-metadatastoragehandler-sanity skey-metadatastoragehandler-sanity)
+add_executable(skey-metadatastoragehandler-sanity skey-metadatastoragehandler-sanity.cpp
+    ${SharedParameters_UUT_SRCS} ${SKeyParameters_UUT_SRCS}
+    ${MetadataDB_UUT_SRCS} ${skey_metadatastorage_UUT_SRCS} ${MetadataDBSanityTest_SRCS} ${storage_UUT_SRCS})
+target_link_libraries(skey-metadatastoragehandler-sanity Qt5::Core Qt5::Sql Qt5::Test)

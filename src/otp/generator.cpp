@@ -2,11 +2,7 @@
 #include "generator_p.h"
 
 #include "token/token.h"
-
-#include "dummy/generator.h"
-#include "oath/generator.h"
-#include "steam/generator.h"
-#include "skey/generator.h"
+#include "parameters.h"
 
 #include <QHash>
 #include <QMutex>
@@ -15,9 +11,6 @@ namespace otp
 {
     namespace generator
     {
-        const QString TokenParameters::OTP_TOKEN_NAME = QLatin1String("otp.token.name");
-        const QString TokenParameters::OTP_KEY_ENCODING_CHARSET = QLatin1String("otp.key.charset");
-        const QString TokenParameters::OTP_KEY_ENCODING_TYPE = QLatin1String("otp.key.type");
         TokenParameters::TokenParameters(TokenParametersPrivate * d, QObject * parent) : QObject(parent), d_ptr(d) {}
         TokenParameters::~TokenParameters() {}
 
@@ -49,7 +42,7 @@ namespace otp
         {
             Q_D(const TokenParameters);
             QVariant str;
-            if(d->lookup(OTP_TOKEN_NAME, str))
+            if(d->lookup(otp::parameters::key::NAME, str))
             {
                 name  = str.isNull() ? QLatin1String("") : str.toString();
                 return true;
@@ -62,7 +55,7 @@ namespace otp
             Q_D(TokenParameters);
             if(!name.isNull())
             {
-                d->storage()->writeParam(OTP_TOKEN_NAME, QVariant(name));
+                d->storage()->writeParam(otp::parameters::key::NAME, QVariant(name));
                 return true;
             }
             return false;
@@ -84,7 +77,7 @@ namespace otp
         {
             Q_D(TokenParameters);
             int v;
-            if(otp::generator::internal::lookupNumericValue<int>(d, OTP_KEY_ENCODING_TYPE, v, (int) EncodingType::Unknown))
+            if(otp::generator::internal::lookupNumericValue<int>(d, otp::parameters::key::ENCODING, v, (int) EncodingType::Unknown))
             {
                 switch((EncodingType) v)
                 {
@@ -103,26 +96,26 @@ namespace otp
         bool TokenParameters::setSecretEncodingType(const EncodingType& type)
         {
             Q_D(TokenParameters);
-            return d->storage()->writeParam(OTP_KEY_ENCODING_TYPE, QVariant((int) type));
+            return d->storage()->writeParam(otp::parameters::key::ENCODING, QVariant((int) type));
         }
 
         bool TokenParameters::secretEncoding(QTextCodec ** codec) const
         {
             Q_D(const TokenParameters);
-            return d->lookupCodec(OTP_KEY_ENCODING_CHARSET, codec);
+            return d->lookupCodec(otp::parameters::key::CHARSET, codec);
         }
 
         bool TokenParameters::setSecretEncoding(const QTextCodec * codec)
         {
             Q_D(TokenParameters);
-            return d->setCodec(OTP_KEY_ENCODING_CHARSET, codec);
+            return d->setCodec(otp::parameters::key::CHARSET, codec);
         }
 
         bool GenericTokenParameters::hashAlgorithm(QCryptographicHash::Algorithm& hash) const
         {
             Q_D(const TokenParameters);
             int v;
-            if(otp::generator::internal::lookupNumericValue<int>(d, OTP_HMAC_HASH_ALGORITHM, v, (int) QCryptographicHash::Sha1))
+            if(otp::generator::internal::lookupNumericValue<int>(d, otp::parameters::hashing::ALGORITHM, v, (int) QCryptographicHash::Sha1))
             {
                 switch((QCryptographicHash::Algorithm) v)
                 {
@@ -149,10 +142,9 @@ namespace otp
         bool GenericTokenParameters::setHashAlgorithm(const QCryptographicHash::Algorithm& hash)
         {
             Q_D(TokenParameters);
-            return d->storage()->writeParam(OTP_HMAC_HASH_ALGORITHM, QVariant((int) hash));
+            return d->storage()->writeParam(otp::parameters::hashing::ALGORITHM, QVariant((int) hash));
         }
 
-        const QString GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM = QLatin1String("otp.hmac.hash");
         GenericTokenParameters::GenericTokenParameters(TokenParametersPrivate * d, QObject * parent) : TokenParameters(d, parent) {}
         GenericTokenParameters::~GenericTokenParameters() {}
 

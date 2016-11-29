@@ -2,6 +2,7 @@
 #include "../generator_p.h"
 #include "../oath/generator.h"
 #include "dummy.h"
+#include "parameters.h"
 
 namespace otp
 {
@@ -12,8 +13,6 @@ namespace otp
             DummyParameters::DummyParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::GenericTokenParameters(d, parent) {}
             DummyParameters::~DummyParameters() {}
 
-            const QString DummyParameters::DUMMY_TOKEN_MESSAGE_VALUE = QLatin1String("dummy.message.value");
-            const QString DummyParameters::DUMMY_TOKEN_MESSAGE_CHARSET = QLatin1String("dummy.message.charset");
             const bool DummyParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::DummyHMAC, create);
 
             DummyParameters * DummyParameters::create(otp::storage::Storage * store, QObject * parent)
@@ -25,7 +24,7 @@ namespace otp
             {
                 Q_D(const otp::generator::TokenParameters);
                 QVariant str;
-                if(d->lookup(DUMMY_TOKEN_MESSAGE_VALUE, str) && !str.isNull())
+                if(d->lookup(otp::dummy::parameters::MESSAGE, str) && !str.isNull())
                 {
                     message = str.toString();
                     return true;
@@ -42,7 +41,7 @@ namespace otp
                 }
                 else
                 {
-                    d->storage()->writeParam(DUMMY_TOKEN_MESSAGE_VALUE, QVariant(message));
+                    d->storage()->writeParam(otp::dummy::parameters::MESSAGE, QVariant(message));
                     return true;
                 }
             }
@@ -50,13 +49,13 @@ namespace otp
             bool DummyParameters::tokenMessageEncoding(QTextCodec ** codec) const
             {
                 Q_D(const otp::generator::TokenParameters);
-                return d->lookupCodec(DUMMY_TOKEN_MESSAGE_CHARSET, codec);
+                return d->lookupCodec(otp::dummy::parameters::CHARSET, codec);
             }
 
             bool DummyParameters::setTokenMessageEncoding(const QTextCodec * codec)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->setCodec(DUMMY_TOKEN_MESSAGE_CHARSET, codec);
+                return d->setCodec(otp::dummy::parameters::CHARSET, codec);
             }
 
             class DummyTokenGeneratorPrivate: public otp::generator::TokenGeneratorPrivate

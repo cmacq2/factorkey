@@ -20,14 +20,14 @@ namespace stubs
             {
                 Q_OBJECT
             public:
-                DummyMetadataDbManager();
-                DummyMetadataDbManager(const QHash<QString, enum otp::storage::OTPTokenType>& entries);
-                DummyMetadataDbManager(const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers);
-                DummyMetadataDbManager(const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers, const QHash<QString, enum otp::storage::OTPTokenType>& entries);
+                DummyMetadataDbManager(const QString& connName);
+                DummyMetadataDbManager(const QString& connName, const QHash<QString, enum otp::storage::OTPTokenType>& entries);
+                DummyMetadataDbManager(const QString& connName, const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers);
+                DummyMetadataDbManager(const QString& connName, const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers, const QHash<QString, enum otp::storage::OTPTokenType>& entries);
                 virtual ~DummyMetadataDbManager();
 
                 bool isOpened(void) const;
-                bool open(void);
+                QSqlDatabase open(void);
                 bool close(void);
 
                 bool readType(const QString& entry, QVariant& value);
@@ -51,7 +51,7 @@ namespace stubs
                 virtual bool allowGetHandler(void) const;
 
                 virtual bool impl_isOpened(void) const;
-                virtual bool impl_open(void);
+                virtual QSqlDatabase impl_open(void);
                 virtual bool impl_close(void);
 
                 virtual bool impl_readType(const QString& entry, QVariant& value);
@@ -62,7 +62,7 @@ namespace stubs
                 virtual QSharedPointer<otp::storage::db::MetadataStorageHandler> impl_getHandler(otp::storage::OTPTokenType type);
             Q_SIGNALS:
                 void notify_isOpened(bool result) const;
-                void notify_open(bool result);
+                void notify_open(QSqlDatabase result);
                 void notify_close(bool result);
 
                 void notify_readType(bool result, const QString& entry, QVariant& value);

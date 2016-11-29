@@ -2,6 +2,7 @@
 #include "../generator_p.h"
 #include "skey.h"
 #include "token.h"
+#include "parameters.h"
 
 #include <QMutex>
 #include <QScopedPointer>
@@ -14,8 +15,6 @@ namespace otp
         {
 
             const QString SKeyTokenParameters::DEFAULT_DICTIONARY_VALUE = QLatin1String("otp.skey.default.dictionary");
-            const QString SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME = QLatin1String("otp.skey.dictionary");
-            const QString SKeyTokenParameters::OTP_SKEY_ENCODING_TYPE   = QLatin1String("otp.skey.token.encoding");
 
             DictionaryProvider::~DictionaryProvider() {}
 
@@ -195,14 +194,14 @@ namespace otp
             bool SKeyTokenParameters::setSKeyEncoding(const SKeyEncodingType& value)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d->storage()->writeParam(OTP_SKEY_ENCODING_TYPE, QVariant((int) value));
+                return d->storage()->writeParam(otp::skey::parameters::ENCODING, QVariant((int) value));
             }
 
             bool SKeyTokenParameters::sKeyEncoding(SKeyEncodingType& value) const
             {
                 Q_D(const otp::generator::TokenParameters);
                 int v;
-                if(otp::generator::internal::lookupNumericValue<int>(d, OTP_SKEY_ENCODING_TYPE, v, (int) SKeyEncodingType::Words))
+                if(otp::generator::internal::lookupNumericValue<int>(d, otp::skey::parameters::ENCODING, v, (int) SKeyEncodingType::Words))
                 {
                     switch((SKeyEncodingType) v)
                     {
@@ -330,14 +329,14 @@ namespace otp
             bool SKeyTokenParameters::setDictionaryName(const QString& name)
             {
                 Q_D(otp::generator::TokenParameters);
-                return d && d->storage()->writeParam(OTP_SKEY_DICTIONARY_NAME, QVariant(name));
+                return d && d->storage()->writeParam(otp::skey::parameters::DICTIONARY, QVariant(name));
             }
 
             bool SKeyTokenParameters::dictionaryName(QString& name) const
             {
                 Q_D(const otp::generator::TokenParameters);
                 QVariant value;
-                if(d && d->lookup(OTP_SKEY_DICTIONARY_NAME, value))
+                if(d && d->lookup(otp::skey::parameters::DICTIONARY, value))
                 {
                     if(value.isNull())
                     {

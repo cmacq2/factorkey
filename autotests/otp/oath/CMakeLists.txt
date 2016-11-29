@@ -28,15 +28,33 @@ set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
 set(util_UUT_SRCS $<TARGET_OBJECTS:Util>)
 
 add_test(hotp-generator-samples hotp-generator-samples)
-add_executable(hotp-generator-samples hotp-generator-samples
-     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
-     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-     ${util_UUT_SRCS} ${storage_STUB_SRCS})
+add_executable(hotp-generator-samples hotp-generator-samples.cpp
+    ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
+    ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
+    ${util_UUT_SRCS} ${storage_STUB_SRCS})
 target_link_libraries(hotp-generator-samples Qt5::Core Qt5::Test)
 
 add_test(totp-generator-samples totp-generator-samples)
-add_executable(totp-generator-samples totp-generator-samples
-     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
-     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-     ${util_UUT_SRCS} ${storage_STUB_SRCS})
+add_executable(totp-generator-samples totp-generator-samples.cpp
+    ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
+    ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
+    ${util_UUT_SRCS} ${storage_STUB_SRCS})
 target_link_libraries(totp-generator-samples Qt5::Core Qt5::Test)
+
+set(SharedParameters_UUT_SRCS $<TARGET_OBJECTS:SharedParameters>)
+set(oath_parameters_UUT_SRCS $<TARGET_OBJECTS:OATHParameters>)
+set(oath_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:OATH_MetaDB>)
+set(MetadataDB_UUT_SRCS $<TARGET_OBJECTS:MetadataDB>)
+set(MetadataDBSanityTest_SRCS $<TARGET_OBJECTS:MetadataDBSanityTest>)
+
+add_test(hotp-metadatastoragehandler-sanity hotp-metadatastoragehandler-sanity)
+add_executable(hotp-metadatastoragehandler-sanity hotp-metadatastoragehandler-sanity.cpp
+    ${SharedParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS}
+    ${MetadataDB_UUT_SRCS} ${oath_metadatastorage_UUT_SRCS} ${MetadataDBSanityTest_SRCS} ${storage_UUT_SRCS})
+target_link_libraries(hotp-metadatastoragehandler-sanity Qt5::Core Qt5::Sql Qt5::Test)
+
+add_test(totp-metadatastoragehandler-sanity totp-metadatastoragehandler-sanity)
+add_executable(totp-metadatastoragehandler-sanity totp-metadatastoragehandler-sanity.cpp
+    ${SharedParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS}
+    ${MetadataDB_UUT_SRCS} ${oath_metadatastorage_UUT_SRCS} ${MetadataDBSanityTest_SRCS} ${storage_UUT_SRCS})
+target_link_libraries(totp-metadatastoragehandler-sanity Qt5::Core Qt5::Sql Qt5::Test)

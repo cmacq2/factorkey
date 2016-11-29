@@ -2,6 +2,8 @@
 #include "otp/oath/generator.h"
 #include "otp/base32/base32.h"
 #include "autotests/otp/storage/storage.h"
+#include "otp/oath/parameters.h"
+#include "otp/parameters.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -41,11 +43,11 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QFETCH(quint64, counter);
 
     QHash<QString, QVariant> map;
-    map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    map.insert(otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
-    map.insert(otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
+    map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
+    map.insert(otp::parameters::hashing::ALGORITHM, QVariant());
+    map.insert(otp::oath::parameters::generic::LOCALE, QVariant());
+    map.insert(otp::oath::parameters::generic::LENGTH, QVariant());
+    map.insert(otp::oath::parameters::hotp::COUNTER, counter);
 
     auto stub = new HOTPStoragePrivate(secret, map);
     auto storage = new otp::storage::Storage(stub);
@@ -59,15 +61,15 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QList<bool> commitResult;
     QList<enum otp::storage::OTPTokenType> typeResult;
     QList<QList<QVariant>> paramWrites;
-    stubs::storage::DummyStoragePrivate::expect_param(paramWrites, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter + 1);
+    stubs::storage::DummyStoragePrivate::expect_param(paramWrites, true, otp::oath::parameters::hotp::COUNTER, counter + 1);
 
     QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER, counter);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::hotp::COUNTER, counter);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::hashing::ALGORITHM, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LOCALE, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LENGTH, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::hotp::COUNTER, counter);
 
     stub->check_read_param(paramReads);
     stub->check_write_param(paramWrites);
@@ -79,7 +81,7 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     stub->check_no_exists();
     stub->check_commit(commitResult << true);
 
-    const QVariant resultingCounter = stub->rawStorage().value(otp::oath::generator::HOTPTokenParameters::HOTP_TOKEN_COUNTER);
+    const QVariant resultingCounter = stub->rawStorage().value(otp::oath::parameters::hotp::COUNTER);
     QCOMPARE(resultingCounter.type(), QVariant::ULongLong);
     QCOMPARE(resultingCounter.toULongLong(), counter + 1);
 

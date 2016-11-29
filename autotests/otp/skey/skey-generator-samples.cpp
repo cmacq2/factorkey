@@ -1,6 +1,8 @@
 
 #include "otp/skey/generator.h"
 #include "autotests/otp/storage/storage.h"
+#include "otp/skey/parameters.h"
+#include "otp/parameters.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -39,10 +41,10 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     QFETCH(QString, challenge);
 
     QHash<QString, QVariant> map;
-    map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Text);
-    map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_CHARSET, QVariant());
-    map.insert(otp::skey::generator::SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME, QVariant());
-    map.insert(otp::skey::generator::SKeyTokenParameters::OTP_SKEY_ENCODING_TYPE, (int) tokenFormat);
+    map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Text);
+    map.insert(otp::parameters::key::CHARSET, QVariant());
+    map.insert(otp::skey::parameters::DICTIONARY, QVariant());
+    map.insert(otp::skey::parameters::ENCODING, (int) tokenFormat);
 
     auto stub = new SKeyStoragePrivate(secret, map);
     auto storage = new otp::storage::Storage(stub);
@@ -56,12 +58,12 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
 
     QList<enum otp::storage::OTPTokenType> typeResult;
     QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Text);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_CHARSET, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_ENCODING_TYPE, (int) tokenFormat);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Text);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::CHARSET, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::parameters::ENCODING, (int) tokenFormat);
     if(tokenFormat == otp::skey::generator::SKeyEncodingType::Words)
     {
-        stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::generator::SKeyTokenParameters::OTP_SKEY_DICTIONARY_NAME, dictionaryValue);
+        stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::parameters::DICTIONARY, dictionaryValue);
     }
 
     stub->check_read_param(paramReads);

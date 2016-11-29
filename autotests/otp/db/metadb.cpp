@@ -21,26 +21,26 @@ namespace stubs
                 }
             }
 
-            DummyMetadataDbManager::DummyMetadataDbManager():
-                QObject(), otp::storage::db::MetadataDbManager()
+            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName):
+                QObject(), otp::storage::db::MetadataDbManager(connName)
             {
                 init();
             }
 
-            DummyMetadataDbManager::DummyMetadataDbManager(const QHash<QString, enum otp::storage::OTPTokenType>& entries):
-                QObject(), otp::storage::db::MetadataDbManager(), m_entries(entries)
+            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName, const QHash<QString, enum otp::storage::OTPTokenType>& entries):
+                QObject(), otp::storage::db::MetadataDbManager(connName), m_entries(entries)
             {
                 init();
             }
 
-            DummyMetadataDbManager::DummyMetadataDbManager(const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers):
-                QObject(), otp::storage::db::MetadataDbManager(), m_typeHandlers(typeHandlers)
+            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName, const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers):
+                QObject(), otp::storage::db::MetadataDbManager(connName), m_typeHandlers(typeHandlers)
             {
                 init();
             }
 
-            DummyMetadataDbManager::DummyMetadataDbManager(const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers, const QHash<QString, enum otp::storage::OTPTokenType>& entries):
-                QObject(), otp::storage::db::MetadataDbManager(), m_typeHandlers(typeHandlers), m_entries(entries)
+            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName, const QHash<int,QSharedPointer<DummyMetadataStorageHandler>>& typeHandlers, const QHash<QString, enum otp::storage::OTPTokenType>& entries):
+                QObject(), otp::storage::db::MetadataDbManager(connName), m_typeHandlers(typeHandlers), m_entries(entries)
             {
                 init();
             }
@@ -52,7 +52,7 @@ namespace stubs
                 return m_removed;
             }
 
-            bool DummyMetadataDbManager::open(void)
+            QSqlDatabase DummyMetadataDbManager::open(void)
             {
                 auto result = impl_open();
                 emit notify_open(result);
@@ -64,15 +64,16 @@ namespace stubs
                 return true;
             }
 
-            bool DummyMetadataDbManager::impl_open(void)
+            QSqlDatabase DummyMetadataDbManager::impl_open(void)
             {
-                if(allowOpen())
-                {
-                    bool result = !m_opened;
-                    m_opened = true;
-                    return result;
-                }
-                return false;
+                return QSqlDatabase();
+//                 if(allowOpen())
+//                 {
+//                     bool result = !m_opened;
+//                     m_opened = true;
+//                     return result;
+//                 }
+//                 return false;
             }
 
             bool DummyMetadataDbManager::impl_close(void)

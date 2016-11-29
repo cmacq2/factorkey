@@ -26,8 +26,8 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                static const QString OTP_SKEY_DICTIONARY_NAME;
-                static const QString OTP_SKEY_ENCODING_TYPE;
+//                 static const QString OTP_SKEY_DICTIONARY_NAME;
+//                 static const QString OTP_SKEY_ENCODING_TYPE;
                 static const QString DEFAULT_DICTIONARY_VALUE;
             public:
                 bool dictionaryProvider(DictionaryProvider ** provider) const;

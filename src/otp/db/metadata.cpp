@@ -20,11 +20,28 @@ namespace otp
                     return true;
                 }
 
-                if(m_typeHandler && m_typeHandler->saveMetaData(m_entryId, m_dataWrite))
+
+                if(m_typeHandler && m_dbManager)
                 {
-                    m_dataRead = m_dataWrite;
-                    m_typeRead = m_typeWrite;
-                    return true;
+                    /*
+                     * Construct a QHash representation of the full, desired state of the meta data.
+                     */
+                    QHash<QString,QVariant> newParamState(m_dataWrite);
+                    for(const auto k: m_dataRead.keys())
+                    {
+                        if(!newParamState.contains(k))
+                        {
+                            newParamState.insert(k, m_dataRead.value(k));
+                        }
+                    }
+
+                    if(m_typeHandler->saveMetaData(m_entryId, m_dataWrite, m_dbManager.data()))
+                    {
+                        m_dataRead = newParamState;
+                        m_typeRead = m_typeWrite;
+                        m_dataWrite.clear();
+                        return true;
+                    }
                 }
                 return false;
             }
@@ -34,7 +51,7 @@ namespace otp
 
                 QHash<QString,QVariant> data;
                 otp::storage::OTPTokenType t;
-                if(establishTokenType(t) && m_typeHandler && m_typeHandler->fetchMetaData(m_entryId, data))
+                if(establishTokenType(t) && m_typeHandler && m_dbManager && m_typeHandler->fetchMetaData(m_entryId, data, m_dbManager.data()))
                 {
                     m_dataRead = data;
                     return true;
@@ -103,7 +120,7 @@ namespace otp
             bool Metadata::containsType(const QHash<QString,QVariant>& data) const
             {
                 return data.contains(otp::storage::Storage::OTP_TOKEN_TYPE) &&
-                !m_dataRead.value(otp::storage::Storage::OTP_TOKEN_TYPE).isNull();
+                    !m_dataRead.value(otp::storage::Storage::OTP_TOKEN_TYPE).isNull();
             }
 
             bool Metadata::haveType(void) const
@@ -115,13 +132,8 @@ namespace otp
             {
                 if(m_dbManager)
                 {
-                    m_typeHandler = m_dbManager->getHandler(type);
+                    m_typeHandler.reset(m_dbManager->handler(type));
                 }
-                else
-                {
-                    m_typeHandler.reset(nullptr);
-                }
-
                 if(m_typeHandler)
                 {
                     m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
@@ -134,7 +146,7 @@ namespace otp
                 }
             }
 
-            bool Metadata::convertHandler(MetadataStorageHandler * newHandler)
+            bool Metadata::convertHandler(const MetadataStorageHandler * newHandler)
             {
                 bool result;
                 if(m_typeHandler) {
@@ -150,7 +162,7 @@ namespace otp
                             iter.remove();
                         }
                     }
-                    result = origKeys.isEmpty() || m_typeHandler->deleteMetaData(m_entryId, origKeys);
+                    result = origKeys.isEmpty() || (m_dbManager && m_typeHandler->deleteMetaData(m_entryId, origKeys, m_dbManager.data()));
                 }
                 else {
                     result = true;
@@ -174,7 +186,7 @@ namespace otp
                         result = true;
                     }
                     else {
-                        MetadataStorageHandler * newHandler = MetadataStorageHandler::createHandler(type);
+                        const MetadataStorageHandler * newHandler = m_dbManager ? m_dbManager->handler(type) : nullptr;
                         if(newHandler) {
                             result = convertHandler(newHandler);
                             m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));

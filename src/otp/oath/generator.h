@@ -16,9 +16,6 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                static const QString OTP_ENCODER_TOKEN_LOCALE;
-                static const QString OTP_ENCODER_TOKEN_LENGTH;
-            public:
                 bool setTokenLength(uint length);
                 bool setTokenLocale(const QLocale& l);
 
@@ -32,8 +29,6 @@ namespace otp
             class HOTPTokenParameters: public GenericOTPParameters
             {
                 Q_OBJECT
-            public:
-                static const QString HOTP_TOKEN_COUNTER;
             public:
                 static otp::generator::TokenGenerator * generator(HOTPTokenParameters * params, QObject * parent = 0);
                 static HOTPTokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
@@ -51,9 +46,6 @@ namespace otp
             class TOTPTokenParameters: public GenericOTPParameters
             {
                 Q_OBJECT
-            public:
-                static const QString TOTP_TOKEN_EPOCH;
-                static const QString TOTP_TOKEN_TIMESTEP;
             public:
                 static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, QObject * parent = 0);
                 static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, qint64 currentMSec, QObject * parent = 0);

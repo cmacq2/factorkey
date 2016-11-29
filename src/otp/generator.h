@@ -30,10 +30,6 @@ namespace otp
         {
             Q_OBJECT
         public:
-            static const QString OTP_TOKEN_NAME;
-            static const QString OTP_KEY_ENCODING_CHARSET;
-            static const QString OTP_KEY_ENCODING_TYPE;
-        public:
             typedef std::function<TokenParameters*(otp::storage::Storage*, QObject*)> ConstructorFunction;
             bool setSecretEncoding(const QTextCodec * codec);
             bool setSecretEncodingType(const EncodingType& type);
@@ -64,8 +60,6 @@ namespace otp
         class GenericTokenParameters: public TokenParameters
         {
             Q_OBJECT
-        public:
-            static const QString OTP_HMAC_HASH_ALGORITHM;
         public:
             bool setHashAlgorithm(const QCryptographicHash::Algorithm& hash);
             bool hashAlgorithm(QCryptographicHash::Algorithm& hash) const;

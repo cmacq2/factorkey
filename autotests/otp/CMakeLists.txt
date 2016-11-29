@@ -2,6 +2,8 @@
 add_subdirectory(base32)
 add_subdirectory(oath)
 add_subdirectory(skey)
+add_subdirectory(dummy)
+add_subdirectory(steam)
 add_subdirectory(storage)
 add_subdirectory(db)
 

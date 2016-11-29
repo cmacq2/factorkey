@@ -4,6 +4,7 @@
 #include "../storage/storage.h"
 #include "metadatastoragehandler.h"
 
+#include <QSqlDatabase>
 #include <QString>
 #include <QVariant>
 
@@ -17,11 +18,13 @@ namespace otp
             {
             public:
                 static const QString METADATA_FOLDER;
+                static const QString METADATA_DB_NAME;
             public:
-                MetadataDbManager();
+                MetadataDbManager(const QString& connectionName);
+                const QString& connectionName(void) const;
                 virtual ~MetadataDbManager();
                 virtual bool isOpened(void) const;
-                virtual bool open(void);
+                virtual QSqlDatabase open(void);
                 virtual bool close(void);
 
                 virtual bool readType(const QString& entry, QVariant& value);
@@ -29,9 +32,9 @@ namespace otp
                 virtual bool contains(const QString & entry);
                 virtual bool entries(QStringList& entryList);
 
-                virtual QSharedPointer<MetadataStorageHandler> getHandler(otp::storage::OTPTokenType type);
-
+                virtual const MetadataStorageHandler * handler(otp::storage::OTPTokenType type);
             private:
+                const QString m_connectionName;
             };
         }
     }

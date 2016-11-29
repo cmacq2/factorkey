@@ -15,7 +15,7 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                DefaultStorageProvider(QObject * parent = 0);
+                DefaultStorageProvider(const QString& connectionName, QObject * parent = 0);
             };
         }
     }

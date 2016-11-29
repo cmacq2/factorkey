@@ -3,6 +3,8 @@
 #include "otp/oath/oath.h"
 #include "otp/base32/base32.h"
 #include "autotests/otp/storage/storage.h"
+#include "otp/oath/parameters.h"
+#include "otp/parameters.h"
 
 #include <QTest>
 #include <QtDebug>
@@ -36,12 +38,12 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     QFETCH(int, timeSteps);
 
     QHash<QString, QVariant> map;
-    map.insert(otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    map.insert(otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    map.insert(otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
-    map.insert(otp::oath::generator::TOTPTokenParameters::TOTP_TOKEN_EPOCH, QVariant());
-    map.insert(otp::oath::generator::TOTPTokenParameters::TOTP_TOKEN_TIMESTEP, QVariant());
+    map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
+    map.insert(otp::parameters::hashing::ALGORITHM, QVariant());
+    map.insert(otp::oath::parameters::generic::LOCALE, QVariant());
+    map.insert(otp::oath::parameters::generic::LENGTH, QVariant());
+    map.insert(otp::oath::parameters::totp::EPOCH, QVariant());
+    map.insert(otp::oath::parameters::totp::TIMESTEP, QVariant());
 
     auto stub = new TOTPStoragePrivate(secret, map);
     auto storage = new otp::storage::Storage(stub);
@@ -54,12 +56,12 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
 
     QList<enum otp::storage::OTPTokenType> typeResult;
     QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::TOTPTokenParameters::TOTP_TOKEN_EPOCH, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::TOTPTokenParameters::TOTP_TOKEN_TIMESTEP, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::TokenParameters::OTP_KEY_ENCODING_TYPE, (int) otp::generator::EncodingType::Base32);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::generator::GenericTokenParameters::OTP_HMAC_HASH_ALGORITHM, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LOCALE, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::generator::GenericOTPParameters::OTP_ENCODER_TOKEN_LENGTH, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::totp::EPOCH, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::totp::TIMESTEP, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::hashing::ALGORITHM, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LOCALE, QVariant());
+    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LENGTH, QVariant());
 
     stub->check_read_param(paramReads);
     stub->check_no_write_param();
