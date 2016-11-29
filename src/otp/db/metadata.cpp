@@ -13,6 +13,11 @@ namespace otp
                 return m_dbManager && m_dbManager->remove(m_entryId);
             }
 
+            bool Metadata::exists(void) const
+            {
+                return m_dbManager && m_dbManager->contains(m_entryId);
+            }
+
             bool Metadata::commit(void)
             {
                 if(m_dataWrite.isEmpty())

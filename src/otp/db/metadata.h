@@ -31,6 +31,7 @@ namespace otp
                 bool remove(void);
                 bool commit(void);
                 bool poll(void);
+                bool exists(void) const;
             private:
                 bool establishTokenType(otp::storage::OTPTokenType& type);
                 bool createHandler(const otp::storage::OTPTokenType& type);

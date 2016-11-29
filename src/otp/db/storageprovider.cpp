@@ -69,7 +69,7 @@ namespace otp
 
                 bool exists(void) const
                 {
-                    return m_wallet && m_wallet->contains(entryId());
+                    return m_metadata.exists();
                 }
 
                 bool commit(void)
@@ -95,12 +95,12 @@ namespace otp
                 bool contains(const QString& entry)
                 {
                     QString id(entry);
-                    return open() && m_wallet->contains(id);
+                    return open() && m_metaDb->contains(id);
                 }
 
                 bool entries(QStringList& entryList)
                 {
-                    return open() && m_wallet->entries(entryList);
+                    return open() && m_metaDb->entries(entryList);
                 }
 
             protected:
