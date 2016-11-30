@@ -32,7 +32,7 @@ namespace otp
                 virtual bool contains(const QString & entry);
                 virtual bool entries(QStringList& entryList);
 
-                virtual const MetadataStorageHandler * handler(otp::storage::OTPTokenType type);
+                virtual const MetadataStorageHandler * handler(otp::storage::OTPTokenType type) const;
             private:
                 const QString m_connectionName;
             };
