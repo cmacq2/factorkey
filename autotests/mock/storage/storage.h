@@ -13,7 +13,7 @@ namespace stubs
 {
     namespace storage
     {
-        class DummyStoragePrivate: public QObject, public otp::storage::internal::FailingStoragePrivate
+        class DummyStoragePrivate: public QObject, public otp::storage::StoragePrivate
         {
             Q_OBJECT
         private:
@@ -47,6 +47,7 @@ namespace stubs
             QSignalSpy * spy_poll(void) const;
             QSignalSpy * spy_type(void) const;
             QSignalSpy * spy_entryId(void) const;
+
         public:
             const QHash<QString,QVariant>& rawStorage(void) const;
         protected:
@@ -81,6 +82,7 @@ namespace stubs
             void notify_exists(bool ok) const;
             void notify_commit(bool ok);
             void notify_poll(bool ok);
+
         public:
             DummyStoragePrivate(const QString& entryId, otp::storage::OTPTokenType type, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr);
             DummyStoragePrivate(const QString& entryId,  otp::storage::OTPTokenType type, const QString& password, QObject * parent = nullptr);

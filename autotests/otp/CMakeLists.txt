@@ -4,7 +4,7 @@ add_subdirectory(oath)
 add_subdirectory(skey)
 add_subdirectory(dummy)
 add_subdirectory(steam)
-add_subdirectory(storage)
+add_subdirectory(util)
 add_subdirectory(db)
 
 set(base32_UUT_SRCS $<TARGET_OBJECTS:Base32>)

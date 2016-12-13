@@ -2,7 +2,7 @@
 #include "otp/oath/generator.h"
 #include "otp/oath/oath.h"
 #include "otp/base32/base32.h"
-#include "autotests/otp/storage/storage.h"
+#include "autotests/mock/storage/storage.h"
 #include "otp/oath/parameters.h"
 #include "otp/parameters.h"
 
@@ -45,10 +45,12 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     map.insert(otp::oath::parameters::totp::EPOCH, QVariant());
     map.insert(otp::oath::parameters::totp::TIMESTEP, QVariant());
 
-    auto stub = new TOTPStoragePrivate(secret, map);
-    auto storage = new otp::storage::Storage(stub);
-    auto params = otp::oath::generator::TOTPTokenParameters::create(storage);
-    auto generator = otp::oath::generator::TOTPTokenParameters::generator(params, timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC);
+    auto parent = new QObject();
+
+    auto stub = new TOTPStoragePrivate(secret, map, parent);
+    auto storage = new otp::storage::Storage(stub, parent);
+    auto params = otp::oath::generator::TOTPTokenParameters::create(storage, parent);
+    auto generator = otp::oath::generator::TOTPTokenParameters::generator(params, timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC, parent);
 
     QString token;
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
@@ -73,10 +75,7 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     stub->check_no_exists();
     stub->check_no_commit();
 
-    generator->deleteLater();
-    params->deleteLater();
-    storage->deleteLater();
-    stub->deleteLater();
+    parent->deleteLater();
 }
 
 static void result(int k, const QString& secret, const char * expected)
@@ -114,6 +113,6 @@ void TOTPGeneratorSamplesTest::testDefaults_data(void)
     }
 }
 
-QTEST_APPLESS_MAIN(TOTPGeneratorSamplesTest)
+QTEST_MAIN(TOTPGeneratorSamplesTest)
 
 #include "totp-generator-samples.moc"

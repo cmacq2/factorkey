@@ -1,8 +1,23 @@
 
-set(DummyMetadataDB_SRCS metadb.cpp metadatastoragehandler.cpp)
-add_library(DummyMetadataDB OBJECT ${DummyMetadataDB_SRCS})
-set_public_target_object_vars(DummyMetadataDB Qt5::Core Qt5::Test Qt5::Sql)
+set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
+set(MetadataDB_UUT_SRCS $<TARGET_OBJECTS:MetadataDB>)
 
-set(MetadataDBSanityTest_SRCS metadatastoragehandler-sanity.cpp)
-add_library(MetadataDBSanityTest OBJECT ${MetadataDBSanityTest_SRCS})
-set_public_target_object_vars(MetadataDBSanityTest Qt5::Core Qt5::Test Qt5::Sql)
+set(SharedParameters_UUT_SRCS $<TARGET_OBJECTS:SharedParameters>)
+set(DummyParameters_UUT_SRCS $<TARGET_OBJECTS:DummyParameters>)
+set(SKeyParameters_UUT_SRCS $<TARGET_OBJECTS:SKeyParameters>)
+set(oath_parameters_UUT_SRCS $<TARGET_OBJECTS:OATHParameters>)
+set(SteamParameters_UUT_SRCS $<TARGET_OBJECTS:SteamParameters>)
+set(oath_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:OATH_MetaDB>)
+set(skey_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:SKey_MetaDB>)
+set(dummy_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:DUMMY_MetaDB>)
+set(Steam_MetaDB_UUT_SRCS $<TARGET_OBJECTS:Steam_MetaDB>)
+
+set(MetadataDB_STUB_SRCS $<TARGET_OBJECTS:MockMetadataDB>)
+
+add_test(metadb-schema metadb-schema)
+add_executable(metadb-schema metadb-schema.cpp
+    ${SharedParameters_UUT_SRCS} ${DummyParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS} ${SKeyParameters_UUT_SRCS} ${SteamParameters_UUT_SRCS}
+    ${MetadataDB_UUT_SRCS} ${MetadataDB_STUB_SRCS}
+    ${dummy_metadatastorage_UUT_SRCS} ${oath_metadatastorage_UUT_SRCS} ${skey_metadatastorage_UUT_SRCS} ${Steam_MetaDB_UUT_SRCS} ${storage_UUT_SRCS})
+target_link_libraries(metadb-schema Qt5::Core Qt5::Sql Qt5::Test)
+

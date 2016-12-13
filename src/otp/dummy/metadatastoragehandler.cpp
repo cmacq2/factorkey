@@ -17,16 +17,15 @@ namespace otp
         {
             namespace db
             {
-                const bool DummyMetadataStorageHandler::isRegistered = otp::storage::db::MetadataStorageHandler::registerType(otp::storage::OTPTokenType::DummyHMAC, create);
-
-                const QString DummyMetadataStorageHandler::DUMMY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2`, `%3`, `%4`, `%5`);\n")).
+                const QString DummyMetadataStorageHandler::DUMMY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARHCAR(36) NOT NULL PRIMARY KEY, `%4` TEXT NOT NULL, `%5` VARCHAR(36), `%6` INTEGER NOT NULL, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(DUMMY_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
+                    arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).
                     arg(DUMMY_MESSAGE_COL).
                     arg(DUMMY_CHARSET_COL).
                     arg(DUMMY_ALGORITHM_COL);
 
-                const otp::storage::db::MetadataStorageHandler * DummyMetadataStorageHandler::create(void)
+                const QSharedPointer<otp::storage::db::MetadataStorageHandler> DummyMetadataStorageHandler::create(void)
                 {
                     static const QString invalid;
                     static const otp::storage::db::MetadataStorageHandler::MappingFunction mapper([](const QString& param, const otp::storage::db::MetadataStorageHandler::RegisterFunction& fn) -> void
@@ -55,10 +54,15 @@ namespace otp
                         return table == DUMMY_TABLE_NAME ? DUMMY_TABLE_SCHEMA : invalid;
                     });
 
-                    static const QScopedPointer<MetadataStorageHandler> h(MetadataStorageHandler::build(
+                    return QSharedPointer<MetadataStorageHandler>(MetadataStorageHandler::build(
                         otp::storage::OTPTokenType::DummyHMAC, otp::dummy::parameters::tokenParameters(), mapper, schema
                     ));
-                    return h.data();
+                }
+
+                bool DummyMetadataStorageHandler::registerWith(otp::storage::db::MetadataDbBuilder& builder)
+                {
+                    const auto hh = create();
+                    return builder.registerType(hh);
                 }
             }
         }

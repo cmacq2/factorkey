@@ -13,15 +13,14 @@ namespace otp
         {
             namespace db
             {
-                const bool SKeyMetadataStorageHandler::isRegistered = otp::storage::db::MetadataStorageHandler::registerType(otp::storage::OTPTokenType::SKey, create);
-
-                const QString SKeyMetadataStorageHandler::SKEY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2`, `%3`, `%4`);\n")).
+                const QString SKeyMetadataStorageHandler::SKEY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` VARCHAR(255), `%5` INTEGER NOT NULL, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(SKEY_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
+                    arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).
                     arg(SKEY_DICTIONARY_COL).
                     arg(SKEY_ENCODING_COL);
 
-                const otp::storage::db::MetadataStorageHandler * SKeyMetadataStorageHandler::create(void)
+                const QSharedPointer<otp::storage::db::MetadataStorageHandler> SKeyMetadataStorageHandler::create(void)
                 {
                     static const QString invalid;
                     static const otp::storage::db::MetadataStorageHandler::MappingFunction mapper([](const QString& param, const otp::storage::db::MetadataStorageHandler::RegisterFunction& fn) -> void
@@ -44,10 +43,15 @@ namespace otp
                     {
                         return table == SKEY_TABLE_NAME ? SKEY_TABLE_SCHEMA : invalid;
                     });
-                    static const QScopedPointer<MetadataStorageHandler> h(MetadataStorageHandler::build(
-                        otp::storage::OTPTokenType::DummyHMAC, otp::skey::parameters::tokenParameters(), mapper, schema
+                    return QSharedPointer<MetadataStorageHandler>(MetadataStorageHandler::build(
+                        otp::storage::OTPTokenType::SKey, otp::skey::parameters::tokenParameters(), mapper, schema
                     ));
-                    return h.data();
+                }
+
+                bool SKeyMetadataStorageHandler::registerWith(otp::storage::db::MetadataDbBuilder& builder)
+                {
+                    const auto hh = create();
+                    return builder.registerType(hh);
                 }
             }
         }

@@ -9,9 +9,7 @@ namespace otp
         {
             namespace db
             {
-                const bool SteamGuardMetadataStorageHandler::isRegistered = otp::storage::db::MetadataStorageHandler::registerType(otp::storage::OTPTokenType::SteamGuard, create);
-
-                const otp::storage::db::MetadataStorageHandler * SteamGuardMetadataStorageHandler::create(void)
+                const QSharedPointer<otp::storage::db::MetadataStorageHandler> SteamGuardMetadataStorageHandler::create(void)
                 {
                     static const QString invalid;
 
@@ -25,10 +23,15 @@ namespace otp
                         return invalid;
                     });
 
-                    static const QScopedPointer<MetadataStorageHandler> h(MetadataStorageHandler::build(
+                    return QSharedPointer<MetadataStorageHandler>(MetadataStorageHandler::build(
                         otp::storage::OTPTokenType::SteamGuard, otp::steam::parameters::tokenParameters(), mapper, schema
                     ));
-                    return h.data();
+                }
+
+                bool SteamGuardMetadataStorageHandler::registerWith(otp::storage::db::MetadataDbBuilder& builder)
+                {
+                    const auto hh = create();
+                    return builder.registerType(hh);
                 }
             }
         }

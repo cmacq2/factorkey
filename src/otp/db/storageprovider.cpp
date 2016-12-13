@@ -89,7 +89,7 @@ namespace otp
             class DefaultStorageProviderPrivate: public otp::storage::StorageProviderPrivate
             {
             public:
-                DefaultStorageProviderPrivate(const QString& connectionName) : otp::storage::StorageProviderPrivate(), m_dbConnectionName(connectionName) {}
+                DefaultStorageProviderPrivate(const MetadataDbBuilder& dbInfo) : otp::storage::StorageProviderPrivate(), m_dbInfo(dbInfo) {}
                 virtual ~DefaultStorageProviderPrivate() {}
                 //         static const QString WALLET_FOLDER;
                 bool contains(const QString& entry)
@@ -117,7 +117,7 @@ namespace otp
                     //                 // todo emit signal?
                     //             }
                     m_wallet.reset(new WalletManager(m_window, m_walletName));
-                    m_metaDb.reset(new MetadataDbManager(m_dbConnectionName));
+                    m_metaDb = m_dbInfo.create();
                     QSqlDatabase conn = m_metaDb->open();
                     return conn.isValid() && conn.isOpen() && m_wallet->open();
                 }
@@ -163,12 +163,12 @@ namespace otp
 
                 WId m_window;
                 const QString m_walletName; // Wallet::LocalWallet()
-                const QString m_dbConnectionName;
+                const MetadataDbBuilder m_dbInfo;
                 QSharedPointer<WalletManager> m_wallet;
                 QSharedPointer<MetadataDbManager> m_metaDb;
             };
 
-            DefaultStorageProvider::DefaultStorageProvider(const QString& connectionName, QObject * parent): otp::storage::StorageProvider(new DefaultStorageProviderPrivate(connectionName), parent) {}
+            DefaultStorageProvider::DefaultStorageProvider(const MetadataDbBuilder& dbInfo, QObject * parent): otp::storage::StorageProvider(new DefaultStorageProviderPrivate(dbInfo), parent) {}
         }
     }
 }

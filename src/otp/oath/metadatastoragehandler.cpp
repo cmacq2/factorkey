@@ -40,17 +40,16 @@ namespace otp
                     return false;
                 }
 
-                const QString HOTPMetadataStorageHandler::HOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2`, `%3`, `%4`, `%5`, `%6`);\n")).
+                const QString HOTPMetadataStorageHandler::HOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` INTEGER, `%5` VARCHAR(100), `%6` INTEGER, `%7` INTEGER, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(HOTP_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
+                    arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).
                     arg(OATH_ENC_LENGTH_COL).
                     arg(OATH_ENC_LOCALE_COL).
                     arg(OATH_HASH_ALGO_COL).
                     arg(HOTP_COUNTER_COL);
 
-                const bool HOTPMetadataStorageHandler::isRegistered = otp::storage::db::MetadataStorageHandler::registerType(otp::storage::OTPTokenType::HOTP, create);
-
-                const otp::storage::db::MetadataStorageHandler * HOTPMetadataStorageHandler::create(void)
+                const QSharedPointer<otp::storage::db::MetadataStorageHandler> HOTPMetadataStorageHandler::create(void)
                 {
                     static const QString invalid;
                     static const otp::storage::db::MetadataStorageHandler::MappingFunction mapper([](const QString& param, const otp::storage::db::MetadataStorageHandler::RegisterFunction& fn) -> void
@@ -71,24 +70,28 @@ namespace otp
                         return table == HOTP_TABLE_NAME ? HOTP_TABLE_SCHEMA : invalid;
                     });
 
-                    static const QScopedPointer<MetadataStorageHandler> h(MetadataStorageHandler::build(
+                    return QSharedPointer<MetadataStorageHandler>(MetadataStorageHandler::build(
                         otp::storage::OTPTokenType::HOTP, otp::oath::parameters::hotp::tokenParameters(), mapper, schema
                     ));
-                    return h.data();
                 }
 
-                const QString TOTPMetadataStorageHandler::TOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2`, `%3`, `%4`, `%5`, `%6`, `%7`);\n")).
+                bool HOTPMetadataStorageHandler::registerWith(otp::storage::db::MetadataDbBuilder& builder)
+                {
+                    const auto hh = create();
+                    return builder.registerType(hh);
+                }
+
+                const QString TOTPMetadataStorageHandler::TOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` INTEGER, `%5` VARCHAR(100), `%6` INTEGER, `%7` UNSIGNED BIGINT, `%8` INTEGER, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(TOTP_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
+                    arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).
                     arg(OATH_ENC_LENGTH_COL).
                     arg(OATH_ENC_LOCALE_COL).
                     arg(OATH_HASH_ALGO_COL).
                     arg(TOTP_EPOCH_COL).
                     arg(TOTP_TIMESTEP_COL);
 
-                const bool TOTPMetadataStorageHandler::isRegistered = otp::storage::db::MetadataStorageHandler::registerType(otp::storage::OTPTokenType::TOTP, create);
-
-                const otp::storage::db::MetadataStorageHandler * TOTPMetadataStorageHandler::create(void)
+                const QSharedPointer<otp::storage::db::MetadataStorageHandler> TOTPMetadataStorageHandler::create(void)
                 {
                     static const QString invalid;
                     static const otp::storage::db::MetadataStorageHandler::MappingFunction mapper([](const QString& param, const otp::storage::db::MetadataStorageHandler::RegisterFunction& fn) -> void
@@ -113,10 +116,15 @@ namespace otp
                         return table == TOTP_TABLE_NAME ? TOTP_TABLE_SCHEMA : invalid;
                     });
 
-                    static const QScopedPointer<MetadataStorageHandler> h(MetadataStorageHandler::build(
+                    return QSharedPointer<MetadataStorageHandler>(MetadataStorageHandler::build(
                         otp::storage::OTPTokenType::TOTP, otp::oath::parameters::totp::tokenParameters(), mapper, schema
                     ));
-                    return h.data();
+                }
+
+                bool TOTPMetadataStorageHandler::registerWith(otp::storage::db::MetadataDbBuilder& builder)
+                {
+                    const auto hh = create();
+                    return builder.registerType(hh);
                 }
             }
         }

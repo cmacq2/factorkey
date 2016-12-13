@@ -1,6 +1,6 @@
 
 #include "otp/skey/generator.h"
-#include "autotests/otp/storage/storage.h"
+#include "autotests/mock/storage/storage.h"
 #include "otp/skey/parameters.h"
 #include "otp/parameters.h"
 
@@ -46,10 +46,12 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     map.insert(otp::skey::parameters::DICTIONARY, QVariant());
     map.insert(otp::skey::parameters::ENCODING, (int) tokenFormat);
 
-    auto stub = new SKeyStoragePrivate(secret, map);
-    auto storage = new otp::storage::Storage(stub);
-    auto params = otp::skey::generator::SKeyTokenParameters::create(storage);
-    auto generator = otp::skey::generator::SKeyTokenParameters::generator(params);
+    auto parent = new QObject();
+
+    auto stub = new SKeyStoragePrivate(secret, map, parent);
+    auto storage = new otp::storage::Storage(stub, parent);
+    auto params = otp::skey::generator::SKeyTokenParameters::create(storage, parent);
+    auto generator = otp::skey::generator::SKeyTokenParameters::generator(params, parent);
 
     QString token;
     QVERIFY2(params->setChallenge(challenge), "The challenge should be accepted");
@@ -76,10 +78,7 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     stub->check_no_exists();
     stub->check_no_commit();
 
-    generator->deleteLater();
-    params->deleteLater();
-    storage->deleteLater();
-    stub->deleteLater();
+    parent->deleteLater();
 }
 
 static void result(const QString& challenge, const QString& secret, const QString& rfcTestVector)
@@ -197,6 +196,6 @@ void SKeyGeneratorSamplesTest::testWordsSamples_data(void)
     result("otp-sha1 99 correct", "OTP's are good", "AURA ALOE HURL WING BERG WAIT");
 }
 
-QTEST_APPLESS_MAIN(SKeyGeneratorSamplesTest)
+QTEST_MAIN(SKeyGeneratorSamplesTest)
 
 #include "skey-generator-samples.moc"

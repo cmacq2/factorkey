@@ -9,7 +9,7 @@ namespace sanity
     {
         namespace db
         {
-            MetadataStorageHandlerSanityTest::MetadataStorageHandlerSanityTest(const otp::storage::db::MetadataStorageHandler* uut, QObject * parent): QObject(parent), m_uut(uut) {}
+            MetadataStorageHandlerSanityTest::MetadataStorageHandlerSanityTest(const QSharedPointer<otp::storage::db::MetadataStorageHandler> uut, QObject * parent): QObject(parent), m_uut(uut) {}
             MetadataStorageHandlerSanityTest::~MetadataStorageHandlerSanityTest() {}
 
             void MetadataStorageHandlerSanityTest::sanity_data(void)

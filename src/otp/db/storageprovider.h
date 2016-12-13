@@ -2,6 +2,7 @@
 #define FACTORKEY_DB_STORAGEPROVIDER_H
 
 #include "../storage/storageprovider.h"
+#include "metadb.h"
 
 namespace otp
 {
@@ -15,7 +16,7 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                DefaultStorageProvider(const QString& connectionName, QObject * parent = 0);
+                DefaultStorageProvider(const MetadataDbBuilder& dbInfo, QObject * parent = 0);
             };
         }
     }

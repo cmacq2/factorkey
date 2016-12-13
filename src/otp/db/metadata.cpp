@@ -137,7 +137,7 @@ namespace otp
             {
                 if(m_dbManager)
                 {
-                    m_typeHandler.reset(m_dbManager->handler(type));
+                    m_typeHandler = m_dbManager->handler(type);
                 }
                 if(m_typeHandler)
                 {
@@ -151,31 +151,28 @@ namespace otp
                 }
             }
 
-            bool Metadata::convertHandler(const MetadataStorageHandler * newHandler)
+            bool Metadata::convertHandler(const QSharedPointer<MetadataStorageHandler> newHandler)
             {
                 bool result;
                 if(m_typeHandler) {
-                    QStringList origKeys;
-                    origKeys = m_typeHandler->keys();
-                    QStringList currentKeys = newHandler->keys();
-                    QMutableStringListIterator iter(origKeys);
-                    while(iter.hasNext())
+                    QSet<QString> currentKeys = newHandler->keys();
+                    currentKeys.insert(otp::storage::Storage::OTP_TOKEN_TYPE);
+
+                    QSet<QString> tablesToNullify;
+                    for(const auto p: currentKeys)
                     {
-                        const QString key = iter.next();
-                        if(currentKeys.contains(key) || key == otp::storage::Storage::OTP_TOKEN_TYPE)
-                        {
-                            iter.remove();
-                        }
+                        const auto t = newHandler->tableForParam(p);
+                        tablesToNullify.insert(t);
                     }
-                    result = origKeys.isEmpty() || (m_dbManager && m_typeHandler->deleteMetaData(m_entryId, origKeys, m_dbManager.data()));
+
+                    result = m_dbManager && m_typeHandler->pruneMetaData(m_entryId, currentKeys, tablesToNullify, m_dbManager.data());
                 }
                 else {
                     result = true;
                 }
-                m_typeHandler.reset(newHandler);
+                m_typeHandler = newHandler;
                 return result;
             }
-
 
             bool Metadata::typeWritten(void) const
             {
@@ -191,11 +188,15 @@ namespace otp
                         result = true;
                     }
                     else {
-                        const MetadataStorageHandler * newHandler = m_dbManager ? m_dbManager->handler(type) : nullptr;
-                        if(newHandler) {
-                            result = convertHandler(newHandler);
-                            m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
-                            m_typeWrite = type;
+                        if(m_dbManager)
+                        {
+                            const auto newHandler = m_dbManager->handler(type);
+                            if(newHandler)
+                            {
+                                result = convertHandler(newHandler);
+                                m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
+                                m_typeWrite = type;
+                            }
                         }
                     }
                 }

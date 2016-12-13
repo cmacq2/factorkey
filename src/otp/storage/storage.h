@@ -40,7 +40,7 @@ namespace otp
             bool commit(void);
             bool poll(void);
 
-            ~Storage();
+            virtual ~Storage();
             Storage(StoragePrivate * d, QObject * parent = 0);
         private:
             Q_DISABLE_COPY(Storage)

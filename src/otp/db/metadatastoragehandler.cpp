@@ -3,7 +3,6 @@
 #include "../parameters.h"
 
 #include <functional>
-#include <QMutex>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -25,7 +24,7 @@ namespace otp
             const QString MetadataStorageHandler::OTP_ENTRY_TABLE = OTP_ENTRY_TABLE_NAME;
             const QString MetadataStorageHandler::OTP_ENTRY_ID = OTP_ENTRY_ID_COLUMN;
             const QString MetadataStorageHandler::OTP_ENTRY_TYPE = OTP_ENTRY_TYPE_COLUMN;
-            const QString MetadataStorageHandler::OTP_ENTRY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2`, `%3`, `%4`, `%5`, `%6`);\n")).
+            const QString MetadataStorageHandler::OTP_ENTRY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%3` INTEGER NOT NULL, `%4` VARCHAR(255), `%5` VARCHAR(36), `%6` INTEGER NOT NULL);\n")).
                 arg(OTP_ENTRY_TABLE_NAME).
                 arg(OTP_ENTRY_ID_COLUMN).
                 arg(OTP_ENTRY_TYPE_COLUMN).
@@ -60,7 +59,8 @@ namespace otp
                 QHash<QString, QString> columnsToParams;
                 QHash<QString, QString> tables;
 
-                QString sql = OTP_ENTRY_TABLE_SCHEMA;
+                QSet<QString> sql;
+                sql.insert(OTP_ENTRY_TABLE_SCHEMA);
 
                 bool called, invalid;
 
@@ -82,7 +82,7 @@ namespace otp
                                 invalid = s.isNull() || s.isEmpty();
                                 if(!invalid)
                                 {
-                                    sql += s;
+                                    sql.insert(s);
                                 }
                             }
                             if(!invalid)
@@ -109,19 +109,19 @@ namespace otp
 
             MetadataStorageHandler::MetadataStorageHandler(otp::storage::OTPTokenType type,
                                                            const QHash<QString,QString>& tables,
-                                                           const QString& schema,
+                                                           const QSet<QString>& schema,
                                                            const QHash<QString,QString> columnsToParams,
                                                            const QHash<QString,QString> paramsToTables): m_type(type), m_tables(tables), m_schema(schema), m_columnsToParams(columnsToParams), m_paramsToTables(paramsToTables) {}
             MetadataStorageHandler::~MetadataStorageHandler() {}
 
-            const QString& MetadataStorageHandler::schema(void) const
+            const QSet<QString>& MetadataStorageHandler::schema(void) const
             {
                 return m_schema;
             }
 
-            QStringList MetadataStorageHandler::keys(void) const
+            QSet<QString> MetadataStorageHandler::keys(void) const
             {
-                QStringList l;
+                QSet<QString> l;
                 for(const auto k: m_paramsToTables.keys())
                 {
                     l << k;
@@ -239,7 +239,41 @@ namespace otp
                 return sql;
             }
 
+
             QString MetadataStorageHandler::upsertSql(const QString& table, const QHash<QString,QVariant>& params, QHash<QString,QString>& mapping) const
+            {
+                const std::function<bool(const QString&)> ctest([&params](const QString& param) -> bool
+                {
+                    return params.contains(param);
+                });
+                const std::function<QString(const QString&,const QString&)> map([&params,&mapping](const QString& column, const QString& param) -> QString
+                {
+                    const QString pfmt(QLatin1String(":%1"));
+                    const QString sfmt(QLatin1String(", %1"));
+                    const auto placeholder = pfmt.arg(column);
+                    mapping.insert(param, placeholder);
+                    return sfmt.arg(placeholder);
+                });
+                return upsertSql(table, ctest, map);
+            }
+
+            QString MetadataStorageHandler::nullifySql(const QString& table, const QSet<QString>& paramsToNull) const
+            {
+                const std::function<bool(const QString&)> ctest([&paramsToNull](const QString& param) -> bool
+                {
+                    return paramsToNull.contains(param);
+                });
+                const std::function<QString(const QString&,const QString&)> nil([](const QString&,const QString&) -> QString
+                {
+                    const QString n(QLatin1String(", NULL"));
+                    return n;
+                });
+                return upsertSql(table, ctest, nil);
+            }
+
+            QString MetadataStorageHandler::upsertSql(const QString& table,
+                                                      const std::function<bool(const QString&)>& containTest,
+                                                      const std::function<QString(const QString&, const QString&)>& placeHolder) const
             {
                 const auto columns = columnsInTable(table);
 
@@ -266,18 +300,7 @@ namespace otp
                     if(p != OTP_ENTRY_ID)
                     {
                         const auto param = columnToParam(p);
-                        if(params.contains(param))
-                        {
-                            const QString pfmt(QLatin1String(":%1"));
-                            const auto placeholder = fmt.arg(p);
-                            sql += QLatin1String(", ");
-                            sql += placeholder;
-                            mapping.insert(param, placeholder);
-                        }
-                        else
-                        {
-                            sql += fmt.arg(p).arg(table).arg(OTP_ENTRY_ID);
-                        }
+                        sql += containTest(param) ? placeHolder(p, param) : (fmt.arg(p).arg(table).arg(OTP_ENTRY_ID));
                     }
                 }
 
@@ -287,29 +310,43 @@ namespace otp
 
             bool MetadataStorageHandler::saveMetaData(const QString& entryId, const QHash<QString,QVariant>& params, MetadataDbManager * db) const
             {
-                QString sql(QLatin1String(""));
                 QSet<QString> tables;
                 QHash<QString, QString> mapping;
 
-                for(const QString p: params.keys())
+                QSqlDatabase conn = db->open();
+                bool ok = conn.isValid() && conn.isOpen() && conn.transaction();
+                if(ok)
                 {
-                    if(isParamNameValid(p))
+                    for(const QString p: params.keys())
                     {
-                        const QString tbl = tableForParam(p);
-
-                        if(!tables.contains(tbl))
+                        if(ok && isParamNameValid(p))
                         {
-                            tables.insert(tbl);
-                            sql += upsertSql(tbl, params, mapping);
+                            const auto& tbl = tableForParam(p);
+
+                            if(!tables.contains(tbl))
+                            {
+                                tables.insert(tbl);
+                                const auto& sql = upsertSql(tbl, params, mapping);
+                                ok = execute(sql, entryId, params, mapping, db);
+                            }
                         }
+                        else
+                        {
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if(ok)
+                    {
+                        return conn.commit() && conn.lastError().type() == QSqlError::NoError;
                     }
                     else
                     {
-                        return false;
+                        conn.rollback();
                     }
                 }
-
-                return execute(sql, entryId, params, mapping, db);
+                return false;
             }
 
             bool MetadataStorageHandler::fetchMetaData(const QString& entryId, QHash<QString,QVariant>& params, MetadataDbManager * db) const
@@ -317,65 +354,85 @@ namespace otp
                 return query(fetchSql(), entryId, params, db);
             }
 
-            bool MetadataStorageHandler::deleteMetaData(const QString& entryId, const QStringList& params, MetadataDbManager * db) const
+            bool MetadataStorageHandler::execute(const QString& entryId, const QSet<QString>& params, const std::function<QString(const QString&)>& sql, MetadataDbManager * db) const
             {
-                QString sql(QLatin1String(""));
                 QSet<QString> tables;
-
-                for(const QString p: params)
-                {
-                    if(isParamNameValid(p))
-                    {
-                        const QString tbl = tableForParam(p);
-
-                        if(!tables.contains(tbl))
-                        {
-                            tables.insert(tbl);
-                            sql += deleteSql(tbl);
-                        }
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
 
                 const QHash<QString, QVariant> noParams;
                 const QHash<QString, QString> noMapping;
-                return execute(sql, entryId, noParams, noMapping, db);
+
+                QSqlDatabase conn = db->open();
+                bool ok = conn.isValid() && conn.isOpen() && conn.transaction();
+                if(ok)
+                {
+                    for(const QString p: params)
+                    {
+                        if(ok && isParamNameValid(p))
+                        {
+                            const auto& tbl = tableForParam(p);
+
+                            if(!tables.contains(tbl))
+                            {
+                                tables.insert(tbl);
+                                const auto& q = sql(tbl);
+                                ok = execute(q, entryId, noParams, noMapping, db);
+                            }
+                        }
+                        else
+                        {
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if(ok)
+                    {
+                        return conn.commit() && conn.lastError().type() == QSqlError::NoError;
+                    }
+                    else
+                    {
+                        conn.rollback();
+                    }
+                }
+                return false;
             }
 
-            static QMutex metadataHandlerMapLock;
-            static QHash<int,MetadataStorageHandler::ConstructorFunction> metadataHandlerCtorMap;
-
-            bool MetadataStorageHandler::registerType(otp::storage::OTPTokenType type, const ConstructorFunction& ctor)
+            bool MetadataStorageHandler::pruneMetaData(const QString& entryId, const QSet<QString>& newKeys, const QSet<QString>& tablesToNullify, MetadataDbManager * db) const
             {
-                QMutexLocker lock(&metadataHandlerMapLock);
+                QSet<QString> origKeys = keys();
+                QMutableSetIterator<QString> iter(origKeys);
+                while(iter.hasNext())
+                {
+                    const QString key = iter.next();
+                    if(newKeys.contains(key))
+                    {
+                        iter.remove();
+                    }
+                }
 
-                int t = (int) type;
-                if(metadataHandlerCtorMap.contains(t))
+                const std::function<QString(const QString&)> sql([this,&tablesToNullify,&origKeys](const QString& table) -> QString
                 {
-                    return false;
-                }
-                else
-                {
-                    metadataHandlerCtorMap.insert(t, ctor);
-                    return true;
-                }
+                    return tablesToNullify.contains(table) ? nullifySql(table, origKeys) : deleteSql(table);
+                });
+                return origKeys.isEmpty() || execute(entryId, origKeys, sql, db);
             }
 
-            const MetadataStorageHandler * MetadataStorageHandler::createHandler(const otp::storage::OTPTokenType type)
+            bool MetadataStorageHandler::resetMetaData(const QString& entryId, const QSet<QString>& params, MetadataDbManager * db) const
             {
-                const int t = (int) type;
-                if(!metadataHandlerCtorMap.contains(t))
+                const std::function<QString(const QString&)> sql([this,&params](const QString& table) -> QString
                 {
-                    return nullptr;
-                }
-                else
+                    return nullifySql(table, params);
+                });
+                return execute(entryId, params, sql, db);
+            }
+
+            bool MetadataStorageHandler::deleteMetaData(const QString& entryId, const QSet<QString>& params, MetadataDbManager * db) const
+            {
+                const std::function<QString(const QString&)> sql([this](const QString& table) -> QString
                 {
-                    auto ctor = metadataHandlerCtorMap.value(t);
-                    return ctor ? ctor() : nullptr;
-                }
+                    return deleteSql(table);
+                });
+                return execute(entryId, params, sql, db);
             }
 
             otp::storage::OTPTokenType MetadataStorageHandler::type(void) const

@@ -35,7 +35,7 @@ namespace otp
             private:
                 bool establishTokenType(otp::storage::OTPTokenType& type);
                 bool createHandler(const otp::storage::OTPTokenType& type);
-                bool convertHandler(const MetadataStorageHandler * newHandler);
+                bool convertHandler(const QSharedPointer<MetadataStorageHandler> newHandler);
                 bool containsType(const QHash<QString,QVariant>& data) const;
                 bool haveType(void) const;
                 bool typeWritten(void) const;

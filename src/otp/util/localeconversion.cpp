@@ -133,6 +133,7 @@ namespace otp
                         }
                         else
                         {
+                            out.language = QLocale::AnyLanguage;
                             langValid = true;
                         }
                         if(size > (1 + scriptIdx))

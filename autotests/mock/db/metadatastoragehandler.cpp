@@ -35,7 +35,7 @@ namespace stubs
 
             DummyMetadataStorageHandler::DummyMetadataStorageHandler(const otp::storage::OTPTokenType& type,
                                                                      const QHash<QString,QString>& tables,
-                                                                     const QString& schema,
+                                                                     const QSet<QString>& schema,
                                                                      const QHash<QString,QString> columnsToParams,
                                                                      const QHash<QString,QString> paramsToTables):
                 QObject(), otp::storage::db::MetadataStorageHandler(type, tables, schema, columnsToParams, paramsToTables)
@@ -61,6 +61,16 @@ namespace stubs
                 return m_spy_deleteMetaData;
             }
 
+            QSignalSpy * DummyMetadataStorageHandler::spy_resetMetaData(void) const
+            {
+                return m_spy_resetMetaData;
+            }
+
+            QSignalSpy * DummyMetadataStorageHandler::spy_pruneMetaData(void) const
+            {
+                return m_spy_pruneMetaData;
+            }
+
             QSignalSpy * DummyMetadataStorageHandler::spy_keys(void) const
             {
                 return m_spy_keys;
@@ -75,14 +85,14 @@ namespace stubs
                 return m_spy_schema;
             }
 
-            const QString& DummyMetadataStorageHandler::schema(void) const
+            const QSet<QString>& DummyMetadataStorageHandler::schema(void) const
             {
-                const QString& result = impl_schema();
+                const auto& result = impl_schema();
                 emit notify_schema(result);
                 return result;
             }
 
-            const QString& DummyMetadataStorageHandler::impl_schema(void) const
+            const QSet<QString>& DummyMetadataStorageHandler::impl_schema(void) const
             {
                 return MetadataStorageHandler::schema();
             }
@@ -133,7 +143,21 @@ namespace stubs
                 return false;
             }
 
-            bool DummyMetadataStorageHandler::deleteMetaData(const QString& entryId, const QStringList& keys, otp::storage::db::MetadataDbManager * db) const
+            bool DummyMetadataStorageHandler::resetMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const
+            {
+                bool result = impl_resetMetaData(entryId, keys, db);
+                emit notify_resetMetaData(result, entryId, keys, db);
+                return result;
+            }
+
+            bool DummyMetadataStorageHandler::pruneMetaData(const QString& entryId, const QSet<QString>& keys, const QSet<QString>& tables, otp::storage::db::MetadataDbManager * db) const
+            {
+                bool result = impl_pruneMetaData(entryId, keys, tables, db);
+                emit notify_pruneMetaData(result, entryId, keys, tables, db);
+                return result;
+            }
+
+            bool DummyMetadataStorageHandler::deleteMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const
             {
                 bool result = impl_deleteMetaData(entryId, keys, db);
                 emit notify_deleteMetaData(result, entryId, keys, db);
@@ -145,19 +169,39 @@ namespace stubs
                 return true;
             }
 
-            bool DummyMetadataStorageHandler::impl_deleteMetaData(const QString&, const QStringList&, otp::storage::db::MetadataDbManager *) const
+            bool DummyMetadataStorageHandler::allowResetMetaData(void) const
             {
                 return true;
             }
 
-            QStringList DummyMetadataStorageHandler::keys(void) const
+            bool DummyMetadataStorageHandler::allowPruneMetaData(void) const
             {
-                const QStringList result = impl_keys();
+                return true;
+            }
+
+            bool DummyMetadataStorageHandler::impl_deleteMetaData(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *) const
+            {
+                return true;
+            }
+
+            bool DummyMetadataStorageHandler::impl_resetMetaData(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *) const
+            {
+                return true;
+            }
+
+            bool DummyMetadataStorageHandler::impl_pruneMetaData(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *) const
+            {
+                return true;
+            }
+
+            QSet<QString> DummyMetadataStorageHandler::keys(void) const
+            {
+                const auto result = impl_keys();
                 emit notify_keys(result);
                 return result;
             }
 
-            QStringList DummyMetadataStorageHandler::impl_keys(void) const
+            QSet<QString> DummyMetadataStorageHandler::impl_keys(void) const
             {
                 return MetadataStorageHandler::keys();
             }
@@ -183,14 +227,59 @@ namespace stubs
                 m_spy_saveMetaData = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_saveMetaData);
                 m_spy_fetchMetaData = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_fetchMetaData);
                 m_spy_deleteMetaData = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_deleteMetaData);
+                m_spy_resetMetaData = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_resetMetaData);
+                m_spy_pruneMetaData = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_pruneMetaData);
                 m_spy_keys = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_keys);
                 m_spy_isParamNameValid = new QSignalSpy(this, &DummyMetadataStorageHandler::notify_isParamNameValid);
             }
 
-            void DummyMetadataStorageHandler::check_deleteMetaData(const QList<QList<QVariant>>& callArgs) const
+            void DummyMetadataStorageHandler::check_pruneMetaData(const QList<QList<QVariant>>& callArgs) const
             {
-                QSignalSpy * spy = spy_deleteMetaData();
-                QVERIFY2(spy && spy->isValid(), "deleteMetaData() should be spied on by a valid QSignalSpy");
+                QSignalSpy * spy = spy_pruneMetaData();
+                QVERIFY2(spy && spy->isValid(), "pruneMetaData() should be spid on by a valid QSignalSpy");
+
+                int size = callArgs.size();
+                QCOMPARE(spy->count(), size);
+
+                for(int i = 0; i < size; ++i)
+                {
+                    auto paramCallArgs = spy->at(i);
+                    QCOMPARE(paramCallArgs.size(), 5);
+
+                    auto p1 = paramCallArgs.at(0), p2  = paramCallArgs.at(1), p3 = paramCallArgs.at(2), p4 = paramCallArgs.at(3), p5 = paramCallArgs.at(4);
+                    QCOMPARE(p1.type(), QVariant::Bool);
+                    QCOMPARE(p2.type(), QVariant::String);
+                    QCOMPARE(p3.userType(), qMetaTypeId<QSet<QString>>());
+                    QCOMPARE(p4.userType(), qMetaTypeId<QSet<QString>>());
+                    QCOMPARE(p5.userType(), qMetaTypeId<otp::storage::db::MetadataDbManager*>());
+
+                    auto expectedCallArgs = callArgs.at(i);
+                    QVERIFY2(expectedCallArgs.size() == 5, "Internal sanity check failed: size of expected call args should be 5");
+
+                    auto e1 = expectedCallArgs.at(0), e2 = expectedCallArgs.at(1), e3 = expectedCallArgs.at(2), e4 = expectedCallArgs.at(3), e5 = expectedCallArgs.at(4);
+                    QVERIFY2(e1.type() == QVariant::Bool, "Internal sanity check failed: type of first expected call arg should be boolean");
+                    QVERIFY2(e2.type() == QVariant::String, "Internal sanity check failed: type of second expected call arg should be string");
+                    QVERIFY2(e3.userType() == qMetaTypeId<QSet<QString>>(), "Internal sanity check failed: type of third expected call arg should be QSet<QString>");
+                    QVERIFY2(e4.userType() == qMetaTypeId<QSet<QString>>(), "Internal sanity check failed: type of fourth expected call arg should be QSet<QString>");
+                    QVERIFY2(e5.userType() == qMetaTypeId<otp::storage::db::MetadataDbManager*>(), "Internal sanity check failed: type of fifth expected parameter should be otp::storage::db::MetadataDbManager *");
+
+                    QCOMPARE(p1.toBool(), e1.toBool());
+                    QCOMPARE(p2.toString(), e2.toString());
+                    QCOMPARE(p3.value<QSet<QString>>(), e3.value<QSet<QString>>());
+                    QCOMPARE(p4.value<QSet<QString>>(), e4.value<QSet<QString>>());
+                    QCOMPARE(p5.value<otp::storage::db::MetadataDbManager*>(), e5.value<otp::storage::db::MetadataDbManager*>());
+                }
+            }
+
+            void DummyMetadataStorageHandler::check_no_pruneMetaData(void) const
+            {
+                const QList<QList<QVariant>> empty;
+                check_pruneMetaData(empty);
+            }
+
+            static void check_reset_deleted_metadata(QSignalSpy * spy, const char * spyValidMessage, const QList<QList<QVariant>>& callArgs)
+            {
+                QVERIFY2(spy && spy->isValid(), spyValidMessage);
 
                 int size = callArgs.size();
                 QCOMPARE(spy->count(), size);
@@ -203,7 +292,7 @@ namespace stubs
                     auto p1 = paramCallArgs.at(0), p2  = paramCallArgs.at(1), p3 = paramCallArgs.at(2), p4 = paramCallArgs.at(3);
                     QCOMPARE(p1.type(), QVariant::Bool);
                     QCOMPARE(p2.type(), QVariant::String);
-                    QCOMPARE(p3.userType(), qMetaTypeId<QStringList>());
+                    QCOMPARE(p3.userType(), qMetaTypeId<QSet<QString>>());
                     QCOMPARE(p4.userType(), qMetaTypeId<otp::storage::db::MetadataDbManager*>());
 
                     auto expectedCallArgs = callArgs.at(i);
@@ -212,17 +301,39 @@ namespace stubs
                     auto e1 = expectedCallArgs.at(0), e2 = expectedCallArgs.at(1), e3 = expectedCallArgs.at(2), e4 = expectedCallArgs.at(3);
                     QVERIFY2(e1.type() == QVariant::Bool, "Internal sanity check failed: type of first expected call arg should be boolean");
                     QVERIFY2(e2.type() == QVariant::String, "Internal sanity check failed: type of second expected call arg should be string");
-                    QVERIFY2(e2.userType() == qMetaTypeId<QStringList>(), "Internal sanity check failed: type of third expected call arg should be QStringList");
+                    QVERIFY2(e3.userType() == qMetaTypeId<QSet<QString>>(), "Internal sanity check failed: type of third expected call arg should be QSet<QString>");
                     QVERIFY2(e4.userType() == qMetaTypeId<otp::storage::db::MetadataDbManager*>(), "Internal sanity check failed: type of fourth expected parameter should be otp::storage::db::MetadataDbManager *");
 
                     QCOMPARE(p1.toBool(), e1.toBool());
                     QCOMPARE(p2.toString(), e2.toString());
-                    QCOMPARE(p3.value<QStringList>(), e3.value<QStringList>());
+                    QCOMPARE(p3.value<QSet<QString>>(), e3.value<QSet<QString>>());
                     QCOMPARE(p4.value<otp::storage::db::MetadataDbManager*>(), e4.value<otp::storage::db::MetadataDbManager*>());
                 }
             }
 
-            void DummyMetadataStorageHandler::check_schema(const QStringList& callArgs) const
+            void DummyMetadataStorageHandler::check_resetMetaData(const QList<QList<QVariant>>& callArgs) const
+            {
+                check_reset_deleted_metadata(spy_resetMetaData(), "resetMetaData() should be spied on by a valid QSignalSpy", callArgs);
+            }
+
+            void DummyMetadataStorageHandler::check_no_resetMetaData(void) const
+            {
+                const QList<QList<QVariant>> empty;
+                check_resetMetaData(empty);
+            }
+
+            void DummyMetadataStorageHandler::check_deleteMetaData(const QList<QList<QVariant>>& callArgs) const
+            {
+                check_reset_deleted_metadata(spy_deleteMetaData(), "deleteMetaData() should be spied on by a valid QSignalSpy", callArgs);
+            }
+
+            void DummyMetadataStorageHandler::check_no_deleteMetaData(void) const
+            {
+                const QList<QList<QVariant>> empty;
+                check_deleteMetaData(empty);
+            }
+
+            void DummyMetadataStorageHandler::check_schema(const QList<QSet<QString>>& callArgs) const
             {
                 QSignalSpy * spy = spy_schema();
                 QVERIFY2(spy && spy->isValid(), "schema() should be spied on by a valid QSignalSpy");
@@ -236,24 +347,29 @@ namespace stubs
                     QCOMPARE(paramCallArgs.size(), 1);
 
                     auto p1 = paramCallArgs.at(0);
-                    QCOMPARE(p1.type(), QVariant::String);
+                    QCOMPARE(p1.userType(), qMetaTypeId<QSet<QString>>());
 
                     auto e1 = callArgs.at(i);
 
-                    QCOMPARE(p1.toString(), e1);
+                    QCOMPARE(p1.value<QSet<QString>>(), e1);
                 }
             }
 
             void DummyMetadataStorageHandler::check_no_schema(void) const
             {
-                QStringList empty;
+                QList<QSet<QString>> empty;
                 return check_schema(empty);
             }
 
-            QList<QList<QVariant>>& DummyMetadataStorageHandler::expect_deleted_param(QList<QList<QVariant>>& callStack, bool status, const QString& entry, const QString& param, otp::storage::db::MetadataDbManager * db)
+
+            QList<QList<QVariant>>& DummyMetadataStorageHandler::expect_params(QList<QList<QVariant>>& callStack,
+                                                                               bool status,
+                                                                               const QString& entry,
+                                                                               const QSet<QString>& params,
+                                                                               otp::storage::db::MetadataDbManager * db)
             {
                 QList<QVariant> args;
-                args << status << entry << param << QVariant::fromValue<otp::storage::db::MetadataDbManager *>(db);
+                args << status << entry << QVariant::fromValue<QSet<QString>>(params) << QVariant::fromValue<otp::storage::db::MetadataDbManager *>(db);
                 return callStack << args;
             }
 

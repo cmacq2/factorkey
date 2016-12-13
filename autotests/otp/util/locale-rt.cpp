@@ -18,7 +18,7 @@ private Q_SLOTS:
 
 void LocaleRTTest::testLocaleToString(void)
 {
-    struct otp::generator::internal::LocaleTriplet sample;
+    struct otp::util::LocaleTriplet sample;
     QFETCH(int, language);
     QFETCH(int, country);
     QFETCH(int, script);
@@ -30,7 +30,7 @@ void LocaleRTTest::testLocaleToString(void)
     QLocale s(sample.language, sample.script, sample.country);
     qDebug() << "Sample in BCP-47:" << s.bcp47Name() << "name:" << s.name();
 
-    QTEST(otp::generator::internal::localeToString(sample), "expected");
+    QTEST(otp::util::localeToString(sample), "expected");
 }
 
 static void result(int l, int c, int s, const QString& name)
@@ -57,7 +57,7 @@ void LocaleRTTest::testLocaleToString_data(void)
 
 void LocaleRTTest::testStringToLocale(void)
 {
-    struct otp::generator::internal::LocaleTriplet comparison;
+    struct otp::util::LocaleTriplet comparison;
     QFETCH(QString, name);
 
     QFETCH(int, expectedLanguage);
@@ -65,7 +65,7 @@ void LocaleRTTest::testStringToLocale(void)
     QFETCH(int, expectedScript);
 
 
-    QVERIFY2(otp::generator::internal::stringToLocale(name, comparison), "Expected string -> locale conversion step to work");
+    QVERIFY2(otp::util::stringToLocale(name, comparison), "Expected string -> locale conversion step to work");
     QCOMPARE(comparison.language, (QLocale::Language) expectedLanguage);
     QCOMPARE(comparison.country, (QLocale::Country) expectedCountry);
     QCOMPARE(comparison.script, (QLocale::Script) expectedScript);

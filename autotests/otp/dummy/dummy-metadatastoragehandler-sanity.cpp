@@ -1,5 +1,5 @@
 #include "otp/dummy/metadatastoragehandler.h"
-#include "autotests/otp/db/metadatastoragehandler-sanity.h"
+#include "autotests/util/db/metadatastoragehandler-sanity.h"
 
 #include <QTest>
 #include <QtDebug>

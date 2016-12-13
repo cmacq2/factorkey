@@ -2,6 +2,7 @@
 #define FACTORKEY_OATH_METADATASTORAGEHANDLER_H
 
 #include "../db/metadatastoragehandler.h"
+#include "../db/metadb.h"
 
 namespace otp
 {
@@ -14,23 +15,21 @@ namespace otp
                 class HOTPMetadataStorageHandler: public otp::storage::db::MetadataStorageHandler
                 {
                 public:
-                    static const otp::storage::db::MetadataStorageHandler * create(void);
+                    static const QSharedPointer<otp::storage::db::MetadataStorageHandler> create(void);
+                    static bool registerWith(otp::storage::db::MetadataDbBuilder& builder);
                 private:
                     HOTPMetadataStorageHandler() = delete;
-                private:
                     static const QString HOTP_TABLE_SCHEMA;
-                    static const bool isRegistered;
                 };
 
                 class TOTPMetadataStorageHandler: otp::storage::db::MetadataStorageHandler
                 {
                 public:
-                    static const otp::storage::db::MetadataStorageHandler * create(void);
+                    static const QSharedPointer<otp::storage::db::MetadataStorageHandler> create(void);
+                    static bool registerWith(otp::storage::db::MetadataDbBuilder& builder);
                 private:
                     TOTPMetadataStorageHandler() = delete;
-                private:
                     static const QString TOTP_TABLE_SCHEMA;
-                    static const bool isRegistered;
                 };
             }
         }

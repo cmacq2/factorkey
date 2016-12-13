@@ -22,21 +22,18 @@ namespace stubs
         DummyStoragePrivate::DummyStoragePrivate(const QString& entryId,
                             otp::storage::OTPTokenType type,
                             const QString& password,
-                            const QHash<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset)
+                            const QHash<QString,QVariant>& preset,
+                            QObject * parent):
+            QObject(parent), otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset)
         {
             init();
         }
 
         DummyStoragePrivate::DummyStoragePrivate(const QString& entryId,
                             otp::storage::OTPTokenType type,
-                            const QString& password, QObject * parent): QObject(parent), FailingStoragePrivate(), m_entryId(entryId), m_type(type), m_password(password)
-        {
-            init();
-        }
-
-        DummyStoragePrivate::DummyStoragePrivate(
-                            otp::storage::OTPTokenType type,
-                            const QString& password, QObject * parent): QObject(parent), FailingStoragePrivate(), m_type(type), m_password(password)
+                            const QString& password,
+                            QObject * parent):
+            QObject(parent), otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password)
         {
             init();
         }
@@ -44,14 +41,23 @@ namespace stubs
         DummyStoragePrivate::DummyStoragePrivate(
                             otp::storage::OTPTokenType type,
                             const QString& password,
-                            const QHash<QString,QVariant>& preset, QObject * parent): QObject(parent), FailingStoragePrivate(), m_type(type), m_password(password), m_map(preset)
+                            QObject * parent):
+            QObject(parent), otp::storage::StoragePrivate(), m_type(type), m_password(password)
         {
             init();
         }
 
-        DummyStoragePrivate::~DummyStoragePrivate()
+        DummyStoragePrivate::DummyStoragePrivate(
+                            otp::storage::OTPTokenType type,
+                            const QString& password,
+                            const QHash<QString,QVariant>& preset,
+                            QObject * parent):
+            QObject(parent), otp::storage::StoragePrivate(), m_type(type), m_password(password), m_map(preset)
         {
+            init();
         }
+
+        DummyStoragePrivate::~DummyStoragePrivate() {}
 
         void DummyStoragePrivate::init(void)
         {

@@ -41,26 +41,6 @@ namespace otp
             virtual bool openBackend(void);
             virtual bool closeBackend(void);
         };
-
-        namespace internal
-        {
-            class FailingStoragePrivate: public otp::storage::StoragePrivate
-            {
-            public:
-                virtual ~FailingStoragePrivate();
-                virtual QString entryId(void) const;
-                virtual OTPTokenType type(void) const;
-                virtual bool writePassword(const QString&);
-                virtual bool readTokenType(OTPTokenType&) const;
-                virtual bool writeTokenType(const OTPTokenType&);
-                virtual bool readParam(const QString&, QVariant&) const;
-                virtual bool readPassword(QString&) const;
-                virtual bool writeParam(const QString&, const QVariant&);
-                virtual bool exists(void) const;
-                virtual bool commit(void);
-                virtual bool poll(void);
-            };
-        }
     }
 }
 

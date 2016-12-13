@@ -1,7 +1,7 @@
 
 #include "otp/oath/generator.h"
 #include "otp/base32/base32.h"
-#include "autotests/otp/storage/storage.h"
+#include "autotests/mock/storage/storage.h"
 #include "otp/oath/parameters.h"
 #include "otp/parameters.h"
 
@@ -36,7 +36,6 @@ private Q_SLOTS:
     void testDefaults_data(void);
 };
 
-
 void HOTPGeneratorSamplesTest::testDefaults(void)
 {
     QFETCH(QString, secret);
@@ -49,10 +48,12 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     map.insert(otp::oath::parameters::generic::LENGTH, QVariant());
     map.insert(otp::oath::parameters::hotp::COUNTER, counter);
 
-    auto stub = new HOTPStoragePrivate(secret, map);
-    auto storage = new otp::storage::Storage(stub);
-    auto params = otp::oath::generator::HOTPTokenParameters::create(storage);
-    auto generator = otp::oath::generator::HOTPTokenParameters::generator(params);
+    auto parent = new QObject();
+
+    auto stub = new HOTPStoragePrivate(secret, map, parent);
+    auto storage = new otp::storage::Storage(stub, parent);
+    auto params = otp::oath::generator::HOTPTokenParameters::create(storage, parent);
+    auto generator = otp::oath::generator::HOTPTokenParameters::generator(params, parent);
 
     QString token;
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
@@ -85,10 +86,7 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QCOMPARE(resultingCounter.type(), QVariant::ULongLong);
     QCOMPARE(resultingCounter.toULongLong(), counter + 1);
 
-    generator->deleteLater();
-    params->deleteLater();
-    storage->deleteLater();
-    stub->deleteLater();
+    parent->deleteLater();
 }
 
 static void result(int k, const QString& secret, const char * expected)
@@ -125,6 +123,6 @@ void HOTPGeneratorSamplesTest::testDefaults_data(void)
     }
 }
 
-QTEST_APPLESS_MAIN(HOTPGeneratorSamplesTest)
+QTEST_MAIN(HOTPGeneratorSamplesTest)
 
 #include "hotp-generator-samples.moc"
