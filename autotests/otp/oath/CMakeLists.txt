@@ -21,7 +21,8 @@ add_test(rfc4226-hotp-compat rfc4226-hotp-compat)
 add_executable(rfc4226-hotp-compat rfc4226-hotp-compat.cpp ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS})
 target_link_libraries(rfc4226-hotp-compat Qt5::Core Qt5::Test)
 
-set(storage_STUB_SRCS $<TARGET_OBJECTS:DummyStorage>)
+#set(storage_STUB_SRCS $<TARGET_OBJECTS:DummyStorage>)
+set(storage_MOCK_SRCS $<TARGET_OBJECTS:MockStorage>)
 set(generator_UUT_SRCS $<TARGET_OBJECTS:GENERATOR>)
 set(oath_generator_UUT_SRCS $<TARGET_OBJECTS:OATH_GENERATOR>)
 set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
@@ -31,15 +32,15 @@ add_test(hotp-generator-samples hotp-generator-samples)
 add_executable(hotp-generator-samples hotp-generator-samples.cpp
     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-    ${util_UUT_SRCS} ${storage_STUB_SRCS})
-target_link_libraries(hotp-generator-samples Qt5::Core Qt5::Test)
+    ${util_UUT_SRCS} ${storage_MOCK_SRCS})
+target_link_libraries(hotp-generator-samples Qt5::Core Qt5::Test gtest gmock)
 
 add_test(totp-generator-samples totp-generator-samples)
 add_executable(totp-generator-samples totp-generator-samples.cpp
     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-    ${util_UUT_SRCS} ${storage_STUB_SRCS})
-target_link_libraries(totp-generator-samples Qt5::Core Qt5::Test)
+    ${util_UUT_SRCS} ${storage_MOCK_SRCS})
+target_link_libraries(totp-generator-samples Qt5::Core Qt5::Test gtest gmock)
 
 set(SharedParameters_UUT_SRCS $<TARGET_OBJECTS:SharedParameters>)
 set(oath_parameters_UUT_SRCS $<TARGET_OBJECTS:OATHParameters>)

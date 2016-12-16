@@ -8,24 +8,19 @@
 #include <QTest>
 #include <QtDebug>
 
-class HOTPStoragePrivate: public stubs::storage::DummyStoragePrivate
+class HOTPStoragePrivate: public stubs::storage::FakeStoragePrivate
 {
 public:
-    HOTPStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::HOTP, password, preset, parent) {}
-    HOTPStoragePrivate(const QString& entryId, const QString& password, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::HOTP, password, parent) {}
-    HOTPStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::HOTP, password, preset, parent) {}
-    HOTPStoragePrivate(const QString& password, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::HOTP, password, parent) {}
-    HOTPStoragePrivate(QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::HOTP, QString(), parent) {}
-
-    bool impl_commit(void)
-    {
-        return true;
-    }
+    HOTPStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset):
+        stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::HOTP, password, preset) {}
+    HOTPStoragePrivate(const QString& entryId, const QString& password):
+        stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::HOTP, password) {}
+    HOTPStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset):
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::HOTP, password, preset) {}
+    HOTPStoragePrivate(const QString& password):
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::HOTP, password) {}
+    HOTPStoragePrivate():
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::HOTP, QString()) {}
 };
 
 class HOTPGeneratorSamplesTest: public QObject
@@ -48,10 +43,31 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     map.insert(otp::oath::parameters::generic::LENGTH, QVariant());
     map.insert(otp::oath::parameters::hotp::COUNTER, counter);
 
-    auto parent = new QObject();
+    QObject * parent = new QObject();
 
-    auto stub = new HOTPStoragePrivate(secret, map, parent);
-    auto storage = new otp::storage::Storage(stub, parent);
+    QSharedPointer<HOTPStoragePrivate> stub(new HOTPStoragePrivate(secret, map));
+    auto mock = new mock::storage::DelegatingMockStoragePrivate();
+    mock->delegateToFake(stub);
+
+    EXPECT_CALL(*mock, type()).Times(1);
+
+    EXPECT_CALL(*mock, readPassword(testing::_)).Times(1);
+
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::hotp::COUNTER), testing::_)).Times(2);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::ENCODING), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::hashing::ALGORITHM), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LOCALE), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LENGTH), testing::_)).Times(1);
+
+    EXPECT_CALL(*mock, writeParam(testing::Eq(otp::oath::parameters::hotp::COUNTER), testing::Eq(counter +1))).Times(1);
+    EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, poll()).Times(0);
+    EXPECT_CALL(*mock, exists()).Times(0);
+    EXPECT_CALL(*mock, commit()).Times(1).WillRepeatedly(testing::Return(true));
+
+    auto storage = new otp::storage::Storage(mock, parent);
     auto params = otp::oath::generator::HOTPTokenParameters::create(storage, parent);
     auto generator = otp::oath::generator::HOTPTokenParameters::generator(params, parent);
 
@@ -59,34 +75,13 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
     QTEST(token, "rfc-test-vector");
 
-    QList<bool> commitResult;
-    QList<enum otp::storage::OTPTokenType> typeResult;
-    QList<QList<QVariant>> paramWrites;
-    stubs::storage::DummyStoragePrivate::expect_param(paramWrites, true, otp::oath::parameters::hotp::COUNTER, counter + 1);
-
-    QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::hotp::COUNTER, counter);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::hashing::ALGORITHM, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LOCALE, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LENGTH, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::hotp::COUNTER, counter);
-
-    stub->check_read_param(paramReads);
-    stub->check_write_param(paramWrites);
-    stub->check_type(typeResult << otp::storage::OTPTokenType::HOTP);
-    stub->check_no_read_token_type();
-    stub->check_no_write_token_type();
-    stub->check_no_write_password();
-    stub->check_no_poll();
-    stub->check_no_exists();
-    stub->check_commit(commitResult << true);
-
     const QVariant resultingCounter = stub->rawStorage().value(otp::oath::parameters::hotp::COUNTER);
     QCOMPARE(resultingCounter.type(), QVariant::ULongLong);
     QCOMPARE(resultingCounter.toULongLong(), counter + 1);
 
-    parent->deleteLater();
+    QVERIFY2(testing::Mock::VerifyAndClearExpectations(mock), "Interactions with the mock should match expectations");
+
+    delete parent;
 }
 
 static void result(int k, const QString& secret, const char * expected)
@@ -123,6 +118,6 @@ void HOTPGeneratorSamplesTest::testDefaults_data(void)
     }
 }
 
-QTEST_MAIN(HOTPGeneratorSamplesTest)
+QTEST_APPLESS_MAIN(HOTPGeneratorSamplesTest)
 
 #include "hotp-generator-samples.moc"

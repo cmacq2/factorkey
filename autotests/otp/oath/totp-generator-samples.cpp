@@ -9,19 +9,19 @@
 #include <QTest>
 #include <QtDebug>
 
-class TOTPStoragePrivate: public stubs::storage::DummyStoragePrivate
+class TOTPStoragePrivate: public stubs::storage::FakeStoragePrivate
 {
 public:
-    TOTPStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::TOTP, password, preset, parent) {}
-    TOTPStoragePrivate(const QString& entryId, const QString& password, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::TOTP, password, parent) {}
-    TOTPStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::TOTP, password, preset, parent) {}
-    TOTPStoragePrivate(const QString& password, QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::TOTP, password, parent) {}
-    TOTPStoragePrivate(QObject * parent = nullptr):
-        stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::TOTP, QString(), parent) {}
+    TOTPStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset):
+        stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::TOTP, password, preset) {}
+    TOTPStoragePrivate(const QString& entryId, const QString& password):
+        stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::TOTP, password) {}
+    TOTPStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset):
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::TOTP, password, preset) {}
+    TOTPStoragePrivate(const QString& password):
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::TOTP, password) {}
+    TOTPStoragePrivate():
+        stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::TOTP, QString()) {}
 };
 
 class TOTPGeneratorSamplesTest: public QObject
@@ -45,10 +45,32 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     map.insert(otp::oath::parameters::totp::EPOCH, QVariant());
     map.insert(otp::oath::parameters::totp::TIMESTEP, QVariant());
 
-    auto parent = new QObject();
+    QObject * parent = new QObject();
 
-    auto stub = new TOTPStoragePrivate(secret, map, parent);
-    auto storage = new otp::storage::Storage(stub, parent);
+    QSharedPointer<TOTPStoragePrivate> stub(new TOTPStoragePrivate(secret, map));
+    auto mock = new mock::storage::DelegatingMockStoragePrivate();
+    mock->delegateToFake(stub);
+
+    EXPECT_CALL(*mock, type()).Times(1);
+
+    EXPECT_CALL(*mock, readPassword(testing::_)).Times(1);
+
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::totp::EPOCH), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::totp::TIMESTEP), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::ENCODING), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::hashing::ALGORITHM), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LOCALE), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LENGTH), testing::_)).Times(1);
+
+    EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, poll()).Times(0);
+    EXPECT_CALL(*mock, exists()).Times(0);
+    EXPECT_CALL(*mock, commit()).Times(0);
+
+    auto storage = new otp::storage::Storage(mock, parent);
     auto params = otp::oath::generator::TOTPTokenParameters::create(storage, parent);
     auto generator = otp::oath::generator::TOTPTokenParameters::generator(params, timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC, parent);
 
@@ -56,26 +78,9 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
     QTEST(token, "rfc-test-vector");
 
-    QList<enum otp::storage::OTPTokenType> typeResult;
-    QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::totp::EPOCH, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::totp::TIMESTEP, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::hashing::ALGORITHM, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LOCALE, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::oath::parameters::generic::LENGTH, QVariant());
+    QVERIFY2(testing::Mock::VerifyAndClearExpectations(mock), "Interactions with the mock should match expectations");
 
-    stub->check_read_param(paramReads);
-    stub->check_no_write_param();
-    stub->check_type(typeResult << otp::storage::OTPTokenType::TOTP);
-    stub->check_no_read_token_type();
-    stub->check_no_write_token_type();
-    stub->check_no_write_password();
-    stub->check_no_poll();
-    stub->check_no_exists();
-    stub->check_no_commit();
-
-    parent->deleteLater();
+    delete parent;
 }
 
 static void result(int k, const QString& secret, const char * expected)
@@ -113,6 +118,6 @@ void TOTPGeneratorSamplesTest::testDefaults_data(void)
     }
 }
 
-QTEST_MAIN(TOTPGeneratorSamplesTest)
+QTEST_APPLESS_MAIN(TOTPGeneratorSamplesTest)
 
 #include "totp-generator-samples.moc"

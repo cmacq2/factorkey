@@ -7,19 +7,19 @@
 #include <QTest>
 #include <QtDebug>
 
-class SKeyStoragePrivate: public stubs::storage::DummyStoragePrivate
+class SKeyStoragePrivate: public stubs::storage::FakeStoragePrivate
 {
 public:
-    SKeyStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-    stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password, preset, parent) {}
-    SKeyStoragePrivate(const QString& entryId, const QString& password, QObject * parent = nullptr):
-    stubs::storage::DummyStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password, parent) {}
-    SKeyStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset, QObject * parent = nullptr):
-    stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::SKey, password, preset, parent) {}
-    SKeyStoragePrivate(const QString& password, QObject * parent = nullptr):
-    stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::SKey, password, parent) {}
-    SKeyStoragePrivate(QObject * parent = nullptr):
-    stubs::storage::DummyStoragePrivate(otp::storage::OTPTokenType::SKey, QString(), parent) {}
+    SKeyStoragePrivate(const QString& entryId, const QString& password, const QHash<QString,QVariant>& preset):
+    stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password, preset) {}
+    SKeyStoragePrivate(const QString& entryId, const QString& password):
+    stubs::storage::FakeStoragePrivate(entryId, otp::storage::OTPTokenType::SKey, password) {}
+    SKeyStoragePrivate(const QString& password, const QHash<QString,QVariant>& preset):
+    stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::SKey, password, preset) {}
+    SKeyStoragePrivate(const QString& password):
+    stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::SKey, password) {}
+    SKeyStoragePrivate():
+    stubs::storage::FakeStoragePrivate(otp::storage::OTPTokenType::SKey, QString()) {}
 };
 
 class SKeyGeneratorSamplesTest: public QObject
@@ -43,13 +43,37 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     QHash<QString, QVariant> map;
     map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Text);
     map.insert(otp::parameters::key::CHARSET, QVariant());
-    map.insert(otp::skey::parameters::DICTIONARY, QVariant());
+    map.insert(otp::skey::parameters::DICTIONARY, dictionaryValue);
     map.insert(otp::skey::parameters::ENCODING, (int) tokenFormat);
 
-    auto parent = new QObject();
+    QObject * parent = new QObject();
 
-    auto stub = new SKeyStoragePrivate(secret, map, parent);
-    auto storage = new otp::storage::Storage(stub, parent);
+    QSharedPointer<SKeyStoragePrivate> stub(new SKeyStoragePrivate(secret, map));
+    auto mock = new mock::storage::DelegatingMockStoragePrivate();
+    mock->delegateToFake(stub);
+
+    EXPECT_CALL(*mock, type()).Times(1);
+
+    EXPECT_CALL(*mock, readPassword(testing::_)).Times(1);
+
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::ENCODING), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::CHARSET), testing::_)).Times(1);
+    EXPECT_CALL(*mock, readParam(testing::Eq(otp::skey::parameters::ENCODING), testing::_)).Times(1);
+
+    if(tokenFormat == otp::skey::generator::SKeyEncodingType::Words)
+    {
+        EXPECT_CALL(*mock, readParam(testing::Eq(otp::skey::parameters::DICTIONARY), testing::_)).Times(1);
+    }
+
+    EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
+    EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, poll()).Times(0);
+    EXPECT_CALL(*mock, exists()).Times(0);
+    EXPECT_CALL(*mock, commit()).Times(0);
+
+    auto storage = new otp::storage::Storage(mock, parent);
     auto params = otp::skey::generator::SKeyTokenParameters::create(storage, parent);
     auto generator = otp::skey::generator::SKeyTokenParameters::generator(params, parent);
 
@@ -58,27 +82,9 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
     QTEST(token, "rfc-test-vector");
 
-    QList<enum otp::storage::OTPTokenType> typeResult;
-    QList<QList<QVariant>> paramReads;
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Text);
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::parameters::key::CHARSET, QVariant());
-    stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::parameters::ENCODING, (int) tokenFormat);
-    if(tokenFormat == otp::skey::generator::SKeyEncodingType::Words)
-    {
-        stubs::storage::DummyStoragePrivate::expect_param(paramReads, true, otp::skey::parameters::DICTIONARY, dictionaryValue);
-    }
+    QVERIFY2(testing::Mock::VerifyAndClearExpectations(mock), "Interactions with the mock should match expectations");
 
-    stub->check_read_param(paramReads);
-    stub->check_no_write_param();
-    stub->check_type(typeResult << otp::storage::OTPTokenType::SKey);
-    stub->check_no_read_token_type();
-    stub->check_no_write_token_type();
-    stub->check_no_write_password();
-    stub->check_no_poll();
-    stub->check_no_exists();
-    stub->check_no_commit();
-
-    parent->deleteLater();
+    delete parent;
 }
 
 static void result(const QString& challenge, const QString& secret, const QString& rfcTestVector)
@@ -196,6 +202,6 @@ void SKeyGeneratorSamplesTest::testWordsSamples_data(void)
     result("otp-sha1 99 correct", "OTP's are good", "AURA ALOE HURL WING BERG WAIT");
 }
 
-QTEST_MAIN(SKeyGeneratorSamplesTest)
+QTEST_APPLESS_MAIN(SKeyGeneratorSamplesTest)
 
 #include "skey-generator-samples.moc"
