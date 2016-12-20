@@ -3,10 +3,9 @@
 
 #include "otp/db/metadatastoragehandler.h"
 #include "otp/db/metadb.h"
+#include "gmock/gmock.h"
 
 #include <QHash>
-#include <QList>
-#include <QSignalSpy>
 #include <QString>
 #include <QVariant>
 
@@ -16,9 +15,8 @@ namespace stubs
     {
         namespace db
         {
-            class DummyMetadataStorageHandler: public QObject, public otp::storage::db::MetadataStorageHandler
+            class DummyMetadataStorageHandler: public otp::storage::db::MetadataStorageHandler
             {
-                Q_OBJECT
             public:
                 DummyMetadataStorageHandler(const otp::storage::OTPTokenType& type,
                                             const QHash<QString,QString>& tables,
@@ -35,78 +33,55 @@ namespace stubs
                 virtual bool resetMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
                 virtual QSet<QString> keys(void) const;
                 virtual bool isParamNameValid(const QString& param) const;
-            private:
-                QSignalSpy * m_spy_schema = nullptr;
-                QSignalSpy * m_spy_type = nullptr;
-                QSignalSpy * m_spy_saveMetaData = nullptr;
-                QSignalSpy * m_spy_fetchMetaData = nullptr;
-                QSignalSpy * m_spy_deleteMetaData = nullptr;
-                QSignalSpy * m_spy_resetMetaData = nullptr;
-                QSignalSpy * m_spy_pruneMetaData = nullptr;
-                QSignalSpy * m_spy_keys = nullptr;
-                QSignalSpy * m_spy_isParamNameValid = nullptr;
-            public:
-                QSignalSpy * spy_schema(void) const;
-                QSignalSpy * spy_type(void) const;
-                QSignalSpy * spy_saveMetaData(void) const;
-                QSignalSpy * spy_fetchMetaData(void) const;
-                QSignalSpy * spy_deleteMetaData(void) const;
-                QSignalSpy * spy_resetMetaData(void) const;
-                QSignalSpy * spy_pruneMetaData(void) const;
-                QSignalSpy * spy_keys(void) const;
-                QSignalSpy * spy_isParamNameValid(void) const;
-            private:
-                void init(void);
             protected:
-                virtual const QSet<QString>& impl_schema(void) const;
-
-                virtual bool impl_saveMetaData(const QString& entryId, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool impl_fetchMetaData(const QString& entryId, QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool impl_deleteMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool impl_resetMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool impl_pruneMetaData(const QString& entryId, const QSet<QString>& keys, const QSet<QString>& tables, otp::storage::db::MetadataDbManager * db) const;
-                virtual QSet<QString> impl_keys(void) const;
-                virtual otp::storage::OTPTokenType impl_type(void) const;
-                virtual bool impl_isParamNameValid(const QString& param) const;
-
                 virtual bool allowSaveMetaData(void) const;
                 virtual bool allowFetchMetaData(void) const;
                 virtual bool allowDeleteMetaData(void) const;
                 virtual bool allowResetMetaData(void) const;
                 virtual bool allowPruneMetaData(void) const;
-            Q_SIGNALS:
-                void notify_schema(const QSet<QString>& result) const;
-                void notify_type(otp::storage::OTPTokenType) const;
-                void notify_saveMetaData(bool result, const QString& entryId, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                void notify_fetchMetaData(bool result, const QString& entryId, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                void notify_deleteMetaData(bool result, const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                void notify_resetMetaData(bool result, const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                void notify_pruneMetaData(bool result, const QString& entryId, const QSet<QString>& keys, const QSet<QString>& tables, otp::storage::db::MetadataDbManager * db) const;
-                void notify_keys(const QSet<QString>& result) const;
-                void notify_isParamNameValid(bool result, const QString& param) const;
+            };
+        }
+    }
+}
+
+namespace mock
+{
+    namespace storage
+    {
+        namespace db
+        {
+            class MockMetadataStorageHandler: public otp::storage::db::MetadataStorageHandler
+            {
             public:
-                void check_schema(const QList<QSet<QString>>& callArgs) const;
-                void check_no_schema(void) const;
-                void check_saveMetaData(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_saveMetaData(void) const;
-                void check_fetchMetaData(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_fetchMetaData(void) const;
-                void check_deleteMetaData(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_deleteMetaData(void) const;
-                void check_resetMetaData(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_resetMetaData(void) const;
-                void check_pruneMetaData(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_pruneMetaData(void) const;
-                void check_type(const QList<enum otp::storage::OTPTokenType>& callArgs) const;
-                void check_no_type(void) const;
-                void check_keys(const QList<QStringList>& callArgs) const;
-                void check_no_keys(void) const;
-                void check_isParamNameValid(const QList<QList<QVariant>>& callArgs) const;
-                void check_no_isParamNameValid(void) const;
+                MockMetadataStorageHandler(otp::storage::OTPTokenType type);
+                MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
+                MOCK_CONST_METHOD0(schema, const QSet<QString>&());
+                MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(fetchMetaData, bool(const QString&, QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD4(pruneMetaData, bool(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(deleteMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(resetMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD0(keys, QSet<QString>());
+                MOCK_CONST_METHOD1(isParamNameValid, bool(const QString&));
+            };
+
+            class DelegatingMockMetadataStorageHandler: public otp::storage::db::MetadataStorageHandler
+            {
             public:
-                static QList<QList<QVariant>>& expect_metadata(QList<QList<QVariant>>& callStack, bool status, const QString& entry, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db);
-                static QList<QList<QVariant>>& expect_params(QList<QList<QVariant>>& callStack, bool status, const QString& entry, const QSet<QString>& params, otp::storage::db::MetadataDbManager * db);
-                static QList<QList<QVariant>>& expect_paramName(QList<QList<QVariant>>& callStack, bool status, const QString& param);
+                DelegatingMockMetadataStorageHandler(otp::storage::OTPTokenType type);
+                MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
+                MOCK_CONST_METHOD0(schema, const QSet<QString>&());
+                MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(fetchMetaData, bool(const QString&, QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD4(pruneMetaData, bool(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(deleteMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD3(resetMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MOCK_CONST_METHOD0(keys, QSet<QString>());
+                MOCK_CONST_METHOD1(isParamNameValid, bool(const QString&));
+            private:
+                bool delegateToFake(const QSharedPointer<otp::storage::db::MetadataStorageHandler> fake);
+            private:
+                QSharedPointer<otp::storage::db::MetadataStorageHandler> m_fake;
             };
         }
     }

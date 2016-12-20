@@ -1,4 +1,5 @@
 #include "memory-metadb.h"
+#include <QSqlError>
 
 namespace stubs
 {
@@ -6,15 +7,65 @@ namespace stubs
     {
         namespace db
         {
+            bool MemoryMetadataDbManager::drop(void)
+            {
+                const auto& supported = supportedHandlers();
+                QSet<QString> tables;
+                for(const auto& t: supported)
+                {
+                    const auto& ptr = handler(t);
+                    for(const auto& k: ptr->keys())
+                    {
+                        const auto table = ptr->tableForParam(k);
+                        if(table != otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE && !tables.contains(table))
+                        {
+                            tables.insert(table);
+                        }
+                    }
+                }
+
+                if(!tables.isEmpty())
+                {
+                    QSqlDatabase db  = open();
+                    bool ok = db.isValid() && db.isOpen() && db.transaction();
+                    if(ok)
+                    {
+                        const QString fmt(QLatin1String("DROP TABLE `%1`"));
+                        QSqlQuery query(db);
+                        for(const auto& table: tables)
+                        {
+                            ok = query.prepare(fmt.arg(table)) && query.exec() && query.lastError().type() == QSqlError::NoError;
+                            if(!ok)
+                            {
+                                break;
+                            }
+                        }
+                        if(ok)
+                        {
+                            ok = query.prepare(fmt.arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE)) && query.exec() && query.lastError().type() == QSqlError::NoError;
+                        }
+                        if(ok)
+                        {
+                            return db.commit() && db.lastError().type() == QSqlError::NoError;
+                        }
+                        else
+                        {
+                            db.rollback();
+                        }
+                    }
+                }
+                return false;
+            }
+
             MemoryMetadataDbManager::~MemoryMetadataDbManager()
             {
                 close();
             }
 
-            MemoryMetadataDbManager::MemoryMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers, QObject * parent) :
-                MetadataDbManager(connectionName, handlers, parent) {}
+            MemoryMetadataDbManager::MemoryMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers) :
+                otp::storage::db::MetadataDbManager(connectionName, handlers) {}
 
-            bool MemoryMetadataDbManager::impl_initDb(QSqlDatabase& db)
+            bool MemoryMetadataDbManager::initDb(QSqlDatabase& db)
             {
                 if(allowInitDb())
                 {
@@ -27,59 +78,14 @@ namespace stubs
                 }
             }
 
-            QSqlDatabase MemoryMetadataDbManager::impl_open(void)
+            bool MemoryMetadataDbManager::allowInitDb(void) const
             {
-                return allowOpen() ? otp::storage::db::MetadataDbManager::open() : QSqlDatabase();
-            }
-
-            bool MemoryMetadataDbManager::impl_close(void)
-            {
-                return allowClose() && otp::storage::db::MetadataDbManager::close();
-            }
-
-            bool MemoryMetadataDbManager::impl_removeAll(void)
-            {
-                return allowRemoveAll() && otp::storage::db::MetadataDbManager::removeAll();
-            }
-
-            bool MemoryMetadataDbManager::impl_isOpened(void) const
-            {
-                return otp::storage::db::MetadataDbManager::isOpened();
-            }
-
-            bool MemoryMetadataDbManager::impl_readType(const QString& entry, QVariant& value)
-            {
-                return allowReadType() && otp::storage::db::MetadataDbManager::readType(entry, value);
-            }
-
-            bool MemoryMetadataDbManager::impl_remove(const QString& entry)
-            {
-                return allowRemove() && otp::storage::db::MetadataDbManager::remove(entry);
-            }
-
-            bool MemoryMetadataDbManager::impl_removeEntries(const QStringList& entryList)
-            {
-                return allowRemoveEntries() && otp::storage::db::MetadataDbManager::removeEntries(entryList);
-            }
-
-            bool MemoryMetadataDbManager::impl_contains(const QString& entry)
-            {
-                return allowContains() && otp::storage::db::MetadataDbManager::contains(entry);
-            }
-
-            bool MemoryMetadataDbManager::impl_entries(QStringList& e)
-            {
-                return allowEntries() && otp::storage::db::MetadataDbManager::entries(e);
-            }
-
-            void MemoryMetadataDbBuilder::setParent(QObject * parent)
-            {
-                m_parent = parent;
+                return true;
             }
 
             MemoryMetadataDbManager * MemoryMetadataDbBuilder::build(void) const
             {
-                return new MemoryMetadataDbManager(m_connectionName, m_handlers, m_parent);
+                return new MemoryMetadataDbManager(m_connectionName, m_handlers);
             }
         }
     }

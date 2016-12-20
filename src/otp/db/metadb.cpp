@@ -184,6 +184,22 @@ namespace otp
                 return m_handlers.contains(t) ? m_handlers.value(t) : QSharedPointer<MetadataStorageHandler>();
             }
 
+            bool MetadataDbManager::supports(otp::storage::OTPTokenType type) const
+            {
+                int t = (int) type;
+                return m_handlers.contains(t);
+            }
+
+            QList<otp::storage::OTPTokenType> MetadataDbManager::supportedHandlers(void) const
+            {
+                QList<otp::storage::OTPTokenType> l;
+                for(const auto t: m_handlers.keys())
+                {
+                    l << ((otp::storage::OTPTokenType) t);
+                }
+                return l;
+            }
+
             const QString& MetadataDbManager::connectionName(void) const
             {
                 return m_connectionName;

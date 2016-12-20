@@ -35,6 +35,8 @@ namespace otp
                 virtual bool entries(QStringList& entryList);
 
                 virtual const QSharedPointer<MetadataStorageHandler> handler(otp::storage::OTPTokenType type);
+                QList<otp::storage::OTPTokenType> supportedHandlers(void) const;
+                bool supports(otp::storage::OTPTokenType type) const;
             protected:
                 virtual bool initDb(QSqlDatabase& db);
                 virtual bool ensureSchema(QSqlDatabase& db);
@@ -49,8 +51,9 @@ namespace otp
             public:
                 bool registerType(const QSharedPointer<MetadataStorageHandler>& handler);
                 void setConnectionName(const QString& name);
-                MetadataDbManager * build(void) const;
                 virtual QSharedPointer<MetadataDbManager> create(void) const;
+            protected:
+                virtual MetadataDbManager * build(void) const;
             public:
                 virtual ~MetadataDbBuilder();
             protected:

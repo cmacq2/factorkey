@@ -12,12 +12,13 @@ set(skey_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:SKey_MetaDB>)
 set(dummy_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:DUMMY_MetaDB>)
 set(Steam_MetaDB_UUT_SRCS $<TARGET_OBJECTS:Steam_MetaDB>)
 
-set(MetadataDB_STUB_SRCS $<TARGET_OBJECTS:MockMetadataDB>)
+set(MemoryMetadataDB_STUB_SRCS $<TARGET_OBJECTS:MemoryMetadataDB>)
+set(MetadataDB_MOCK_SRCS $<TARGET_OBJECTS:MockMetadataDB>)
 
 add_test(metadb-schema metadb-schema)
 add_executable(metadb-schema metadb-schema.cpp
     ${SharedParameters_UUT_SRCS} ${DummyParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS} ${SKeyParameters_UUT_SRCS} ${SteamParameters_UUT_SRCS}
-    ${MetadataDB_UUT_SRCS} ${MetadataDB_STUB_SRCS}
+    ${MetadataDB_UUT_SRCS} ${MemoryMetadataDB_STUB_SRCS}
     ${dummy_metadatastorage_UUT_SRCS} ${oath_metadatastorage_UUT_SRCS} ${skey_metadatastorage_UUT_SRCS} ${Steam_MetaDB_UUT_SRCS} ${storage_UUT_SRCS})
 target_link_libraries(metadb-schema Qt5::Core Qt5::Sql Qt5::Test)
 

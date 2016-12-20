@@ -1,7 +1,8 @@
 #ifndef FACTORKEY_AUTOTESTS_STUBBED_MEMORY_METADBH_H
 #define FACTORKEY_AUTOTESTS_STUBBED_MEMORY_METADBH_H
 
-#include "metadb.h"
+#include "otp/db/metadb.h"
+#include "otp/db/metadatastoragehandler.h"
 
 namespace stubs
 {
@@ -9,32 +10,22 @@ namespace stubs
     {
         namespace db
         {
-            class MemoryMetadataDbManager: public MetadataDbManager
+            class MemoryMetadataDbManager: public otp::storage::db::MetadataDbManager
             {
             public:
-                MemoryMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers, QObject * parent = nullptr);
+                MemoryMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers);
                 virtual ~MemoryMetadataDbManager();
+                bool drop(void);
             protected:
-                virtual bool impl_initDb(QSqlDatabase& db);
-                virtual bool impl_isOpened(void) const;
-                virtual QSqlDatabase impl_open(void);
-                virtual bool impl_close(void);
-
-                virtual bool impl_readType(const QString& entry, QVariant& value);
-                virtual bool impl_remove(const QString& entry);
-                virtual bool impl_contains(const QString & entry);
-                virtual bool impl_entries(QStringList& entryList);
-                virtual bool impl_removeEntries(const QStringList& entryList);
-                virtual bool impl_removeAll(void);
+                virtual bool allowInitDb(void) const;
+            protected:
+                virtual bool initDb(QSqlDatabase& db);
             };
 
             class MemoryMetadataDbBuilder: public otp::storage::db::MetadataDbBuilder
             {
             public:
                 MemoryMetadataDbManager * build(void) const;
-                void setParent(QObject * parent = nullptr);
-            private:
-                QObject * m_parent = nullptr;
             };
         }
     }
