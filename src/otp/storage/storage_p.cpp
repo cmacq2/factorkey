@@ -10,31 +10,18 @@ namespace otp
 
         bool StorageProviderPrivate::open(void)
         {
-            bool open = isOpened();
-            if(!open)
-            {
-                return openBackend();
-            }
-            return open;
+            return isOpened() || openBackend();
         }
 
         bool StorageProviderPrivate::close(void)
         {
-            if(isOpened())
-            {
-                return closeBackend();
-            }
-            return true;
+            return !isOpened() || closeBackend();
         }
 
         bool StorageProviderPrivate::contains(const QString& entry)
         {
             QStringList l;
-            if(entries(l))
-            {
-                return l.indexOf(entry) >= 0;
-            }
-            return false;
+            return entries(l) && l.indexOf(entry) >= 0;
         }
 
         bool StorageProviderPrivate::entries(QStringList&)
@@ -54,9 +41,17 @@ namespace otp
                 if(contains(entry))
                 {
                     Storage * s = lookup(entry);
-                    if(s && s->type() == type)
+                    if(s)
                     {
-                        return s;
+                        if(s->type() == type)
+                        {
+                            return s;
+                        }
+                        else
+                        {
+                            delete s;
+                            return nullptr;
+                        }
                     }
                 }
                 else

@@ -22,10 +22,10 @@ namespace otp
             return d->type();
         }
 
-        bool Storage::writePassword(const QString& secret)
+        bool Storage::writePassword(const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
         {
             Q_D(Storage);
-            return d->writePassword(secret);
+            return d->writePassword(secret, confirmation);
         }
 
         bool Storage::readTokenType(OTPTokenType& value) const
@@ -46,7 +46,7 @@ namespace otp
             return d->readParam(param, value);
         }
 
-        bool Storage::readPassword(QString& secret) const
+        bool Storage::readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
         {
             Q_D(const Storage);
             return d->readPassword(secret);

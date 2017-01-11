@@ -62,7 +62,7 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     EXPECT_CALL(*mock, writeParam(testing::Eq(otp::oath::parameters::hotp::COUNTER), testing::Eq(counter +1))).Times(1);
     EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
     EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*mock, poll()).Times(0);
     EXPECT_CALL(*mock, exists()).Times(0);
     EXPECT_CALL(*mock, commit()).Times(1).WillRepeatedly(testing::Return(true));

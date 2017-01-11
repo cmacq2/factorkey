@@ -6,6 +6,8 @@
 #include <QString>
 #include <QVariant>
 
+#include "../secrets/secrets.h"
+
 namespace otp
 {
     namespace storage
@@ -29,8 +31,8 @@ namespace otp
         public:
             const QString entryId(void) const;
             OTPTokenType type(void) const;
-            bool readPassword(QString& secret) const;
-            bool writePassword(const QString& secret);
+            bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
+            bool writePassword(const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
             bool readTokenType(OTPTokenType& value) const;
             bool writeTokenType(const OTPTokenType& value);
             bool readParam(const QString& param, QVariant& value) const;

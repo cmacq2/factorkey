@@ -53,20 +53,24 @@ namespace otp
             return false;
         }
 
-        bool TokenParametersPrivate::lookupSecret(QString & value) const
+        bool TokenParametersPrivate::lookupSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
         {
-            QString str;
-            if(m_storage->readPassword(str)  && !str.isNull() && !str.isEmpty())
+            return m_storage->readPassword([secret](bool ok, const QString& entryId, const QString& value) -> void
             {
-                value = str;
-                return true;
-            }
-            return false;
+                if(ok && !value.isNull() && !value.isEmpty())
+                {
+                    secret(ok, entryId, value);
+                }
+                else
+                {
+                    secret(false, entryId, QString());
+                }
+            });
         }
 
-        bool TokenParametersPrivate::writeSecret(const QString & secret)
+        bool TokenParametersPrivate::writeSecret(const QString & secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
         {
-            return !secret.isNull() && !secret.isEmpty() && m_storage->writePassword(secret);
+            return !secret.isNull() && !secret.isEmpty() && m_storage->writePassword(secret, confirmation);
         }
 
         bool TokenParametersPrivate::lookup(const QString & key, QVariant & value) const
@@ -113,9 +117,9 @@ namespace otp
             return false;
         }
 
-        bool TokenGeneratorPrivate::secret(QString& secret) const
+        bool TokenGeneratorPrivate::secret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& answer) const
         {
-            return m_params->secret(secret);
+            return m_params->askSecret(answer);
         }
 
         bool TokenGeneratorPrivate::key(otp::token::Key& key) const

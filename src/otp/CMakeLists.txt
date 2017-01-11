@@ -6,6 +6,7 @@ add_subdirectory(oath)
 add_subdirectory(steam)
 add_subdirectory(dummy)
 add_subdirectory(storage)
+add_subdirectory(secrets)
 add_subdirectory(db)
 add_subdirectory(util)
 

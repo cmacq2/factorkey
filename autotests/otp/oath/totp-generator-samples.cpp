@@ -65,7 +65,7 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
     EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*mock, poll()).Times(0);
     EXPECT_CALL(*mock, exists()).Times(0);
     EXPECT_CALL(*mock, commit()).Times(0);

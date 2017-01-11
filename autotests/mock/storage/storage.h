@@ -31,11 +31,11 @@ namespace stubs
         public:
             QString entryId(void) const;
             otp::storage::OTPTokenType type(void) const;
-            bool writePassword(const QString& password);
+            bool writePassword(const QString& password, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
             bool readTokenType(otp::storage::OTPTokenType& type) const;
             bool writeTokenType(const otp::storage::OTPTokenType& type);
             bool readParam(const QString& param, QVariant& value) const;
-            bool readPassword(QString& password) const;
+            bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
             bool writeParam(const QString& param, const QVariant& value);
             bool exists(void) const;
             bool commit(void);
@@ -59,10 +59,10 @@ namespace mock
         {
         public:
             MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));
-            MOCK_CONST_METHOD1(readPassword, bool(QString& password));
+            MOCK_CONST_METHOD1(readPassword, bool(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret));
             MOCK_CONST_METHOD1(readTokenType, bool(otp::storage::OTPTokenType& type));
 
-            MOCK_METHOD1(writePassword, bool(const QString& password));
+            MOCK_METHOD2(writePassword, bool(const QString& password, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation));
             MOCK_METHOD1(writeTokenType, bool(const otp::storage::OTPTokenType& type));
             MOCK_METHOD2(writeParam, bool(const QString& param, const QVariant& value));
 
@@ -80,11 +80,11 @@ namespace mock
             MOCK_CONST_METHOD0(entryId, QString(void));
             MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType(void));
             MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));
-            MOCK_CONST_METHOD1(readPassword, bool(QString& password));
+            MOCK_CONST_METHOD1(readPassword, bool(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret));
             MOCK_CONST_METHOD0(exists, bool(void));
             MOCK_CONST_METHOD1(readTokenType, bool(otp::storage::OTPTokenType& type));
 
-            MOCK_METHOD1(writePassword, bool(const QString& password));
+            MOCK_METHOD2(writePassword, bool(const QString& password, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation));
             MOCK_METHOD1(writeTokenType, bool(const otp::storage::OTPTokenType& type));
             MOCK_METHOD2(writeParam, bool(const QString& param, const QVariant& value));
             MOCK_METHOD0(commit, bool(void));

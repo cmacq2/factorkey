@@ -18,7 +18,7 @@ namespace otp
             class DefaultStoragePrivate: public otp::storage::StoragePrivate
             {
             public:
-                DefaultStoragePrivate(QSharedPointer<WalletManager>& secretBackend, QSharedPointer<MetadataDbManager>& metaBackend, const QString& entry):
+                DefaultStoragePrivate(QSharedPointer<otp::storage::secrets::SecretsAPIProvider>& secretBackend, QSharedPointer<MetadataDbManager>& metaBackend, const QString& entry):
                     otp::storage::StoragePrivate(), m_wallet(secretBackend), m_metadata(entry, metaBackend), m_entryId(entry)
                 {
 
@@ -37,9 +37,9 @@ namespace otp
                     return type;
                 }
 
-                bool writePassword(const QString&)
+                bool writePassword(const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
                 {
-                    return false;
+                    return m_wallet && m_wallet->tell(m_entryId, secret, confirmation);
                 }
 
                 bool readTokenType(OTPTokenType& type) const
@@ -57,9 +57,9 @@ namespace otp
                     return m_metadata.readParam(param, value);
                 }
 
-                bool readPassword(QString&) const
+                bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
                 {
-                    return false;
+                    return m_wallet && m_wallet->ask(m_entryId, secret);
                 }
 
                 bool writeParam(const QString& param, const QVariant& value)
@@ -81,7 +81,7 @@ namespace otp
                     return m_metadata.poll();
                 }
             private:
-                QSharedPointer<WalletManager> m_wallet;
+                QSharedPointer<otp::storage::secrets::SecretsAPIProvider> m_wallet;
                 otp::storage::db::Metadata m_metadata;
                 const QString m_entryId;
             };
@@ -89,9 +89,9 @@ namespace otp
             class DefaultStorageProviderPrivate: public otp::storage::StorageProviderPrivate
             {
             public:
-                DefaultStorageProviderPrivate(const MetadataDbBuilder& dbInfo) : otp::storage::StorageProviderPrivate(), m_dbInfo(dbInfo) {}
+                DefaultStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const WalletBuilder& secretsInfo) : otp::storage::StorageProviderPrivate(), m_dbInfo(dbInfo), m_secretsInfo(secretsInfo) {}
                 virtual ~DefaultStorageProviderPrivate() {}
-                //         static const QString WALLET_FOLDER;
+
                 bool contains(const QString& entry)
                 {
                     QString id(entry);
@@ -112,11 +112,7 @@ namespace otp
 
                 bool openBackend(void)
                 {
-                    //             if(m_wallet)
-                    //             {
-                    //                 // todo emit signal?
-                    //             }
-                    m_wallet.reset(new WalletManager(m_window, m_walletName));
+                    m_wallet = m_secretsInfo.create();
                     m_metaDb = m_dbInfo.create();
                     QSqlDatabase conn = m_metaDb->open();
                     return conn.isValid() && conn.isOpen() && m_wallet->open();
@@ -159,16 +155,13 @@ namespace otp
                     }
                 }
             private:
-
-
-                WId m_window;
-                const QString m_walletName; // Wallet::LocalWallet()
                 const MetadataDbBuilder m_dbInfo;
-                QSharedPointer<WalletManager> m_wallet;
+                const WalletBuilder m_secretsInfo;
+                QSharedPointer<otp::storage::secrets::SecretsAPIProvider> m_wallet;
                 QSharedPointer<MetadataDbManager> m_metaDb;
             };
 
-            DefaultStorageProvider::DefaultStorageProvider(const MetadataDbBuilder& dbInfo, QObject * parent): otp::storage::StorageProvider(new DefaultStorageProviderPrivate(dbInfo), parent) {}
+            DefaultStorageProvider::DefaultStorageProvider(const MetadataDbBuilder& dbInfo, const WalletBuilder& secretsInfo, QObject * parent): otp::storage::StorageProvider(new DefaultStorageProviderPrivate(dbInfo, secretsInfo), parent) {}
         }
     }
 }

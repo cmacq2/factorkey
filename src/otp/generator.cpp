@@ -61,16 +61,34 @@ namespace otp
             return false;
         }
 
-        bool TokenParameters::secret(QString & secret) const
+        bool TokenParameters::askSecret(void) const
+        {
+            return askSecret([this](bool ok, const QString& entryId, const QString& secret) -> void
+            {
+                if(ok)
+                {
+                    emit retrievedSecret(ok, entryId, secret);
+                }
+                else
+                {
+                    emit retrievedSecret(false, entryId, QString());
+                }
+            });
+        }
+
+        bool TokenParameters::askSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& answer) const
         {
             Q_D(const TokenParameters);
-            return d->lookupSecret(secret);
+            return d->lookupSecret(answer);
         }
 
         bool TokenParameters::setSecret(const QString & secret)
         {
             Q_D(TokenParameters);
-            return d->writeSecret(secret);
+            return d->writeSecret(secret, [this](bool ok, const QString& entryId) -> void
+            {
+                emit secretUpdated(ok, entryId);
+            });
         }
 
         bool TokenParameters::secretEncodingType(EncodingType& type)
@@ -194,27 +212,53 @@ namespace otp
             return d ? d->params() : nullptr;
         }
 
-        bool TokenGenerator::generateToken(QString& value)
+        bool TokenGenerator::generateToken(void)
+        {
+            return generateToken([this](bool ok, const QString& token) -> void
+            {
+                emit tokenGenerated(ok, token);
+            });
+        }
+
+        bool TokenGenerator::generateToken(QString& token)
+        {
+            bool finished = false;
+            bool started = generateToken([this, &token, &finished](bool ok, const QString& result) -> void
+            {
+                if(ok)
+                {
+                    finished = ok;
+                    token = result;
+                }
+            });
+            return started && finished;
+        }
+
+        bool TokenGenerator::generateToken(const TokenResult result)
         {
             Q_D(TokenGenerator);
-            QString token;
-            QString secret;
+
             otp::token::Key key;
             otp::token::Encoder encoder;
             otp::token::Message message;
             otp::token::Algorithm algo;
 
-            if(d && d->ensureStorage() && d->secret(secret) &&  d->message(message) &&
-                d->key(key) && d->algorithm(algo) && d->encoder(encoder))
+            if(d && d->ensureStorage() &&  d->message(message) && d->key(key) && d->algorithm(algo) && d->encoder(encoder))
             {
-                token = otp::token::token(secret, message, key, algo, encoder);
-                if(d->updateStorage())
+                return d->secret([this, d, key, encoder, message, algo, result](bool ok, const QString&, const QString& secret) -> void
                 {
-                    value = token;
-                    return true;
-                }
+                    if(ok)
+                    {
+                        const QString token = otp::token::token(secret, message, key, algo, encoder);
+                        if(d->updateStorage())
+                        {
+                            result(true, token);
+                            return;
+                        }
+                    }
+                    result(false, QString());
+                });
             }
-
             return false;
         }
     }

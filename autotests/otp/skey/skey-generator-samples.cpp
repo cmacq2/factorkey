@@ -68,7 +68,7 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
     EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writePassword(testing::_)).Times(0);
+    EXPECT_CALL(*mock, writePassword(testing::_, testing::_)).Times(0);
     EXPECT_CALL(*mock, poll()).Times(0);
     EXPECT_CALL(*mock, exists()).Times(0);
     EXPECT_CALL(*mock, commit()).Times(0);
@@ -92,6 +92,7 @@ static void result(const QString& challenge, const QString& secret, const QStrin
     QString fmt(QStringLiteral("challenge='%1'; secret='%2'"));
     QTest::newRow(qPrintable(fmt.arg(challenge, secret))) << secret << challenge << rfcTestVector;
 }
+
 static void result(const char * challenge, const char * secret, const char * rfcTestVector)
 {
     result(QLatin1String(challenge), QLatin1String(secret), QLatin1String(rfcTestVector));

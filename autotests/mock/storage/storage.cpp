@@ -63,24 +63,33 @@ namespace stubs
             return true;
         }
 
-        bool FakeStoragePrivate::writePassword(const QString& password)
+        bool FakeStoragePrivate::writePassword(const QString& password, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
         {
             if(allowWritePassword())
             {
                 m_password = password;
+                confirmation(true, m_entryId);
                 return true;
             }
-            return false;
+            else
+            {
+                confirmation(false, m_entryId);
+                return false;
+            }
         }
 
-        bool FakeStoragePrivate::readPassword(QString& password) const
+        bool FakeStoragePrivate::readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
         {
             if(allowReadPassword())
             {
-                password = m_password;
+                secret(true, m_entryId, m_password);
                 return true;
             }
-            return false;
+            else
+            {
+                secret(false, m_entryId, QString());
+                return false;
+            }
         }
 
         bool FakeStoragePrivate::readTokenType(otp::storage::OTPTokenType& type) const
@@ -159,7 +168,7 @@ namespace mock
                 ON_CALL(*this, writeTokenType(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writeTokenType));
                 ON_CALL(*this, readTokenType(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::readTokenType));
                 ON_CALL(*this, readPassword(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::readPassword));
-                ON_CALL(*this, writePassword(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writePassword));
+                ON_CALL(*this, writePassword(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writePassword));
             }
             return fake;
         }

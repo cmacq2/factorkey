@@ -41,12 +41,16 @@ namespace otp
             bool setSecret(const QString& key);
             bool setName(const QString& name);
 
-            bool secret(QString& value) const;
+            bool askSecret(void) const;
+            bool askSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& answer) const;
             bool name(QString & name) const;
             QString id(void) const;
             otp::storage::OTPTokenType type(void) const;
             virtual ~TokenParameters();
             static TokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
+        Q_SIGNALS:
+            void retrievedSecret(bool ok, const QString& entryId, const QString& secret) const;
+            void secretUpdated(bool ok, const QString& entryId) const;
         private:
             Q_DISABLE_COPY(TokenParameters)
             QScopedPointer<TokenParametersPrivate> const d_ptr;
@@ -72,10 +76,15 @@ namespace otp
         {
             Q_OBJECT
         public:
-            bool generateToken(QString& value);
+            typedef std::function<void(bool, const QString&)> TokenResult;
+            bool generateToken(void);
+            bool generateToken(QString& token);
+            bool generateToken(const TokenResult result);
             TokenParameters * params(void) const;
             TokenGenerator(TokenGeneratorPrivate * impl, QObject * parent = 0);
             ~TokenGenerator();
+        Q_SIGNALS:
+            void tokenGenerated(bool ok, const QString& token) const;
         private:
             Q_DISABLE_COPY(TokenGenerator)
             QScopedPointer<TokenGeneratorPrivate> const d_ptr;

@@ -15,8 +15,8 @@ namespace otp
             virtual ~TokenParametersPrivate();
             bool setCodec(const QString& key, const QTextCodec * codec);
             bool lookupCodec(const QString& key, QTextCodec ** codec) const;
-            bool lookupSecret(QString & value) const;
-            bool writeSecret(const QString & secret);
+            bool lookupSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
+            bool writeSecret(const QString & secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
             bool lookup(const QString & key, QVariant & value) const;
             otp::storage::Storage * storage(void) const;
         private:
@@ -33,7 +33,7 @@ namespace otp
             bool ensureStorage(void) const;
             virtual bool updateStorage(void);
             virtual bool message(otp::token::Message&) const;
-            bool secret(QString& secret) const;
+            bool secret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
             virtual bool key(otp::token::Key& key) const;
             virtual bool encoder(otp::token::Encoder&) const;
             virtual bool algorithm(otp::token::Algorithm& algo) const;

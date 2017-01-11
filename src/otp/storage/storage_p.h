@@ -13,11 +13,11 @@ namespace otp
             virtual ~StoragePrivate() = 0;
             virtual QString entryId(void) const = 0;
             virtual OTPTokenType type(void) const = 0;
-            virtual bool writePassword(const QString&) = 0;
+            virtual bool writePassword(const QString&, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation&) = 0;
             virtual bool readTokenType(OTPTokenType&) const = 0;
             virtual bool writeTokenType(const OTPTokenType&) = 0;
             virtual bool readParam(const QString&, QVariant&) const = 0;
-            virtual bool readPassword(QString&) const = 0;
+            virtual bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer&) const = 0;
             virtual bool writeParam(const QString&, const QVariant&) =0;
             virtual bool exists(void) const = 0;
             virtual bool commit(void) = 0;
