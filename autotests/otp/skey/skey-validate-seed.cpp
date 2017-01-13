@@ -35,6 +35,7 @@ void SKeyValidateSeedTest::testSample_data(void)
 
     result("Valid seed", QLatin1String("AValidSeed"), otp::skey::SKeySeedError::Conformant);
     result("Seed must not contain any spaces", QLatin1String("A Seed"), otp::skey::SKeySeedError::Invalid);
+    result("Seed must not contain any spaces", QLatin1String("AVeryLongSeedThatContainsA Seed"), otp::skey::SKeySeedError::Invalid);
     result("Seeds must not be empty", QLatin1String(""), otp::skey::SKeySeedError::Invalid);
     result("Seeds must not be null values (empty)", QString(), otp::skey::SKeySeedError::Invalid);
     result("Seeds should be between 1 and 16 chars in size (got 17)", QLatin1String("LengthOfSeventeen"), otp::skey::SKeySeedError::Acceptable);
