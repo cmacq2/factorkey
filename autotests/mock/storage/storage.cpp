@@ -5,16 +5,16 @@ namespace stubs
     namespace storage
     {
         FakeStoragePrivate::FakeStoragePrivate(const QString& entryId,otp::storage::OTPTokenType type, const QString& password, const QHash<QString,QVariant>& preset):
-        otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset) {}
+            otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password), m_map(preset) {}
 
         FakeStoragePrivate::FakeStoragePrivate(const QString& entryId, otp::storage::OTPTokenType type, const QString& password):
-        otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password) {}
+            otp::storage::StoragePrivate(), m_entryId(entryId), m_type(type), m_password(password) {}
 
         FakeStoragePrivate::FakeStoragePrivate(otp::storage::OTPTokenType type, const QString& password):
-        otp::storage::StoragePrivate(), m_type(type), m_password(password) {}
+            otp::storage::StoragePrivate(), m_type(type), m_password(password) {}
 
         FakeStoragePrivate::FakeStoragePrivate(otp::storage::OTPTokenType type, const QString& password, const QHash<QString,QVariant>& preset):
-        otp::storage::StoragePrivate(), m_type(type), m_password(password), m_map(preset) {}
+            otp::storage::StoragePrivate(), m_type(type), m_password(password), m_map(preset) {}
 
         FakeStoragePrivate::~FakeStoragePrivate() {}
 
@@ -63,7 +63,7 @@ namespace stubs
             return true;
         }
 
-        bool FakeStoragePrivate::writePassword(const QString& password, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
+        bool FakeStoragePrivate::writePassword(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
         {
             if(allowWritePassword())
             {
@@ -78,7 +78,7 @@ namespace stubs
             }
         }
 
-        bool FakeStoragePrivate::readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
+        bool FakeStoragePrivate::readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const
         {
             if(allowReadPassword())
             {

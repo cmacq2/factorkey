@@ -15,7 +15,7 @@ namespace otp
             class DbStorageProviderPrivate: public otp::storage::StorageProviderPrivate
             {
             public:
-                DbStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const otp::storage::secrets::SecretsAPIBuilder& secretsInfo);
+                DbStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const otp::secrets::SecretsAPIBuilder& secretsInfo);
                 virtual ~DbStorageProviderPrivate();
                 bool contains(const QString& entry);
                 bool entries(QStringList& entryList);
@@ -27,8 +27,8 @@ namespace otp
                 otp::storage::Storage * doLookup(const QString& entry);
             private:
                 const MetadataDbBuilder m_dbInfo;
-                const otp::storage::secrets::SecretsAPIBuilder m_secretsInfo;
-                QSharedPointer<otp::storage::secrets::SecretsAPIProvider> m_wallet;
+                const otp::secrets::SecretsAPIBuilder m_secretsInfo;
+                QSharedPointer<otp::secrets::SecretsAPIProvider> m_secrets;
                 QSharedPointer<MetadataDbManager> m_metaDb;
             };
         }

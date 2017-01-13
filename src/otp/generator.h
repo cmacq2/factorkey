@@ -42,7 +42,7 @@ namespace otp
             bool setName(const QString& name);
 
             bool askSecret(void) const;
-            bool askSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& answer) const;
+            bool askSecret(const otp::secrets::SecretsAPIProvider::SecretAnswer& answer) const;
             bool name(QString & name) const;
             QString id(void) const;
             otp::storage::OTPTokenType type(void) const;

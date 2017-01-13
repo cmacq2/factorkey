@@ -2,23 +2,20 @@
 
 namespace otp
 {
-    namespace storage
+    namespace secrets
     {
-        namespace secrets
+        SecretsAPIProvider::~SecretsAPIProvider() {}
+
+        SecretsAPIBuilder::~SecretsAPIBuilder() {}
+
+        QSharedPointer<SecretsAPIProvider> SecretsAPIBuilder::create(void) const
         {
-            SecretsAPIProvider::~SecretsAPIProvider() {}
+            return QSharedPointer<SecretsAPIProvider>(build());
+        }
 
-            SecretsAPIBuilder::~SecretsAPIBuilder() {}
-
-            QSharedPointer<SecretsAPIProvider> SecretsAPIBuilder::create(void) const
-            {
-                return QSharedPointer<SecretsAPIProvider>(build());
-            }
-
-            SecretsAPIProvider * SecretsAPIBuilder::build(void) const
-            {
-                return nullptr;
-            }
+        SecretsAPIProvider * SecretsAPIBuilder::build(void) const
+        {
+            return nullptr;
         }
     }
 }

@@ -15,11 +15,8 @@ namespace otp
             class DbStoragePrivate: public otp::storage::StoragePrivate
             {
             public:
-                DbStoragePrivate(QSharedPointer<otp::storage::secrets::SecretsAPIProvider>& secretBackend, QSharedPointer<MetadataDbManager>& metaBackend, const QString& entry):
-                otp::storage::StoragePrivate(), m_wallet(secretBackend), m_metadata(entry, metaBackend), m_entryId(entry)
-                {
-
-                }
+                DbStoragePrivate(QSharedPointer<otp::secrets::SecretsAPIProvider>& secretBackend, QSharedPointer<MetadataDbManager>& metaBackend, const QString& entry):
+                    otp::storage::StoragePrivate(), m_secrets(secretBackend), m_metadata(entry, metaBackend), m_entryId(entry) {}
                 virtual ~DbStoragePrivate() {}
 
                 QString entryId(void) const
@@ -34,9 +31,9 @@ namespace otp
                     return type;
                 }
 
-                bool writePassword(const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
+                bool writePassword(const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
                 {
-                    return m_wallet && m_wallet->tell(m_entryId, secret, confirmation);
+                    return m_secrets && m_secrets->tell(m_entryId, secret, confirmation);
                 }
 
                 bool readTokenType(OTPTokenType& type) const
@@ -54,9 +51,9 @@ namespace otp
                     return m_metadata.readParam(param, value);
                 }
 
-                bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const
+                bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const
                 {
-                    return m_wallet && m_wallet->ask(m_entryId, secret);
+                    return m_secrets && m_secrets->ask(m_entryId, secret);
                 }
 
                 bool writeParam(const QString& param, const QVariant& value)
@@ -78,12 +75,12 @@ namespace otp
                     return m_metadata.poll();
                 }
             private:
-                QSharedPointer<otp::storage::secrets::SecretsAPIProvider> m_wallet;
+                QSharedPointer<otp::secrets::SecretsAPIProvider> m_secrets;
                 otp::storage::db::Metadata m_metadata;
                 const QString m_entryId;
             };
 
-            DbStorageProviderPrivate::DbStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const otp::storage::secrets::SecretsAPIBuilder& secretsInfo) :
+            DbStorageProviderPrivate::DbStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const otp::secrets::SecretsAPIBuilder& secretsInfo) :
                 otp::storage::StorageProviderPrivate(), m_dbInfo(dbInfo), m_secretsInfo(secretsInfo) {}
             DbStorageProviderPrivate::~DbStorageProviderPrivate() {}
 
@@ -100,22 +97,22 @@ namespace otp
 
             bool DbStorageProviderPrivate::isOpened(void)
             {
-                return m_wallet && m_wallet->isOpened() && m_metaDb && m_metaDb->isOpened();
+                return m_secrets && m_secrets->isOpened() && m_metaDb && m_metaDb->isOpened();
             }
 
             bool DbStorageProviderPrivate::openBackend(void)
             {
-                m_wallet = m_secretsInfo.create();
+                m_secrets = m_secretsInfo.create();
                 m_metaDb = m_dbInfo.create();
                 QSqlDatabase conn = m_metaDb->open();
-                return conn.isValid() && conn.isOpen() && m_wallet->open();
+                return conn.isValid() && conn.isOpen() && m_secrets->open();
             }
 
             bool DbStorageProviderPrivate::closeBackend(void)
             {
-                if(m_metaDb && m_wallet &&isOpened())
+                if(m_metaDb && m_secrets &&isOpened())
                 {
-                    bool result = m_wallet->close();
+                    bool result = m_secrets->close();
                     return m_metaDb->close() && result;
                 }
                 return true;
@@ -123,7 +120,7 @@ namespace otp
 
             otp::storage::Storage * DbStorageProviderPrivate::doCreate(const QString& entry, OTPTokenType type)
             {
-                otp::storage::Storage * s = new otp::storage::Storage(new DbStoragePrivate(m_wallet, m_metaDb, entry));
+                otp::storage::Storage * s = new otp::storage::Storage(new DbStoragePrivate(m_secrets, m_metaDb, entry));
                 if(s)
                 {
                     if(s->writeTokenType(type) && s->commit())
@@ -137,7 +134,7 @@ namespace otp
 
             otp::storage::Storage * DbStorageProviderPrivate::doLookup(const QString& entry)
             {
-                otp::storage::Storage * s = new otp::storage::Storage(new DbStoragePrivate(m_wallet, m_metaDb, entry));
+                otp::storage::Storage * s = new otp::storage::Storage(new DbStoragePrivate(m_secrets, m_metaDb, entry));
                 if(s->poll())
                 {
                     return s;

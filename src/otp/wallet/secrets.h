@@ -6,18 +6,18 @@
 
 namespace otp
 {
-    namespace storage
+    namespace secrets
     {
-        namespace db
+        namespace wallet
         {
-            class WalletManager: public otp::storage::secrets::SecretsAPIProvider
+            class WalletManager: public otp::secrets::SecretsAPIProvider
             {
             public:
                 static const QString WALLET_FOLDER;
                 WalletManager(const WId& window, const QString& m_walletName);
                 virtual ~WalletManager();
-                bool ask(const QString& entryId, const otp::storage::secrets::SecretsAPIProvider::SecretAnswer answer);
-                bool tell(const QString& entryId, const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation confirm);
+                bool ask(const QString& entryId, const otp::secrets::SecretsAPIProvider::SecretAnswer answer);
+                bool tell(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm);
                 bool isOpened(void) const;
                 bool open(void);
                 bool close(void);
@@ -31,7 +31,7 @@ namespace otp
                 QScopedPointer<KWallet::Wallet> m_wallet;
             };
 
-            class WalletBuilder: public otp::storage::secrets::SecretsAPIBuilder
+            class WalletBuilder: public otp::secrets::SecretsAPIBuilder
             {
             public:
                 void setWindow(const WId& m_window);

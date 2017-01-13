@@ -31,8 +31,8 @@ namespace otp
         public:
             const QString entryId(void) const;
             OTPTokenType type(void) const;
-            bool readPassword(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
-            bool writePassword(const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
+            bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
+            bool writePassword(const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
             bool readTokenType(OTPTokenType& value) const;
             bool writeTokenType(const OTPTokenType& value);
             bool readParam(const QString& param, QVariant& value) const;

@@ -76,7 +76,7 @@ namespace otp
             });
         }
 
-        bool TokenParameters::askSecret(const otp::storage::secrets::SecretsAPIProvider::SecretAnswer& answer) const
+        bool TokenParameters::askSecret(const otp::secrets::SecretsAPIProvider::SecretAnswer& answer) const
         {
             Q_D(const TokenParameters);
             return d->lookupSecret(answer);

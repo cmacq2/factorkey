@@ -2,14 +2,15 @@
 
 namespace otp
 {
-    namespace storage
+    namespace secrets
     {
-        namespace db
+        namespace wallet
         {
             const QString WalletManager::WALLET_FOLDER = QStringLiteral("factorkey");
-            WalletManager::WalletManager(const WId& window, const QString& walletName): m_window(window), m_walletName(walletName) {}
+            WalletManager::WalletManager(const WId& window, const QString& walletName) :
+                otp::secrets::SecretsAPIProvider(), m_window(window), m_walletName(walletName) {}
 
-            bool WalletManager::ask(const QString& entryId, const otp::storage::secrets::SecretsAPIProvider::SecretAnswer answer)
+            bool WalletManager::ask(const QString& entryId, const otp::secrets::SecretsAPIProvider::SecretAnswer answer)
             {
                 QString password;
                 if(readPassword(entryId, password))
@@ -24,7 +25,7 @@ namespace otp
                 }
             }
 
-            bool WalletManager::tell(const QString& entryId, const QString& secret, const otp::storage::secrets::SecretsAPIProvider::SecretConfirmation confirm)
+            bool WalletManager::tell(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm)
             {
                 if(writePassword(entryId, secret))
                 {
