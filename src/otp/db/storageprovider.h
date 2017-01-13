@@ -3,7 +3,7 @@
 
 #include "../storage/storageprovider.h"
 #include "metadb.h"
-#include "secrets.h"
+#include "../secrets/secrets.h"
 
 namespace otp
 {
@@ -11,13 +11,11 @@ namespace otp
     {
         namespace db
         {
-            class DefaultStorageProviderPrivate;
-
-            class DefaultStorageProvider: public otp::storage::StorageProvider
+            class DbStorageProvider: public otp::storage::StorageProvider
             {
                 Q_OBJECT
             public:
-                DefaultStorageProvider(const MetadataDbBuilder& dbInfo, const WalletBuilder& secretsInfo, QObject * parent = 0);
+                DbStorageProvider(const MetadataDbBuilder& dbInfo, const otp::storage::secrets::SecretsAPIBuilder& secretsInfo, QObject * parent = 0);
             };
         }
     }

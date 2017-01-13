@@ -3,7 +3,7 @@
 
 #include "otp/db/metadatastoragehandler.h"
 #include "otp/db/metadb.h"
-#include "gmock/gmock.h"
+#include "lib/googlemock.h"
 
 #include <QHash>
 #include <QString>
