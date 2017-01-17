@@ -5,7 +5,7 @@
 #include <QSharedPointer>
 
 #include "otp/secrets/secrets.h"
-#include "lib/googlemock.h"
+#include "autotests/lib/googlemock.h"
 
 #include <QHash>
 

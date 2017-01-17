@@ -1,6 +1,4 @@
 
-include_directories(BEFORE ../src)
-
 set(base32_obj_SRCS $<TARGET_OBJECTS:Base32>)
 set(skey_obj_SRCS $<TARGET_OBJECTS:SKey>)
 set(oath_obj_SRCS $<TARGET_OBJECTS:OATH>)

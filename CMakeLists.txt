@@ -42,7 +42,26 @@ include(KDEInstallDirs)
 include(KDEFrameworkCompilerSettings)
 include(KDECMakeSettings)
 
-find_package(KF5 ${KF5_DEP_VERSION} REQUIRED COMPONENTS I18n Wallet)
+find_package(KF5 ${KF5_DEP_VERSION} REQUIRED COMPONENTS I18n)
+
+if(DEFINED WITH_KWALLET AND "${WITH_KWALLET}")
+    find_package(KF5 ${KF5_DEP_VERSION} REQUIRED COMPONENTS Wallet)
+    set(FACTORKEY_WITH_KWALLET 1)
+else()
+    set(FACTORKEY_WITH_KWALLET 0)
+endif()
+
+if(DEFINED WITH_QT_KEYCHAIN AND "${WITH_QT_KEYCHAIN}")
+    find_package(Qt5Keychain 0.7.0 REQUIRED)
+    set_package_properties(Qt PROPERTIES TYPE REQUIRED DESCRIPTION "QtKeychain" URL "https://github.com/frankosterfeld/qtkeychain")
+    set(FACTORKEY_WITH_QT_KEYCHAIN 1)
+elseif(NOT FACTORKEY_WITH_KWALLET AND NOT DEFINED WITH_QT_KEYCHAIN)
+    message(STATUS "No available backends for 'secrets' configured, will default to: Qt Keychain (portable)")
+    find_package(Qt5Keychain 0.7.0 REQUIRED)
+    set(FACTORKEY_WITH_QT_KEYCHAIN 1)
+else()
+    set(FACTORKEY_WITH_QT_KEYCHAIN 0)
+endif()
 
 include(GenerateExportHeader)
 include(ECMSetupVersion)
@@ -61,6 +80,8 @@ endif()
 
 include(CheckCxxFeatures)
 include(SetTargetObjectVars)
+
+include_directories(BEFORE src)
 
 add_subdirectory(src)
 add_subdirectory(autotests)

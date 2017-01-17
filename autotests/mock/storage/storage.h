@@ -4,7 +4,7 @@
 #include <QSharedPointer>
 
 #include "otp/storage/storage_p.h"
-#include "lib/googlemock.h"
+#include "autotests/lib/googlemock.h"
 
 using ::testing::_;
 using ::testing::Invoke;

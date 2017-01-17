@@ -1,8 +1,8 @@
-#ifndef FACTORKEY_SECRETS_DB_H
-#define FACTORKEY_SECRETS_DB_H
+#ifndef FACTORKEY_SECRETS_WALLET_H
+#define FACTORKEY_SECRETS_WALLET_H
 
 #include <kwallet.h>
-#include "../secrets/secrets.h"
+#include "otp/secrets/secrets.h"
 
 namespace otp
 {

@@ -4,7 +4,7 @@
 
 #include "otp/db/metadb.h"
 #include "otp/db/metadatastoragehandler.h"
-#include "lib/googlemock.h"
+#include "autotests/lib/googlemock.h"
 
 namespace mock
 {
