@@ -26,7 +26,7 @@ int main(int argc, const char** argv)
     /*
      * Use default hashing algorithm
      */
-    const otp::token::Algorithm& algorithm = otp::oath::token::hmacAlgorithm();
+    const otp::token::Algorithm& algorithm = otp::token::hmacAlgorithm();
     /*
      * Use 'Google Authenticator' key format (i.e. base 32). See section #5 of RFC 3548:
      * https://tools.ietf.org/html/rfc3548#section-5
