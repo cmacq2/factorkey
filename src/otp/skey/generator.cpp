@@ -184,11 +184,29 @@ namespace otp
             SKeyTokenParameters::SKeyTokenParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::TokenParameters(d, parent) {}
             SKeyTokenParameters::~SKeyTokenParameters() {}
 
-            const bool SKeyTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::SKey, create);
+            const bool SKeyTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::SKey, from);
 
-            SKeyTokenParameters * SKeyTokenParameters::create(otp::storage::Storage * store, QObject * parent)
+            SKeyTokenParameters * SKeyTokenParameters::from(otp::storage::Storage * store, QObject * parent)
             {
                 return isRegistered && store && store->type() == otp::storage::OTPTokenType::SKey ? new SKeyTokenParameters(new SKeyTokenParametersPrivate(store), parent) : nullptr;
+            }
+
+            SKeyTokenParameters * SKeyTokenParameters::create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent)
+            {
+                auto s = provider->create(entryId, otp::storage::OTPTokenType::SKey);
+                if(s)
+                {
+                    auto p = from(s, parent);
+                    if(p)
+                    {
+                        return p;
+                    }
+                    else
+                    {
+                        delete s;
+                    }
+                }
+                return nullptr;
             }
 
             bool SKeyTokenParameters::setSKeyEncoding(const SKeyEncodingType& value)
@@ -434,9 +452,9 @@ namespace otp
                 }
             };
 
-            otp::generator::TokenGenerator * SKeyTokenParameters::generator(SKeyTokenParameters * params, QObject * parent)
+            otp::generator::TokenGenerator * SKeyTokenParameters::generator(QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new SKeyTokenGeneratorPrivate(params), parent);
+                return new otp::generator::TokenGenerator(new SKeyTokenGeneratorPrivate(this), parent);
             }
         }
     }

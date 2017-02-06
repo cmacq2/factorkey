@@ -61,11 +61,29 @@ namespace otp
             HOTPTokenParameters::HOTPTokenParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : GenericOTPParameters(d, parent) {}
             HOTPTokenParameters::~HOTPTokenParameters() {}
 
-            const bool HOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::HOTP, create);
+            const bool HOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::HOTP, from);
 
-            HOTPTokenParameters * HOTPTokenParameters::create(otp::storage::Storage * store, QObject * parent)
+            HOTPTokenParameters * HOTPTokenParameters::from(otp::storage::Storage * store, QObject * parent)
             {
                 return isRegistered && store && store->type() == otp::storage::OTPTokenType::HOTP ? new HOTPTokenParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
+            }
+
+            HOTPTokenParameters * HOTPTokenParameters::create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent)
+            {
+                auto s = provider->create(entryId, otp::storage::OTPTokenType::HOTP);
+                if(s)
+                {
+                    auto p = from(s, parent);
+                    if(p)
+                    {
+                        return p;
+                    }
+                    else
+                    {
+                        delete s;
+                    }
+                }
+                return nullptr;
             }
 
             bool HOTPTokenParameters::tokenCounter(quint64 & count) const
@@ -83,11 +101,29 @@ namespace otp
             TOTPTokenParameters::TOTPTokenParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : GenericOTPParameters(d, parent) {}
             TOTPTokenParameters::~TOTPTokenParameters() {}
 
-            const bool TOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::TOTP, create);
+            const bool TOTPTokenParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::TOTP, from);
 
-            TOTPTokenParameters * TOTPTokenParameters::create(otp::storage::Storage * store, QObject * parent)
+            TOTPTokenParameters * TOTPTokenParameters::from(otp::storage::Storage * store, QObject * parent)
             {
                 return isRegistered && store && store->type() == otp::storage::OTPTokenType::TOTP ? new TOTPTokenParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
+            }
+
+            TOTPTokenParameters * TOTPTokenParameters::create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent)
+            {
+                auto s = provider->create(entryId, otp::storage::OTPTokenType::TOTP);
+                if(s)
+                {
+                    auto p = from(s, parent);
+                    if(p)
+                    {
+                        return p;
+                    }
+                    else
+                    {
+                        delete s;
+                    }
+                }
+                return nullptr;
             }
 
             bool TOTPTokenParameters::tokenTimeStep(quint64 & timeStepMSec) const
@@ -117,17 +153,6 @@ namespace otp
             {
                 Q_D(otp::generator::TokenParameters);
                 return d->storage()->writeParam(otp::oath::parameters::totp::EPOCH, QVariant(unixTime));
-            }
-
-            bool algorithm(const otp::generator::GenericTokenParameters * params, otp::token::Algorithm& algo)
-            {
-                QCryptographicHash::Algorithm h;
-                if(params && params->hashAlgorithm(h))
-                {
-                    algo =  otp::oath::token::hmacAlgorithm(h);
-                    return true;
-                }
-                return false;
             }
 
             static bool oathTokenEncoder(otp::oath::generator::GenericOTPParameters * p, otp::token::Encoder& encoder)
@@ -163,7 +188,8 @@ namespace otp
 
                 bool algorithm(otp::token::Algorithm& algo) const
                 {
-                    return otp::oath::generator::algorithm(qobject_cast<GenericOTPParameters *>(params()), algo);
+                    auto p = qobject_cast<GenericOTPParameters *>(params());
+                    return p && p->otpAlgorithm(algo);
                 }
 
                 bool encoder(otp::token::Encoder& encoder) const
@@ -184,9 +210,9 @@ namespace otp
                 }
             };
 
-            otp::generator::TokenGenerator * HOTPTokenParameters::generator(HOTPTokenParameters * params, QObject * parent)
+            otp::generator::TokenGenerator * HOTPTokenParameters::generator(QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new HOTPTokenGeneratorPrivate(params), parent);
+                return new otp::generator::TokenGenerator(new HOTPTokenGeneratorPrivate(this), parent);
             }
 
             class TOTPTokenGeneratorPrivate: public otp::generator::TokenGeneratorPrivate
@@ -210,7 +236,8 @@ namespace otp
 
                 bool algorithm(otp::token::Algorithm& algo) const
                 {
-                    return otp::oath::generator::algorithm(qobject_cast<GenericOTPParameters *>(params()), algo);
+                    auto p = qobject_cast<GenericOTPParameters *>(params());
+                    return p && p->otpAlgorithm(algo);
                 }
 
                 bool encoder(otp::token::Encoder& encoder) const
@@ -224,14 +251,14 @@ namespace otp
                 qint64 m_currentMSec;
             };
 
-            otp::generator::TokenGenerator * TOTPTokenParameters::generator(TOTPTokenParameters * params, QObject * parent)
+            otp::generator::TokenGenerator * TOTPTokenParameters::generator(QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(params), parent);
+                return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(this), parent);
             }
 
-            otp::generator::TokenGenerator * TOTPTokenParameters::generator(TOTPTokenParameters * params, qint64 currentMSec, QObject * parent)
+            otp::generator::TokenGenerator * TOTPTokenParameters::generator(qint64 currentMSec, QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(params, true, currentMSec), parent);
+                return new otp::generator::TokenGenerator(new TOTPTokenGeneratorPrivate(this, true, currentMSec), parent);
             }
         }
     }

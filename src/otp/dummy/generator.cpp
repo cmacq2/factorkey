@@ -13,11 +13,29 @@ namespace otp
             DummyParameters::DummyParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::GenericTokenParameters(d, parent) {}
             DummyParameters::~DummyParameters() {}
 
-            const bool DummyParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::DummyHMAC, create);
+            const bool DummyParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::DummyHMAC, from);
 
-            DummyParameters * DummyParameters::create(otp::storage::Storage * store, QObject * parent)
+            DummyParameters * DummyParameters::from(otp::storage::Storage * store, QObject * parent)
             {
                 return isRegistered && store && store->type() == otp::storage::OTPTokenType::DummyHMAC ? new DummyParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
+            }
+
+            DummyParameters * DummyParameters::create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent)
+            {
+                auto s = provider->create(entryId, otp::storage::OTPTokenType::DummyHMAC);
+                if(s)
+                {
+                    auto p = from(s, parent);
+                    if(p)
+                    {
+                        return p;
+                    }
+                    else
+                    {
+                        delete s;
+                    }
+                }
+                return nullptr;
             }
 
             bool DummyParameters::tokenMessage(QString & message) const
@@ -78,7 +96,8 @@ namespace otp
 
                 bool algorithm(otp::token::Algorithm& algo) const
                 {
-                    return otp::oath::generator::algorithm(qobject_cast<otp::oath::generator::GenericOTPParameters *>(params()), algo);
+                    auto p = qobject_cast<otp::generator::GenericTokenParameters *>(params());
+                    return p && p->otpAlgorithm(algo);
                 }
 
                 bool encoder(otp::token::Encoder& encoder) const
@@ -88,9 +107,9 @@ namespace otp
                 }
             };
 
-            otp::generator::TokenGenerator * DummyParameters::generator(DummyParameters * params, QObject * parent)
+            otp::generator::TokenGenerator * DummyParameters::generator(QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new DummyTokenGeneratorPrivate(params), parent);
+                return new otp::generator::TokenGenerator(new DummyTokenGeneratorPrivate(this), parent);
             }
         }
     }

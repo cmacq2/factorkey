@@ -13,11 +13,29 @@ namespace otp
             SteamGuardParameters::SteamGuardParameters(otp::generator::TokenParametersPrivate * d, QObject * parent) : otp::generator::TokenParameters(d, parent) {}
             SteamGuardParameters::~SteamGuardParameters() {}
 
-            const bool SteamGuardParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::SteamGuard, create);
+            const bool SteamGuardParameters::isRegistered = otp::generator::TokenParameters::registerType(otp::storage::OTPTokenType::SteamGuard, from);
 
-            SteamGuardParameters * SteamGuardParameters::create(otp::storage::Storage * store, QObject * parent)
+            SteamGuardParameters * SteamGuardParameters::from(otp::storage::Storage * store, QObject * parent)
             {
                 return isRegistered && store && store->type() == otp::storage::OTPTokenType::SteamGuard ? new SteamGuardParameters(new otp::generator::TokenParametersPrivate(store), parent) : nullptr;
+            }
+
+            SteamGuardParameters * SteamGuardParameters::create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent)
+            {
+                auto s = provider->create(entryId, otp::storage::OTPTokenType::SteamGuard);
+                if(s)
+                {
+                    auto p = from(s, parent);
+                    if(p)
+                    {
+                        return p;
+                    }
+                    else
+                    {
+                        delete s;
+                    }
+                }
+                return nullptr;
             }
 
             class SteamGuardTokenGeneratorPrivate: public otp::generator::TokenGeneratorPrivate
@@ -27,7 +45,7 @@ namespace otp
 
                 bool algorithm(otp::token::Algorithm& algo) const
                 {
-                    algo = otp::oath::token::hmacAlgorithm(QCryptographicHash::Sha1);
+                    algo = otp::token::hmacAlgorithm(QCryptographicHash::Sha1);
                     return true;
                 }
 
@@ -45,9 +63,9 @@ namespace otp
                 }
             };
 
-            otp::generator::TokenGenerator * SteamGuardParameters::generator(SteamGuardParameters * params, QObject * parent)
+            otp::generator::TokenGenerator * SteamGuardParameters::generator(QObject * parent)
             {
-                return new otp::generator::TokenGenerator(new SteamGuardTokenGeneratorPrivate(params), parent);
+                return new otp::generator::TokenGenerator(new SteamGuardTokenGeneratorPrivate(this), parent);
             }
         }
     }

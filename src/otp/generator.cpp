@@ -1,7 +1,6 @@
 #include "generator.h"
 #include "generator_p.h"
 
-#include "token/token.h"
 #include "parameters.h"
 
 #include <QHash>
@@ -13,6 +12,11 @@ namespace otp
     {
         TokenParameters::TokenParameters(TokenParametersPrivate * d, QObject * parent) : QObject(parent), d_ptr(d) {}
         TokenParameters::~TokenParameters() {}
+
+        TokenGenerator * TokenParameters::generator(QObject *)
+        {
+            return nullptr;
+        }
 
         otp::storage::OTPTokenType TokenParameters::type(void) const
         {
@@ -87,7 +91,7 @@ namespace otp
             Q_D(TokenParameters);
             return d->writeSecret(secret, [this](bool ok, const QString& entryId) -> void
             {
-                emit secretUpdated(ok, entryId);
+                emit secretUpdated(ok, entryId, this);
             });
         }
 
@@ -129,6 +133,66 @@ namespace otp
             return d->setCodec(otp::parameters::key::CHARSET, codec);
         }
 
+        bool GenericTokenParameters::nameToHash(const QString& name, QCryptographicHash::Algorithm& hash)
+        {
+            if(name == QLatin1String("md4"))
+            {
+                hash = QCryptographicHash::Md4;
+                return true;
+            }
+            if(name == QLatin1String("md5"))
+            {
+                hash = QCryptographicHash::Md5;
+                return true;
+            }
+            if(name == QLatin1String("sha1"))
+            {
+                hash = QCryptographicHash::Sha1;
+                return true;
+            }
+            if(name == QLatin1String("sha2-224"))
+            {
+                hash = QCryptographicHash::Sha224;
+                return true;
+            }
+            if(name == QLatin1String("sha2-256"))
+            {
+                hash = QCryptographicHash::Sha256;
+                return true;
+            }
+            if(name == QLatin1String("sha2-384"))
+            {
+                hash = QCryptographicHash::Sha384;
+                return true;
+            }
+            if(name == QLatin1String("sha2-512"))
+            {
+                hash = QCryptographicHash::Sha512;
+                return true;
+            }
+            if(name == QLatin1String("sha3-224"))
+            {
+                hash = QCryptographicHash::Sha3_224;
+                return true;
+            }
+            if(name == QLatin1String("sha3-256"))
+            {
+                hash = QCryptographicHash::Sha3_256;
+                return true;
+            }
+            if(name == QLatin1String("sha3-384"))
+            {
+                hash = QCryptographicHash::Sha3_384;
+                return true;
+            }
+            if(name == QLatin1String("sha3-512"))
+            {
+                hash = QCryptographicHash::Sha3_512;
+                return true;
+            }
+            return false;
+        }
+
         bool GenericTokenParameters::hashAlgorithm(QCryptographicHash::Algorithm& hash) const
         {
             Q_D(const TokenParameters);
@@ -157,10 +221,28 @@ namespace otp
             return false;
         }
 
+        bool GenericTokenParameters::otpAlgorithm(otp::token::Algorithm& algo) const
+        {
+            QCryptographicHash::Algorithm h;
+            if(hashAlgorithm(h))
+            {
+                algo = otp::token::hmacAlgorithm(h);
+                return true;
+            }
+            return false;
+        }
+
         bool GenericTokenParameters::setHashAlgorithm(const QCryptographicHash::Algorithm& hash)
         {
             Q_D(TokenParameters);
             return d->storage()->writeParam(otp::parameters::hashing::ALGORITHM, QVariant((int) hash));
+        }
+
+        bool GenericTokenParameters::setHashAlgorithm(const QString& name)
+        {
+            QCryptographicHash::Algorithm h;
+            bool validName = nameToHash(name, h);
+            return validName && setHashAlgorithm(h);
         }
 
         GenericTokenParameters::GenericTokenParameters(TokenParametersPrivate * d, QObject * parent) : TokenParameters(d, parent) {}

@@ -45,14 +45,6 @@ namespace otp
                     return oath::encodeOTPToken(token, locale, length);
                 });
             }
-
-            otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
-            {
-                return otp::token::Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
-                {
-                    return hmac(k, m, hash);
-                });
-            }
         }
     }
 }

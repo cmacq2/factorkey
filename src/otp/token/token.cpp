@@ -33,6 +33,23 @@ namespace otp
             });
         }
 
+        Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash)
+        {
+            return Algorithm([hash](const QByteArray& k, const QByteArray& m) -> QByteArray
+            {
+                return hmac(k, m, hash);
+            });
+        }
+
+        QByteArray hmac(const QByteArray& key, const QByteArray& message, const QCryptographicHash::Algorithm& hash)
+        {
+            QMessageAuthenticationCode mac(hash);
+            mac.setKey(key);
+            mac.addData(message);
+            QByteArray a = mac.result();
+            return a;
+        }
+
         QString token(const QByteArray& key, const QByteArray& message,
                       const Algorithm& algorithm, const Encoder& encoder)
         {

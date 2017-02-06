@@ -2,7 +2,6 @@
 #define FACTORKEY_OATH_H
 
 #include <QByteArray>
-#include <QCryptographicHash>
 #include <QDateTime>
 #include <QLocale>
 #include <QString>
@@ -30,10 +29,6 @@ namespace otp
 
         quint64 countTokens(qint64 epoch = 0, quint64 timeStepMSec = 0U);
         quint64 countTokens(qint64 currentMSec, qint64 epoch = 0, quint64 timeStepMSec = 0U);
-
-        QByteArray hmac(const QByteArray& key,
-                        const QByteArray& message,
-                        const QCryptographicHash::Algorithm& hash);
     }
 }
 #endif

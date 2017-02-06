@@ -2,6 +2,7 @@
 #define FACTORKEY_OATH_GENERATOR_H
 
 #include "../generator.h"
+#include "../storage/storageprovider.h"
 #include "../token/token.h"
 
 namespace otp
@@ -10,8 +11,6 @@ namespace otp
     {
         namespace generator
         {
-            bool algorithm(const otp::generator::GenericTokenParameters * params, otp::token::Algorithm& algo);
-
             class GenericOTPParameters: public otp::generator::GenericTokenParameters
             {
                 Q_OBJECT
@@ -30,9 +29,10 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                static otp::generator::TokenGenerator * generator(HOTPTokenParameters * params, QObject * parent = 0);
-                static HOTPTokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
+                static HOTPTokenParameters * from(otp::storage::Storage * store, QObject * parent = 0);
+                static HOTPTokenParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
                 bool setTokenCounter(quint64 count);
 
                 bool tokenCounter(quint64 & count) const;
@@ -47,10 +47,11 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, QObject * parent = 0);
-                static otp::generator::TokenGenerator * generator(TOTPTokenParameters * params, qint64 currentMSec, QObject * parent = 0);
-                static TOTPTokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
+                static TOTPTokenParameters * from(otp::storage::Storage * store, QObject * parent = 0);
+                static TOTPTokenParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(qint64 currentMSec, QObject * parent = nullptr);
                 bool setTokenEpoch(qint64 unixTime);
                 bool setTokenEpoch(const QDateTime& epoch);
                 bool setTokenTimeStep(quint64 msecs);

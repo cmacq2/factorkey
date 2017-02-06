@@ -2,6 +2,7 @@
 #define FACTORKEY_SKEY_GENERATOR_H
 
 #include "../generator.h"
+#include "../storage/storageprovider.h"
 #include "skey.h"
 
 namespace otp
@@ -26,10 +27,9 @@ namespace otp
             {
                 Q_OBJECT
             public:
-//                 static const QString OTP_SKEY_DICTIONARY_NAME;
-//                 static const QString OTP_SKEY_ENCODING_TYPE;
                 static const QString DEFAULT_DICTIONARY_VALUE;
             public:
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
                 bool dictionaryProvider(DictionaryProvider ** provider) const;
                 bool dictionaryName(QString& name) const;
                 bool dictionary(otp::skey::SKeyDictionary ** dict) const;
@@ -50,8 +50,8 @@ namespace otp
                 bool challenge(QString& value) const;
                 bool setChallenge(const QString& value);
             public:
-                static SKeyTokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
-                static otp::generator::TokenGenerator * generator(SKeyTokenParameters * params, QObject * parent = 0);
+                static SKeyTokenParameters * from(otp::storage::Storage * store, QObject * parent = 0);
+                static SKeyTokenParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
                 virtual ~SKeyTokenParameters();
             protected:

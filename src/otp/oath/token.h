@@ -3,7 +3,6 @@
 
 #include "../token/token.h"
 
-#include <QCryptographicHash>
 #include <QDateTime>
 #include <QLocale>
 
@@ -19,9 +18,6 @@ namespace otp
 
             otp::token::Encoder oathEncoder(uint length, const QLocale& locale);
             otp::token::Encoder oathEncoder(uint length = 0);
-
-
-            otp::token::Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
         }
     }
 }

@@ -71,8 +71,8 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     EXPECT_CALL(*mock, commit()).Times(0);
 
     auto storage = new otp::storage::Storage(mock, parent);
-    auto params = otp::oath::generator::TOTPTokenParameters::create(storage, parent);
-    auto generator = otp::oath::generator::TOTPTokenParameters::generator(params, timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC, parent);
+    auto params = otp::oath::generator::TOTPTokenParameters::from(storage, parent);
+    auto generator = params->generator(timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC, parent);
 
     QString token;
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");

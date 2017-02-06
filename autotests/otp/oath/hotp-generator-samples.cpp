@@ -68,8 +68,8 @@ void HOTPGeneratorSamplesTest::testDefaults(void)
     EXPECT_CALL(*mock, commit()).Times(1).WillRepeatedly(testing::Return(true));
 
     auto storage = new otp::storage::Storage(mock, parent);
-    auto params = otp::oath::generator::HOTPTokenParameters::create(storage, parent);
-    auto generator = otp::oath::generator::HOTPTokenParameters::generator(params, parent);
+    auto params = otp::oath::generator::HOTPTokenParameters::from(storage, parent);
+    auto generator = params->generator(parent);
 
     QString token;
     QVERIFY2(generator->generateToken(token), "Generating the token should succeed");

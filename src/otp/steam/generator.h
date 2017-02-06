@@ -2,6 +2,7 @@
 #define FACTORKEY_STEAM_GENERATOR_H
 
 #include "../generator.h"
+#include "../storage/storageprovider.h"
 
 namespace otp
 {
@@ -13,8 +14,9 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                static SteamGuardParameters * create(otp::storage::Storage * store, QObject * parent = 0);
-                static otp::generator::TokenGenerator * generator(SteamGuardParameters * params, QObject * parent = 0);
+                static SteamGuardParameters * from(otp::storage::Storage * store, QObject * parent = 0);
+                static SteamGuardParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
             public:
                 virtual ~SteamGuardParameters();
             protected:

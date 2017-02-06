@@ -2,6 +2,7 @@
 #define FACTORKEY_GENERATOR_H
 
 #include "storage/storage.h"
+#include "token/token.h"
 
 #include <QByteArray>
 #include <QCryptographicHash>
@@ -19,6 +20,7 @@ namespace otp
     namespace generator
     {
         class TokenParametersPrivate;
+        class TokenGenerator;
         class TokenGeneratorPrivate;
 
         enum EncodingType : int
@@ -47,10 +49,11 @@ namespace otp
             QString id(void) const;
             otp::storage::OTPTokenType type(void) const;
             virtual ~TokenParameters();
+            virtual TokenGenerator * generator(QObject * parent = nullptr);
             static TokenParameters * create(otp::storage::Storage * store, QObject * parent = 0);
         Q_SIGNALS:
             void retrievedSecret(bool ok, const QString& entryId, const QString& secret) const;
-            void secretUpdated(bool ok, const QString& entryId) const;
+            void secretUpdated(bool ok, const QString& entryId, otp::generator::TokenParameters * params) const;
         private:
             Q_DISABLE_COPY(TokenParameters)
             QScopedPointer<TokenParametersPrivate> const d_ptr;
@@ -65,8 +68,12 @@ namespace otp
         {
             Q_OBJECT
         public:
+            static bool nameToHash(const QString& name, QCryptographicHash::Algorithm& hash);
+        public:
             bool setHashAlgorithm(const QCryptographicHash::Algorithm& hash);
+            bool setHashAlgorithm(const QString& name);
             bool hashAlgorithm(QCryptographicHash::Algorithm& hash) const;
+            bool otpAlgorithm(otp::token::Algorithm& algo) const;
             virtual ~GenericTokenParameters();
         protected:
             GenericTokenParameters(TokenParametersPrivate * d, QObject * parent = 0);

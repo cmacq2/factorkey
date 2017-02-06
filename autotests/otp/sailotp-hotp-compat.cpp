@@ -29,7 +29,7 @@ private:
 void SailOTPHOTPCompatTest::initTestCase(void)
 {
     m_key = otp::token::keyForBase32();
-    m_algo = otp::oath::token::hmacAlgorithm();
+    m_algo = otp::token::hmacAlgorithm();
 }
 
 void SailOTPHOTPCompatTest::setupDataColumns(void)

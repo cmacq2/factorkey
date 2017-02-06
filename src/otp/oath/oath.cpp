@@ -1,7 +1,5 @@
 #include "oath.h"
 
-#include <QMessageAuthenticationCode>
-
 namespace otp
 {
     namespace oath
@@ -83,15 +81,5 @@ namespace otp
             }
             return 0;
         }
-
-        QByteArray hmac(const QByteArray& key, const QByteArray& message, const QCryptographicHash::Algorithm& hash)
-        {
-            QMessageAuthenticationCode mac(hash);
-            mac.setKey(key);
-            mac.addData(message);
-            QByteArray a = mac.result();
-            return a;
-        }
-
     }
 }

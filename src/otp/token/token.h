@@ -2,6 +2,7 @@
 #define FACTORKEY_TOKEN_H
 
 #include <QByteArray>
+#include <QCryptographicHash>
 #include <QDateTime>
 #include <QLocale>
 #include <QString>
@@ -22,6 +23,11 @@ namespace otp
         Key keyForBase32(void);
 
         Message textMessage(const QString& message, const QTextCodec * codec = nullptr);
+        Algorithm hmacAlgorithm(const QCryptographicHash::Algorithm& hash = QCryptographicHash::Sha1);
+
+        QByteArray hmac(const QByteArray& key,
+                        const QByteArray& message,
+                        const QCryptographicHash::Algorithm& hash);
 
         QString token(const QByteArray& key,
                       const QByteArray& message,

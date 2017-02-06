@@ -74,8 +74,8 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     EXPECT_CALL(*mock, commit()).Times(0);
 
     auto storage = new otp::storage::Storage(mock, parent);
-    auto params = otp::skey::generator::SKeyTokenParameters::create(storage, parent);
-    auto generator = otp::skey::generator::SKeyTokenParameters::generator(params, parent);
+    auto params = otp::skey::generator::SKeyTokenParameters::from(storage, parent);
+    auto generator = params->generator(parent);
 
     QString token;
     QVERIFY2(params->setChallenge(challenge), "The challenge should be accepted");
