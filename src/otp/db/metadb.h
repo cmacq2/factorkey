@@ -4,6 +4,7 @@
 #include "../storage/storage.h"
 #include "metadatastoragehandler.h"
 
+#include <QDir>
 #include <QSharedPointer>
 #include <QSqlDatabase>
 #include <QString>
@@ -18,9 +19,8 @@ namespace otp
             class MetadataDbManager
             {
             public:
-                static const QString METADATA_DB_FILE;
-            public:
-                MetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<MetadataStorageHandler>>& handlers);
+                typedef std::function<bool(QSqlDatabase&)> InitDb;
+                MetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<MetadataStorageHandler>>& handlers, const InitDb& configure_db);
                 const QString& connectionName(void) const;
                 virtual ~MetadataDbManager();
                 virtual bool isOpened(void) const;
@@ -38,12 +38,11 @@ namespace otp
                 QList<otp::storage::OTPTokenType> supportedHandlers(void) const;
                 bool supports(otp::storage::OTPTokenType type) const;
             protected:
-                virtual bool initDb(QSqlDatabase& db);
                 virtual bool ensureSchema(QSqlDatabase& db);
             private:
                 const QString m_connectionName;
                 const QHash<int, QSharedPointer<MetadataStorageHandler>> m_handlers;
-
+                const InitDb m_configure;
             };
 
             class MetadataDbBuilder
@@ -59,6 +58,23 @@ namespace otp
             protected:
                 QString m_connectionName;
                 QHash<int, QSharedPointer<MetadataStorageHandler>> m_handlers;
+            };
+
+            class MetadataFileDbBuilder: public MetadataDbBuilder
+            {
+            public:
+                static const QString METADATA_DB_FILE;
+            public:
+                MetadataFileDbBuilder();
+                bool setDataDirectory(void);
+                void setDataDirectory(const QDir& dir);
+                void setDataDirectory(const QString& dir);
+                bool setDataFile(const QString& filename);
+            protected:
+                MetadataDbManager * build(void) const;
+            protected:
+                QString m_fileName;
+                QDir m_directory;
             };
         }
     }

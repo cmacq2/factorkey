@@ -9,11 +9,15 @@ namespace mock
     {
         namespace db
         {
-            MockMetadataDbManager::MockMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers) :
-                otp::storage::db::MetadataDbManager(connectionName, handlers) {}
+            MockMetadataDbManager::MockMetadataDbManager(const QString& connectionName,
+                                                         const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers,
+                                                         const otp::storage::db::MetadataDbManager::InitDb& configure) :
+                otp::storage::db::MetadataDbManager(connectionName, handlers, configure) {}
 
-            DelegatingMockMetadataDbManager::DelegatingMockMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers) :
-                otp::storage::db::MetadataDbManager(connectionName, handlers) {}
+            DelegatingMockMetadataDbManager::DelegatingMockMetadataDbManager(const QString& connectionName,
+                                                                             const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers,
+                                                                             const otp::storage::db::MetadataDbManager::InitDb& configure) :
+                otp::storage::db::MetadataDbManager(connectionName, handlers, configure) {}
 
             bool DelegatingMockMetadataDbManager::delegateToFake(const QSharedPointer<otp::storage::db::MetadataDbManager> fake)
             {

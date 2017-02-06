@@ -15,7 +15,7 @@ namespace otp
             class DbStoragePrivate: public otp::storage::StoragePrivate
             {
             public:
-                DbStoragePrivate(QSharedPointer<otp::secrets::SecretsAPIProvider>& secretBackend, QSharedPointer<MetadataDbManager>& metaBackend, const QString& entry):
+                DbStoragePrivate(QSharedPointer<otp::secrets::SecretsAPIProvider> secretBackend, QSharedPointer<MetadataDbManager> metaBackend, const QString& entry):
                     otp::storage::StoragePrivate(), m_secrets(secretBackend), m_metadata(entry, metaBackend), m_entryId(entry) {}
                 virtual ~DbStoragePrivate() {}
 
@@ -80,7 +80,7 @@ namespace otp
                 const QString m_entryId;
             };
 
-            DbStorageProviderPrivate::DbStorageProviderPrivate(const MetadataDbBuilder& dbInfo, const otp::secrets::SecretsAPIBuilder& secretsInfo) :
+            DbStorageProviderPrivate::DbStorageProviderPrivate(const QSharedPointer<MetadataDbBuilder> dbInfo, const QSharedPointer<otp::secrets::SecretsAPIBuilder> secretsInfo) :
                 otp::storage::StorageProviderPrivate(), m_dbInfo(dbInfo), m_secretsInfo(secretsInfo) {}
             DbStorageProviderPrivate::~DbStorageProviderPrivate() {}
 
@@ -102,10 +102,33 @@ namespace otp
 
             bool DbStorageProviderPrivate::openBackend(void)
             {
-                m_secrets = m_secretsInfo.create();
-                m_metaDb = m_dbInfo.create();
-                QSqlDatabase conn = m_metaDb->open();
-                return conn.isValid() && conn.isOpen() && m_secrets->open();
+                if(!m_secrets && m_secretsInfo)
+                {
+                    m_secrets = m_secretsInfo->create();
+                }
+                if(!m_metaDb && m_dbInfo)
+                {
+                    m_metaDb = m_dbInfo->create();
+                }
+                if(m_metaDb && m_secrets)
+                {
+                    QSqlDatabase conn = m_metaDb->open();
+                    return conn.isValid() && conn.isOpen() && m_secrets->open();
+                }
+                else
+                {
+                    if(m_metaDb)
+                    {
+                        m_metaDb = QSharedPointer<MetadataDbManager>();
+                    }
+
+                    if(m_secrets)
+                    {
+                        m_secrets = QSharedPointer<otp::secrets::SecretsAPIProvider>();
+                    }
+
+                    return false;
+                }
             }
 
             bool DbStorageProviderPrivate::closeBackend(void)

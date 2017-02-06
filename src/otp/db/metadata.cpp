@@ -8,6 +8,8 @@ namespace otp
     {
         namespace db
         {
+            Metadata::Metadata(const QString& entryId, QSharedPointer<MetadataDbManager> db) : m_entryId(entryId), m_dbManager(db) {}
+
             bool Metadata::remove(void)
             {
                 return m_dbManager && m_dbManager->remove(m_entryId);

@@ -1,6 +1,5 @@
 #include "metadb.h"
 
-#include <QDir>
 #include <QFileInfo>
 #include <QSqlDriver>
 #include <QSqlError>
@@ -14,11 +13,8 @@ namespace otp
     {
         namespace db
         {
-
-            const QString MetadataDbManager::METADATA_DB_FILE = QLatin1String("factorkey.db");
-
-            MetadataDbManager::MetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<MetadataStorageHandler>>& handlers) :
-                                                 m_connectionName(connectionName), m_handlers(handlers) {}
+            MetadataDbManager::MetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<MetadataStorageHandler>>& handlers, const std::function<bool(QSqlDatabase&)>& configure_db) :
+                                                 m_connectionName(connectionName), m_handlers(handlers), m_configure(configure_db) {}
 
             MetadataDbManager::~MetadataDbManager()
             {
@@ -29,26 +25,6 @@ namespace otp
             {
                 const auto& db = QSqlDatabase::database(m_connectionName, false);
                 return db.isValid() && db.isOpen();
-            }
-
-            bool MetadataDbManager::initDb(QSqlDatabase& db)
-            {
-                const QString dataDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-                if(!dataDirPath.isNull() && !dataDirPath.isEmpty())
-                {
-                    QDir dir(dataDirPath);
-                    QFileInfo info(dir, METADATA_DB_FILE);
-                    if(dir.mkpath(dataDirPath))
-                    {
-                        const QString path = info.filePath();
-                        if(!path.isNull() && !path.isEmpty())
-                        {
-                            db.setDatabaseName(path);
-                            return db.open();
-                        }
-                    }
-                }
-                return false;
             }
 
             bool MetadataDbManager::ensureSchema(QSqlDatabase& db)
@@ -167,7 +143,7 @@ namespace otp
                     {
                         return db;
                     }
-                    if(initDb(db) && ensureSchema(db))
+                    if(m_configure(db) && db.open() && ensureSchema(db))
                     {
                         return db;
                     }
@@ -299,8 +275,14 @@ namespace otp
                 const std::function<bool(QSqlQuery&)> fn([&entryList](QSqlQuery& query) -> bool
                 {
                     QStringList entries;
-                    if(query.exec() && query.first())
+                    if(query.exec())
                     {
+                        // Test if this is an empty result set.
+                        if(!query.first())
+                        {
+                            return true;
+                        }
+
                         do
                         {
                             QVariant v = query.value(1);
@@ -348,7 +330,8 @@ namespace otp
 
             MetadataDbManager * MetadataDbBuilder::build(void) const
             {
-                return new MetadataDbManager(m_connectionName, m_handlers);
+                Q_ASSERT_X(false, Q_FUNC_INFO, "Supertype version of build() must not be called; sub type implementations should override it instead.");
+                return nullptr;
             }
 
             bool MetadataDbBuilder::registerType(const QSharedPointer<MetadataStorageHandler>& handler)
@@ -362,6 +345,61 @@ namespace otp
                 {
                     return false;
                 }
+            }
+
+            const QString MetadataFileDbBuilder::METADATA_DB_FILE = QLatin1String("factorkey.db");
+
+            MetadataFileDbBuilder::MetadataFileDbBuilder() : MetadataDbBuilder(), m_fileName(METADATA_DB_FILE) {}
+
+            bool MetadataFileDbBuilder::setDataDirectory(void)
+            {
+                const QString dataDirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+                if(!dataDirPath.isNull() && !dataDirPath.isEmpty())
+                {
+                    setDataDirectory(dataDirPath);
+                    return true;
+                }
+                return false;
+            }
+
+            bool MetadataFileDbBuilder::setDataFile(const QString& filename)
+            {
+                if(!filename.isNull() && !filename.isEmpty())
+                {
+                    m_fileName = filename;
+                    return true;
+                }
+                return false;
+            }
+
+            void MetadataFileDbBuilder::setDataDirectory(const QString& dir)
+            {
+                setDataDirectory(QDir(dir));
+            }
+
+            void MetadataFileDbBuilder::setDataDirectory(const QDir& dir)
+            {
+                m_directory = dir;
+            }
+
+            MetadataDbManager * MetadataFileDbBuilder::build(void) const
+            {
+                QDir dir = m_directory;
+                QString fileName = m_fileName;
+                return new MetadataDbManager(m_connectionName, m_handlers, [dir, fileName](QSqlDatabase& db) -> bool
+                {
+                    QFileInfo info(dir, fileName);
+                    if(dir.mkpath(dir.absolutePath()))
+                    {
+                        const QString path = info.filePath();
+                        if(!path.isNull() && !path.isEmpty())
+                        {
+                            db.setDatabaseName(path);
+                            return db.open();
+                        }
+                    }
+                    return false;
+                });
             }
         }
     }

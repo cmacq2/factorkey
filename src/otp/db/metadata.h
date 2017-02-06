@@ -41,12 +41,12 @@ namespace otp
                 bool typeWritten(void) const;
             private:
                 const QString& m_entryId;
+                QSharedPointer<MetadataDbManager> m_dbManager;
                 otp::storage::OTPTokenType m_typeRead;
                 otp::storage::OTPTokenType m_typeWrite;
                 QHash<QString, QVariant> m_dataRead;
                 QHash<QString, QVariant> m_dataWrite;
                 QSharedPointer<const MetadataStorageHandler> m_typeHandler;
-                QSharedPointer<MetadataDbManager> m_dbManager;
             };
         }
     }

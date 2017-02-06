@@ -34,8 +34,6 @@ namespace stubs
                 virtual bool removeAll(void);
 
                 virtual const QSharedPointer<otp::storage::db::MetadataStorageHandler> handler(otp::storage::OTPTokenType type);
-            protected:
-                virtual bool initDb(QSqlDatabase& db);
             private:
                 const QHash<QString, enum otp::storage::OTPTokenType> m_entries;
                 QStringList m_removed;

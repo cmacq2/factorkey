@@ -63,20 +63,15 @@ namespace stubs
             }
 
             MemoryMetadataDbManager::MemoryMetadataDbManager(const QString& connectionName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers) :
-                otp::storage::db::MetadataDbManager(connectionName, handlers) {}
-
-            bool MemoryMetadataDbManager::initDb(QSqlDatabase& db)
-            {
-                if(allowInitDb())
+                otp::storage::db::MetadataDbManager(connectionName, handlers, [this](QSqlDatabase& db) -> bool
                 {
-                    db.setDatabaseName(QLatin1String(":memory:"));
-                    return db.open();
-                }
-                else
-                {
+                    if(allowInitDb())
+                    {
+                        db.setDatabaseName(QLatin1String(":memory:"));
+                        return true;
+                    }
                     return false;
-                }
-            }
+                }) {}
 
             bool MemoryMetadataDbManager::allowInitDb(void) const
             {

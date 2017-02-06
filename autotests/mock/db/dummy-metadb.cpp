@@ -8,25 +8,28 @@ namespace stubs
         {
             DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName):
                 otp::storage::db::MetadataDbManager(connName,
-                                                    QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>()) {}
+                                                    QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>(),
+                                                    [this](QSqlDatabase&) -> bool { return allowInitDb(); }) {}
 
             DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName, const QHash<QString, enum otp::storage::OTPTokenType>& entries):
                 otp::storage::db::MetadataDbManager(connName,
-                                                    QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>()), m_entries(entries) {}
+                                                    QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>(),
+                                                    [this](QSqlDatabase&) -> bool { return allowInitDb(); }), m_entries(entries) {}
 
-            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName, const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers):
-                otp::storage::db::MetadataDbManager(connName, typeHandlers) {}
+            DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName,
+                                                           const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers):
+                otp::storage::db::MetadataDbManager(connName, typeHandlers, [this](QSqlDatabase&) -> bool { return allowInitDb(); }) {}
 
             DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName,
                                                            const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers,
                                                            const QHash<QString, enum otp::storage::OTPTokenType>& entries):
-                otp::storage::db::MetadataDbManager(connName, typeHandlers), m_entries(entries) {}
+                otp::storage::db::MetadataDbManager(connName, typeHandlers, [this](QSqlDatabase&) -> bool { return allowInitDb(); }), m_entries(entries) {}
 
             DummyMetadataDbManager::DummyMetadataDbManager(const QString& connName,
                                                            const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers,
                                                            const QHash<QString, enum otp::storage::OTPTokenType>& entries,
                                                            bool openByDefault):
-                otp::storage::db::MetadataDbManager(connName, typeHandlers), m_entries(entries), m_opened(openByDefault) {}
+                otp::storage::db::MetadataDbManager(connName, typeHandlers, [this](QSqlDatabase&) -> bool { return allowInitDb(); }), m_entries(entries), m_opened(openByDefault) {}
 
             bool DummyMetadataDbManager::allowHandler(void) const
             {
@@ -88,11 +91,6 @@ namespace stubs
             DummyMetadataDbManager::~DummyMetadataDbManager()
             {
                 close();
-            }
-
-            bool DummyMetadataDbManager::initDb(QSqlDatabase&)
-            {
-                return allowInitDb();
             }
 
             const QStringList DummyMetadataDbManager::removedEntries(void) const

@@ -18,8 +18,6 @@ namespace stubs
                 bool drop(void);
             protected:
                 virtual bool allowInitDb(void) const;
-            protected:
-                virtual bool initDb(QSqlDatabase& db);
             };
 
             class MemoryMetadataDbBuilder: public otp::storage::db::MetadataDbBuilder

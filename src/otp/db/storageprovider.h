@@ -15,7 +15,7 @@ namespace otp
             {
                 Q_OBJECT
             public:
-                DbStorageProvider(const MetadataDbBuilder& dbInfo, const otp::secrets::SecretsAPIBuilder& secretsInfo, QObject * parent = 0);
+                DbStorageProvider(const QSharedPointer<MetadataDbBuilder> dbInfo, const QSharedPointer<otp::secrets::SecretsAPIBuilder> secretsInfo, QObject * parent = 0);
             };
         }
     }

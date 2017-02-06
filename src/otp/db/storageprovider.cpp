@@ -7,7 +7,7 @@ namespace otp
     {
         namespace db
         {
-            DbStorageProvider::DbStorageProvider(const MetadataDbBuilder& dbInfo, const otp::secrets::SecretsAPIBuilder& secretsInfo, QObject * parent):
+            DbStorageProvider::DbStorageProvider(const QSharedPointer<MetadataDbBuilder> dbInfo, const QSharedPointer<otp::secrets::SecretsAPIBuilder> secretsInfo, QObject * parent):
                 otp::storage::StorageProvider(new otp::storage::db::DbStorageProviderPrivate(dbInfo, secretsInfo), parent) {}
         }
     }
