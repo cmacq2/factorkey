@@ -171,7 +171,7 @@ namespace otp
             {
             public:
                 HOTPTokenGeneratorPrivate(otp::oath::generator::HOTPTokenParameters * p) : otp::generator::TokenGeneratorPrivate(p) {}
-                bool message(otp::token::Message& message) const
+                bool message(otp::token::Message& message) const override
                 {
                     quint64 count;
                     auto p = qobject_cast<otp::oath::generator::HOTPTokenParameters *>(params());
@@ -186,19 +186,19 @@ namespace otp
                     return false;
                 }
 
-                bool algorithm(otp::token::Algorithm& algo) const
+                bool algorithm(otp::token::Algorithm& algo) const override
                 {
                     auto p = qobject_cast<GenericOTPParameters *>(params());
                     return p && p->otpAlgorithm(algo);
                 }
 
-                bool encoder(otp::token::Encoder& encoder) const
+                bool encoder(otp::token::Encoder& encoder) const override
                 {
                     auto p = qobject_cast<otp::oath::generator::HOTPTokenParameters *>(params());
                     return oathTokenEncoder(p, encoder);
                 }
 
-                bool updateStorage(void)
+                bool updateStorage(void) override
                 {
                     quint64 count;
                     auto p = qobject_cast<otp::oath::generator::HOTPTokenParameters *>(params());
@@ -220,7 +220,7 @@ namespace otp
             public:
                 TOTPTokenGeneratorPrivate(otp::oath::generator::TOTPTokenParameters * p, bool overrideNow = false, qint64 currentMSec = 0) :
                     otp::generator::TokenGeneratorPrivate(p), m_overrideNow(overrideNow), m_currentMSec(currentMSec) {}
-                bool message(otp::token::Message& message) const
+                bool message(otp::token::Message& message) const override
                 {
                     auto p = qobject_cast<otp::oath::generator::TOTPTokenParameters *>(params());
                     qint64 epoch;
@@ -234,13 +234,13 @@ namespace otp
                     return false;
                 }
 
-                bool algorithm(otp::token::Algorithm& algo) const
+                bool algorithm(otp::token::Algorithm& algo) const override
                 {
                     auto p = qobject_cast<GenericOTPParameters *>(params());
                     return p && p->otpAlgorithm(algo);
                 }
 
-                bool encoder(otp::token::Encoder& encoder) const
+                bool encoder(otp::token::Encoder& encoder) const override
                 {
                     auto p = qobject_cast<otp::oath::generator::TOTPTokenParameters *>(params());
                     return oathTokenEncoder(p, encoder);

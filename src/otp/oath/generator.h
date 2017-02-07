@@ -32,7 +32,7 @@ namespace otp
                 static HOTPTokenParameters * from(otp::storage::Storage * store, QObject * parent = 0);
                 static HOTPTokenParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
-                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr) override;
                 bool setTokenCounter(quint64 count);
 
                 bool tokenCounter(quint64 & count) const;
@@ -50,7 +50,7 @@ namespace otp
                 static TOTPTokenParameters * from(otp::storage::Storage * store, QObject * parent = 0);
                 static TOTPTokenParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
-                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr) override;
                 otp::generator::TokenGenerator * generator(qint64 currentMSec, QObject * parent = nullptr);
                 bool setTokenEpoch(qint64 unixTime);
                 bool setTokenEpoch(const QDateTime& epoch);

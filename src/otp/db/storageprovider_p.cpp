@@ -19,58 +19,58 @@ namespace otp
                     otp::storage::StoragePrivate(), m_secrets(secretBackend), m_metadata(entry, metaBackend), m_entryId(entry) {}
                 virtual ~DbStoragePrivate() {}
 
-                QString entryId(void) const
+                QString entryId(void) const override
                 {
                     return m_entryId;
                 }
 
-                OTPTokenType type(void) const
+                OTPTokenType type(void) const override
                 {
                     otp::storage::OTPTokenType type;
                     m_metadata.readTokenType(type);
                     return type;
                 }
 
-                bool writePassword(const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation)
+                bool writePassword(const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation) override
                 {
                     return m_secrets && m_secrets->tell(m_entryId, secret, confirmation);
                 }
 
-                bool readTokenType(OTPTokenType& type) const
+                bool readTokenType(OTPTokenType& type) const override
                 {
                     return m_metadata.readTokenType(type);
                 }
 
-                bool writeTokenType(const OTPTokenType& type)
+                bool writeTokenType(const OTPTokenType& type) override
                 {
                     return m_metadata.writeTokenType(type);
                 }
 
-                bool readParam(const QString& param, QVariant& value) const
+                bool readParam(const QString& param, QVariant& value) const override
                 {
                     return m_metadata.readParam(param, value);
                 }
 
-                bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const
+                bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const override
                 {
                     return m_secrets && m_secrets->ask(m_entryId, secret);
                 }
 
-                bool writeParam(const QString& param, const QVariant& value)
+                bool writeParam(const QString& param, const QVariant& value) override
                 {
                     return m_metadata.writeParam(param, value);
                 }
 
-                bool exists(void) const
+                bool exists(void) const override
                 {
                     return m_metadata.exists();
                 }
 
-                bool commit(void)
+                bool commit(void) override
                 {
                     return m_metadata.commit();
                 }
-                bool poll(void)
+                bool poll(void) override
                 {
                     return m_metadata.poll();
                 }

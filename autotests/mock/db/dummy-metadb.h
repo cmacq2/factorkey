@@ -22,18 +22,18 @@ namespace stubs
                 const QStringList removedEntries(void) const;
                 virtual ~DummyMetadataDbManager();
             public:
-                virtual bool isOpened(void) const;
-                virtual QSqlDatabase open(void);
-                virtual bool close(void);
+                virtual bool isOpened(void) const override;
+                virtual QSqlDatabase open(void) override;
+                virtual bool close(void) override;
 
-                virtual bool readType(const QString& entry, QVariant& value);
-                virtual bool remove(const QString& entry);
-                virtual bool contains(const QString & entry);
-                virtual bool entries(QStringList& entryList);
-                virtual bool removeEntries(const QStringList& entryList);
-                virtual bool removeAll(void);
+                virtual bool readType(const QString& entry, QVariant& value) override;
+                virtual bool remove(const QString& entry) override;
+                virtual bool contains(const QString & entry) override;
+                virtual bool entries(QStringList& entryList) override;
+                virtual bool removeEntries(const QStringList& entryList) override;
+                virtual bool removeAll(void) override;
 
-                virtual const QSharedPointer<otp::storage::db::MetadataStorageHandler> handler(otp::storage::OTPTokenType type);
+                virtual const QSharedPointer<otp::storage::db::MetadataStorageHandler> handler(otp::storage::OTPTokenType type) override;
             private:
                 const QHash<QString, enum otp::storage::OTPTokenType> m_entries;
                 QStringList m_removed;

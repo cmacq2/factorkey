@@ -153,6 +153,11 @@ namespace mock
 {
     namespace storage
     {
+        MockStoragePrivate::MockStoragePrivate() {}
+        MockStoragePrivate::~MockStoragePrivate() {}
+        DelegatingMockStoragePrivate::DelegatingMockStoragePrivate() {}
+        DelegatingMockStoragePrivate::~DelegatingMockStoragePrivate() {}
+
         bool DelegatingMockStoragePrivate::delegateToFake(const QSharedPointer<otp::storage::StoragePrivate> fake)
         {
             if(fake)

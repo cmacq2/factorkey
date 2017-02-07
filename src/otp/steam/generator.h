@@ -16,7 +16,7 @@ namespace otp
             public:
                 static SteamGuardParameters * from(otp::storage::Storage * store, QObject * parent = 0);
                 static SteamGuardParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
-                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr) override;
             public:
                 virtual ~SteamGuardParameters();
             protected:

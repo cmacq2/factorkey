@@ -23,12 +23,12 @@ namespace stubs
             FakeStorageProviderPrivate(const QHash<QString, LookupFunction>& lookup);
             FakeStorageProviderPrivate(const QHash<QString, CreateFunction>& create);
             FakeStorageProviderPrivate();
-            bool open(void);
-            bool close(void);
-            bool contains(const QString& entry);
-            bool entries(QStringList&);
-            otp::storage::Storage * lookup(const QString& entry);
-            otp::storage::Storage * create(const QString& entry, otp::storage::OTPTokenType type);
+            bool open(void) override;
+            bool close(void) override;
+            bool contains(const QString& entry) override;
+            bool entries(QStringList&) override;
+            otp::storage::Storage * lookup(const QString& entry) override;
+            otp::storage::Storage * create(const QString& entry, otp::storage::OTPTokenType type) override;
             virtual ~FakeStorageProviderPrivate();
         protected:
             virtual bool allowContains(void) const;
@@ -53,6 +53,8 @@ namespace mock
         class MockStorageProviderPrivate: public otp::storage::StorageProviderPrivate
         {
         public:
+            MockStorageProviderPrivate();
+            virtual ~MockStorageProviderPrivate();
             MOCK_METHOD0(open, bool(void));
             MOCK_METHOD0(close, bool(void));
             MOCK_METHOD1(contains, bool(const QString& entry));
@@ -64,6 +66,8 @@ namespace mock
         class DelegatingMockStorageProviderPrivate: public otp::storage::StorageProviderPrivate
         {
         public:
+            DelegatingMockStorageProviderPrivate();
+            virtual ~DelegatingMockStorageProviderPrivate();
             MOCK_METHOD0(open, bool(void));
             MOCK_METHOD0(close, bool(void));
             MOCK_METHOD1(contains, bool(const QString& entry));

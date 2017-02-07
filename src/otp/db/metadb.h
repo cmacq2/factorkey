@@ -71,7 +71,7 @@ namespace otp
                 void setDataDirectory(const QString& dir);
                 bool setDataFile(const QString& filename);
             protected:
-                MetadataDbManager * build(void) const;
+                MetadataDbManager * build(void) const override;
             protected:
                 QString m_fileName;
                 QDir m_directory;

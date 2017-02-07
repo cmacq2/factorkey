@@ -29,7 +29,7 @@ namespace otp
             public:
                 static const QString DEFAULT_DICTIONARY_VALUE;
             public:
-                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr) override;
                 bool dictionaryProvider(DictionaryProvider ** provider) const;
                 bool dictionaryName(QString& name) const;
                 bool dictionary(otp::skey::SKeyDictionary ** dict) const;

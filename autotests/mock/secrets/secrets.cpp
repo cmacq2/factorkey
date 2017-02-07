@@ -170,6 +170,11 @@ namespace mock
 {
     namespace secrets
     {
+        MockSecretsAPIProvider::MockSecretsAPIProvider() {}
+        MockSecretsAPIProvider::~MockSecretsAPIProvider() {}
+        DelegatingMockSecretsAPIProvider::DelegatingMockSecretsAPIProvider() {}
+        DelegatingMockSecretsAPIProvider::~DelegatingMockSecretsAPIProvider() {}
+
         bool DelegatingMockSecretsAPIProvider::delegateToFake(const QSharedPointer<otp::secrets::SecretsAPIProvider> fake)
         {
             if(fake)

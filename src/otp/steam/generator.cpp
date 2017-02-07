@@ -43,20 +43,20 @@ namespace otp
             public:
                 SteamGuardTokenGeneratorPrivate(otp::steam::generator::SteamGuardParameters * p) : otp::generator::TokenGeneratorPrivate(p) {}
 
-                bool algorithm(otp::token::Algorithm& algo) const
+                bool algorithm(otp::token::Algorithm& algo) const override
                 {
                     algo = otp::token::hmacAlgorithm(QCryptographicHash::Sha1);
                     return true;
                 }
 
-                bool encoder(otp::token::Encoder& encoder) const
+                bool encoder(otp::token::Encoder& encoder) const override
                 {
                     QString(* func)(const QByteArray&) = otp::steam::encodeSteamGuardToken;
                     encoder = otp::token::Encoder(func);
                     return true;
                 }
 
-                bool message(otp::token::Message& message) const
+                bool message(otp::token::Message& message) const override
                 {
                     message = otp::oath::token::totpMessage(0, otp::oath::DEFAULT_TIMESTEP_MSEC);
                     return true;

@@ -99,9 +99,11 @@ namespace mock
             static const QHash<QString,QString> emptyHash;
             static const QSet<QString> emptySet;
 
+            MockMetadataStorageHandler::~MockMetadataStorageHandler() {}
             MockMetadataStorageHandler::MockMetadataStorageHandler(otp::storage::OTPTokenType type) :
                 otp::storage::db::MetadataStorageHandler(type, emptyHash, emptySet, emptyHash, emptyHash) {}
 
+            DelegatingMockMetadataStorageHandler::~DelegatingMockMetadataStorageHandler() {}
             DelegatingMockMetadataStorageHandler::DelegatingMockMetadataStorageHandler(otp::storage::OTPTokenType type) :
                 otp::storage::db::MetadataStorageHandler(type, emptyHash, emptySet, emptyHash, emptyHash) {}
 

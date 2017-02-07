@@ -18,7 +18,7 @@ namespace otp
                 static DummyParameters * from(otp::storage::Storage * store, QObject * parent = 0);
                 static DummyParameters * create(const QString& entryId, otp::storage::StorageProvider * provider, QObject * parent = 0);
             public:
-                otp::generator::TokenGenerator * generator(QObject * parent = nullptr);
+                otp::generator::TokenGenerator * generator(QObject * parent = nullptr) override;
                 bool setTokenMessage(const QString& value);
                 bool setTokenMessageEncoding(const QTextCodec * codec);
 

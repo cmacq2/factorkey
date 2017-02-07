@@ -38,11 +38,11 @@ namespace stubs
             FakeSecretsAPIProvider(const QHash<QString, QString>& secrets, int delayMsec = 0, bool permitSecretUpdate = false);
             virtual ~FakeSecretsAPIProvider();
 
-            bool ask(const QString& entryId, const otp::secrets::SecretsAPIProvider::SecretAnswer answer);
-            bool tell(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm);
-            bool open(void);
-            bool close(void);
-            bool isOpened(void) const;
+            bool ask(const QString& entryId, const otp::secrets::SecretsAPIProvider::SecretAnswer answer) override;
+            bool tell(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm) override;
+            bool open(void) override;
+            bool close(void) override;
+            bool isOpened(void) const override;
 
             const QHash<QString, QString>& originalSecrets(void) const;
             const QHash<QString, QString>& newSecrets(void) const;
@@ -63,7 +63,7 @@ namespace stubs
         class FakeSecretsAPIBuilder: public otp::secrets::SecretsAPIBuilder
         {
         public:
-            otp::secrets::SecretsAPIProvider * build(void) const;
+            otp::secrets::SecretsAPIProvider * build(void) const override;
             void setProvider(otp::secrets::SecretsAPIProvider * fake);
         private:
             otp::secrets::SecretsAPIProvider * m_fake;
@@ -78,6 +78,8 @@ namespace mock
         class MockSecretsAPIProvider: public otp::secrets::SecretsAPIProvider
         {
         public:
+            MockSecretsAPIProvider();
+            virtual ~MockSecretsAPIProvider();
             MOCK_METHOD2(ask, bool(const QString&, const otp::secrets::SecretsAPIProvider::SecretAnswer));
             MOCK_METHOD3(tell, bool(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm));
             MOCK_METHOD0(open, bool(void));
@@ -88,6 +90,8 @@ namespace mock
         class DelegatingMockSecretsAPIProvider: public otp::secrets::SecretsAPIProvider
         {
         public:
+            DelegatingMockSecretsAPIProvider();
+            virtual ~DelegatingMockSecretsAPIProvider();
             MOCK_METHOD2(ask, bool(const QString&, const otp::secrets::SecretsAPIProvider::SecretAnswer));
             MOCK_METHOD3(tell, bool(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm));
             MOCK_METHOD0(open, bool(void));

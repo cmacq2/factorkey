@@ -24,15 +24,15 @@ namespace stubs
                                             const QHash<QString,QString> columnsToParams,
                                             const QHash<QString,QString> paramsToTables);
                 virtual ~DummyMetadataStorageHandler();
-                virtual const QSet<QString>& schema(void) const;
-                virtual otp::storage::OTPTokenType type(void) const;
-                virtual bool saveMetaData(const QString& entryId, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool fetchMetaData(const QString& entryId, QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool pruneMetaData(const QString& entryId, const QSet<QString>& newKeys, const QSet<QString>& tablesToNullify, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool deleteMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                virtual bool resetMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const;
-                virtual QSet<QString> keys(void) const;
-                virtual bool isParamNameValid(const QString& param) const;
+                virtual const QSet<QString>& schema(void) const override;
+                virtual otp::storage::OTPTokenType type(void) const override;
+                virtual bool saveMetaData(const QString& entryId, const QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const override;
+                virtual bool fetchMetaData(const QString& entryId, QHash<QString,QVariant>& metadata, otp::storage::db::MetadataDbManager * db) const override;
+                virtual bool pruneMetaData(const QString& entryId, const QSet<QString>& newKeys, const QSet<QString>& tablesToNullify, otp::storage::db::MetadataDbManager * db) const override;
+                virtual bool deleteMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const override;
+                virtual bool resetMetaData(const QString& entryId, const QSet<QString>& keys, otp::storage::db::MetadataDbManager * db) const override;
+                virtual QSet<QString> keys(void) const override;
+                virtual bool isParamNameValid(const QString& param) const override;
             protected:
                 virtual bool allowSaveMetaData(void) const;
                 virtual bool allowFetchMetaData(void) const;
@@ -54,6 +54,7 @@ namespace mock
             {
             public:
                 MockMetadataStorageHandler(otp::storage::OTPTokenType type);
+                virtual ~MockMetadataStorageHandler();
                 MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
                 MOCK_CONST_METHOD0(schema, const QSet<QString>&());
                 MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
@@ -69,6 +70,7 @@ namespace mock
             {
             public:
                 DelegatingMockMetadataStorageHandler(otp::storage::OTPTokenType type);
+                virtual ~DelegatingMockMetadataStorageHandler();
                 MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
                 MOCK_CONST_METHOD0(schema, const QSet<QString>&());
                 MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));

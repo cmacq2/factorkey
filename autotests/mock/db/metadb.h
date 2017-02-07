@@ -18,6 +18,7 @@ namespace mock
                 MockMetadataDbManager(const QString& connectionName,
                                       const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers,
                                       const otp::storage::db::MetadataDbManager::InitDb& configure);
+                virtual ~MockMetadataDbManager();
 
                 MOCK_CONST_METHOD0(isOpened, bool(void));
                 MOCK_METHOD0(open, QSqlDatabase(void));
@@ -42,6 +43,7 @@ namespace mock
                 DelegatingMockMetadataDbManager(const QString& connectionName,
                                                 const QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& handlers,
                                                 const otp::storage::db::MetadataDbManager::InitDb& configure);
+                virtual ~DelegatingMockMetadataDbManager();
 
                 MOCK_CONST_METHOD0(isOpened, bool(void));
                 MOCK_METHOD0(open, QSqlDatabase(void));

@@ -21,7 +21,7 @@ namespace otp
             class DefaultDictionaryProvider: public DictionaryProvider
             {
             public:
-                otp::skey::SKeyDictionary * dictionary(const QString& name) const
+                otp::skey::SKeyDictionary * dictionary(const QString& name) const override
                 {
                     return name == SKeyTokenParameters::DEFAULT_DICTIONARY_VALUE ? init() : nullptr;
                 }
@@ -396,7 +396,7 @@ namespace otp
             public:
                 SKeyTokenGeneratorPrivate(SKeyTokenParameters * p) : otp::generator::TokenGeneratorPrivate(p) {}
 
-                bool algorithm(otp::token::Algorithm& algo) const
+                bool algorithm(otp::token::Algorithm& algo) const override
                 {
                     auto p = qobject_cast<otp::skey::generator::SKeyTokenParameters *>(params());
                     QCryptographicHash::Algorithm h;
@@ -409,7 +409,7 @@ namespace otp
                     return false;
                 }
 
-                bool encoder(otp::token::Encoder& encoder) const
+                bool encoder(otp::token::Encoder& encoder) const override
                 {
                     auto p = qobject_cast<otp::skey::generator::SKeyTokenParameters *>(params());
                     SKeyEncodingType type;
@@ -436,7 +436,7 @@ namespace otp
                     return false;
                 }
 
-                bool message(otp::token::Message& message) const
+                bool message(otp::token::Message& message) const override
                 {
                     auto p = qobject_cast<otp::skey::generator::SKeyTokenParameters *>(params());
                     QString v;

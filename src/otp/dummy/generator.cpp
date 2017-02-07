@@ -80,7 +80,7 @@ namespace otp
             {
             public:
                 DummyTokenGeneratorPrivate(DummyParameters * p) : otp::generator::TokenGeneratorPrivate(p) {}
-                bool message(otp::token::Message& message) const
+                bool message(otp::token::Message& message) const override
                 {
                     DummyParameters * p = qobject_cast<DummyParameters *>(params());
                     QString str;
@@ -94,13 +94,13 @@ namespace otp
                     return false;
                 }
 
-                bool algorithm(otp::token::Algorithm& algo) const
+                bool algorithm(otp::token::Algorithm& algo) const override
                 {
                     auto p = qobject_cast<otp::generator::GenericTokenParameters *>(params());
                     return p && p->otpAlgorithm(algo);
                 }
 
-                bool encoder(otp::token::Encoder& encoder) const
+                bool encoder(otp::token::Encoder& encoder) const override
                 {
                     encoder = otp::token::Encoder(otp::dummy::encodeDummyFormat);
                     return true;

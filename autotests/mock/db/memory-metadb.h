@@ -23,7 +23,7 @@ namespace stubs
             class MemoryMetadataDbBuilder: public otp::storage::db::MetadataDbBuilder
             {
             public:
-                MemoryMetadataDbManager * build(void) const;
+                MemoryMetadataDbManager * build(void) const override;
             };
         }
     }

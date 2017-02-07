@@ -29,17 +29,17 @@ namespace stubs
         public:
             const QHash<QString,QVariant>& rawStorage(void) const;
         public:
-            QString entryId(void) const;
-            otp::storage::OTPTokenType type(void) const;
-            bool writePassword(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation);
-            bool readTokenType(otp::storage::OTPTokenType& type) const;
-            bool writeTokenType(const otp::storage::OTPTokenType& type);
-            bool readParam(const QString& param, QVariant& value) const;
-            bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const;
-            bool writeParam(const QString& param, const QVariant& value);
-            bool exists(void) const;
-            bool commit(void);
-            bool poll(void);
+            QString entryId(void) const override;
+            otp::storage::OTPTokenType type(void) const override;
+            bool writePassword(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation) override;
+            bool readTokenType(otp::storage::OTPTokenType& type) const override;
+            bool writeTokenType(const otp::storage::OTPTokenType& type) override;
+            bool readParam(const QString& param, QVariant& value) const override;
+            bool readPassword(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret) const override;
+            bool writeParam(const QString& param, const QVariant& value) override;
+            bool exists(void) const override;
+            bool commit(void) override;
+            bool poll(void) override;
         protected:
             bool allowWritePassword(void) const;
             bool allowWriteParam(void) const;
@@ -58,6 +58,8 @@ namespace mock
         class MockStoragePrivate: public otp::storage::StoragePrivate
         {
         public:
+            MockStoragePrivate();
+            virtual ~MockStoragePrivate();
             MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));
             MOCK_CONST_METHOD1(readPassword, bool(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret));
             MOCK_CONST_METHOD1(readTokenType, bool(otp::storage::OTPTokenType& type));
@@ -77,6 +79,8 @@ namespace mock
         class DelegatingMockStoragePrivate: public otp::storage::StoragePrivate
         {
         public:
+            DelegatingMockStoragePrivate();
+            virtual ~DelegatingMockStoragePrivate();
             MOCK_CONST_METHOD0(entryId, QString(void));
             MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType(void));
             MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));

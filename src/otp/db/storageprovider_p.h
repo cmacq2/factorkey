@@ -17,14 +17,14 @@ namespace otp
             public:
                 DbStorageProviderPrivate(const QSharedPointer<MetadataDbBuilder> dbInfo, const QSharedPointer<otp::secrets::SecretsAPIBuilder> secretsInfo);
                 virtual ~DbStorageProviderPrivate();
-                bool contains(const QString& entry);
-                bool entries(QStringList& entryList);
+                bool contains(const QString& entry) override;
+                bool entries(QStringList& entryList) override;
             protected:
-                bool isOpened(void);
-                bool openBackend(void);
-                bool closeBackend(void);
-                otp::storage::Storage * doCreate(const QString& entry, OTPTokenType type);
-                otp::storage::Storage * doLookup(const QString& entry);
+                bool isOpened(void) override;
+                bool openBackend(void) override;
+                bool closeBackend(void) override;
+                otp::storage::Storage * doCreate(const QString& entry, OTPTokenType type) override;
+                otp::storage::Storage * doLookup(const QString& entry) override;
             private:
                 const QSharedPointer<MetadataDbBuilder> m_dbInfo;
                 const QSharedPointer<otp::secrets::SecretsAPIBuilder> m_secretsInfo;

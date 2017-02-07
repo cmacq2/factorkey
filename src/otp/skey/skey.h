@@ -58,10 +58,10 @@ namespace otp
         {
         public:
             DefaultDictionary(const QStringList& words, const SKeyWordComparator& cmp);
-            int size(void) const;
-            bool validate(void) const;
-            int valueOf(const QString& word) const;
-            QString word(int value) const;
+            int size(void) const override;
+            bool validate(void) const override;
+            int valueOf(const QString& word) const override;
+            QString word(int value) const override;
         private:
             const QStringList m_words;
             const SKeyWordComparator m_comparator;
