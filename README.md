@@ -79,3 +79,15 @@ Use `-DCMAKE_PREFIX_PATH` to point cmake to locally built versions of factorkey 
         -DCMAKE_PREFIX_PATH="/path/to/locally/built/versions/of/kde-5;/path/to/locally/built/versions/of/qtkeychain/usr/local" ../factorkey/
         ../factorkey/
 ```
+
+### Permitting debuggers to attach to the process with `ptrace()`
+By default functionality is included with factorkey to prevent other processes from attaching to a running factorkey process with `ptrace()`. This is a counter measure against information leaks (of token secrets) through malicious use of `ptrace()` (e.g. by abusing debuggers). This does not prevent debugging when the process itself is launched (`fork()`'ed) by the debugger itself, but it does guard against processes attaching to a running factorkey process later.
+
+To disable this protection and permit attaching to running factorkey processes with `ptrace()` regardless the `ALLOW_DUMPING` flag may be passed to `cmake` as follows:
+```
+    cmake -DALLOW_DUMPING=1
+```
+
+#### OS support
+At this time the feature is available for Linux only as it relies on `prctl()` to work.
+

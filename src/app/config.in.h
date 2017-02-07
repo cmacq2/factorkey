@@ -8,6 +8,8 @@
 
 #cmakedefine FACTORKEY_WITH_KWALLET         1
 #cmakedefine FACTORKEY_WITH_QT_KEYCHAIN     1
+#cmakedefine FACTORKEY_WITH_DUMPING         1
+#cmakedefine FACTORKEY_USE_LINUX_PRCTL      1
 
 #endif
 
