@@ -1,5 +1,6 @@
 #include "otp/generator.h"
 #include "app/storageprovider.h"
+#include "app/cli.h"
 #include "otp/dummy/generator.h"
 #include "otp/oath/generator.h"
 #include "otp/skey/generator.h"
@@ -535,9 +536,8 @@ static bool accept_options(QObject * owner,
         edit_token(tokenId, storageBackend, owner, options, secret_result);
 }
 
-void run(const QCommandLineParser& options)
+void run(const QCommandLineParser& options, int& result)
 {
-    int result = -1;
     QObject * owner = new QObject();
 
     bool cleanup_prepared = QObject::connect(owner, &QObject::destroyed, [&result](QObject *) -> void
@@ -585,12 +585,16 @@ void run(const QCommandLineParser& options)
 
 int main(int argc, char** argv)
 {
-    QCoreApplication app(argc, argv);
-    app.setApplicationVersion(QLatin1String("0.1"));
-    QCommandLineParser cli;
-    cli.setApplicationDescription(QCoreApplication::translate(TR_DOMAIN, "Configure parameters of one time password (OTP) tokens"));
+    const otp::app::cli::ApplicationDecorator metadata([](QCoreApplication& app) -> void
+    {
+        app.setApplicationVersion(QLatin1String("0.1"));
+    });
 
-    if(cli.addOption(HASH_ALGORITHM_OPTION) &&
+    const otp::app::cli::RegisterCommandLineOptions options([](QCommandLineParser& cli) -> bool
+    {
+        cli.setApplicationDescription(QCoreApplication::translate(TR_DOMAIN, "Configure parameters of one time password (OTP) tokens"));
+
+        return cli.addOption(HASH_ALGORITHM_OPTION) &&
         cli.addOption(HOTP_COUNTER_OPTION) &&
         cli.addOption(TOTP_EPOCH_OPTION) &&
         cli.addOption(SKEY_ENCODING_OPTION) &&
@@ -600,18 +604,8 @@ int main(int argc, char** argv)
         cli.addOption(SECRET_OPTION) &&
         cli.addOption(SECRET_BASE32_OPTION) &&
         cli.addOption(TOTP_TIMESTEP_OPTION) &&
-        samples::cli::addSharedOptions(cli))
-    {
-        QTimer::singleShot(0, [&app, &cli]() -> void
-        {
-            cli.process(app);
-            run(cli);
-        });
-        return QCoreApplication::exec();
-    }
-    else
-    {
-        qDebug() << "Failed to set up options";
-        return -1;
-    }
+        samples::cli::addSharedOptions(cli);
+    });
+
+    return otp::app::cli::skeleton_main(argc, argv, options, run, metadata);
 }

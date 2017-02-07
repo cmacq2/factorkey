@@ -1,6 +1,7 @@
 #include "otp/generator.h"
 #include "otp/skey/generator.h"
 #include "app/storageprovider.h"
+#include "app/cli.h"
 
 #include "shared-cli-options.h"
 
@@ -197,24 +198,15 @@ void run(const QCommandLineParser& options, int& result)
 
 int main(int argc, char** argv)
 {
-    int result = -1;
-    QCoreApplication app(argc, argv);
-    app.setApplicationVersion(QLatin1String("0.1"));
-    QCommandLineParser cli;
-    cli.setApplicationDescription(QCoreApplication::translate(TR_DOMAIN, "Generate one time password (OTP) tokens"));
+    const otp::app::cli::ApplicationDecorator metadata([](QCoreApplication& app) -> void
+    {
+        app.setApplicationVersion(QLatin1String("0.1"));
+    });
+    const otp::app::cli::RegisterCommandLineOptions options([](QCommandLineParser& cli) -> bool
+    {
+        cli.setApplicationDescription(QCoreApplication::translate(TR_DOMAIN, "Generate one time password (OTP) tokens"));
+        return cli.addOption(SKEY_CHALLENGE_OPTION) && cli.addOption(LIST_ENTRIES_OPTION) && samples::cli::addSharedOptions(cli);
+    });
 
-    if(cli.addOption(SKEY_CHALLENGE_OPTION) && cli.addOption(LIST_ENTRIES_OPTION) && samples::cli::addSharedOptions(cli))
-    {
-        QTimer::singleShot(0, [&app, &cli, &result]() -> void
-        {
-            cli.process(app);
-            run(cli, result);
-        });
-        return QCoreApplication::exec();
-    }
-    else
-    {
-        qDebug() << "Failed to set up options";
-        return result;
-    }
+    return otp::app::cli::skeleton_main(argc, argv, options, run, metadata);
 }

@@ -39,3 +39,7 @@ endif()
 set(AppDebuggingSecurity_SRCS debugger.cpp)
 add_library(AppDebuggingSecurity OBJECT ${AppDebuggingSecurity_SRCS})
 set_public_target_object_vars(AppDebuggingSecurity Qt5::Core)
+
+set(AppCliTemplate_SRCS cli.cpp)
+add_library(AppCliTemplate OBJECT ${AppCliTemplate_SRCS})
+set_public_target_object_vars(AppCliTemplate Qt5::Core)

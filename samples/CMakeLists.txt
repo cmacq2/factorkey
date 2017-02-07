@@ -20,6 +20,8 @@ set(storagehandler_obj_srcs $<TARGET_OBJECTS:OATH_MetaDB> $<TARGET_OBJECTS:SKey_
 set(metadb_obj_srcs $<TARGET_OBJECTS:MetadataDB> $<TARGET_OBJECTS:DBProvider>)
 set(secrets_api_obj_srcs $<TARGET_OBJECTS:SecretsAPI>)
 set(app_storage_obj_srcs $<TARGET_OBJECTS:AppStorageProviderDefault>)
+set(app_debugger_obj_srcs $<TARGET_OBJECTS:AppDebuggingSecurity>)
+set(app_skeleton_obj_srcs $<TARGET_OBJECTS:AppCliTemplate>)
 if(DEFINED FACTORKEY_WITH_KWALLET AND "${FACTORKEY_WITH_KWALLET}")
     set(wallet_obj_srcs $<TARGET_OBJECTS:WalletSecrets>)
 else()
@@ -36,7 +38,7 @@ set(obj_libs_SRCS shared-cli-options.cpp
     ${oath_obj_SRCS} ${oath_token_obj_SRCS} ${steam_obj_srcs} ${skey_obj_SRCS} ${skey_token_obj_srcs}
     ${storage_obj_srcs} ${metadb_obj_srcs} ${storagehandler_obj_srcs}
     ${secrets_api_obj_srcs} ${generator_obj_srcs}
-    ${wallet_obj_srcs} ${keychain_obj_srcs} ${app_storage_obj_srcs})
+    ${wallet_obj_srcs} ${keychain_obj_srcs} ${app_storage_obj_srcs} ${app_debugger_obj_srcs} ${app_skeleton_obj_srcs})
 
 set(lookup_token_SRCS lookup-token-sample.cpp ${obj_libs_SRCS})
 set(create_token_SRCS create-token-sample.cpp ${obj_libs_SRCS})
