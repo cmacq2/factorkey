@@ -50,6 +50,21 @@ namespace stubs
                 virtual bool allowRemoveAll(void) const;
                 virtual bool allowHandler(void) const;
             };
+
+            class FakeSingleItemMetadataDbManager: public DummyMetadataDbManager
+            {
+            public:
+                static QHash<QString, enum otp::storage::OTPTokenType> entryMap(const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
+                static QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>> typeMap(QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
+            public:
+                FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
+                FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler, bool openByDefault);
+                virtual ~FakeSingleItemMetadataDbManager();
+            protected:
+                virtual bool allowRemove(void) const override;
+                virtual bool allowRemoveEntries(void) const override;
+                virtual bool allowRemoveAll(void) const override;
+            };
         }
     }
 }

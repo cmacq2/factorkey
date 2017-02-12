@@ -55,12 +55,13 @@ namespace otp
 
             bool Metadata::poll(void)
             {
-
                 QHash<QString,QVariant> data;
                 otp::storage::OTPTokenType t;
                 if(establishTokenType(t) && m_typeHandler && m_dbManager && m_typeHandler->fetchMetaData(m_entryId, data, m_dbManager.data()))
                 {
                     m_dataRead = data;
+                    m_typeRead = t;
+                    m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(t));
                     return true;
                 }
                 return false;
@@ -115,7 +116,6 @@ namespace otp
                         m_typeRead = v.value<enum otp::storage::OTPTokenType>();
                         if(createHandler(m_typeRead))
                         {
-                            m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(m_typeRead));
                             type = m_typeRead;
                             return true;
                         }
@@ -127,7 +127,7 @@ namespace otp
             bool Metadata::containsType(const QHash<QString,QVariant>& data) const
             {
                 return data.contains(otp::storage::Storage::OTP_TOKEN_TYPE) &&
-                    !m_dataRead.value(otp::storage::Storage::OTP_TOKEN_TYPE).isNull();
+                    !data.value(otp::storage::Storage::OTP_TOKEN_TYPE).isNull();
             }
 
             bool Metadata::haveType(void) const

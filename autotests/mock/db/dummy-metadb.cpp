@@ -200,6 +200,51 @@ namespace stubs
                 }
                 return false;
             }
+
+            QHash<QString, enum otp::storage::OTPTokenType> FakeSingleItemMetadataDbManager::entryMap(const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler)
+            {
+                QHash<QString, enum otp::storage::OTPTokenType> result;
+                if(typeHandler)
+                {
+                    result.insert(entryId, typeHandler->type());
+                }
+                return result;
+            }
+
+            QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>> FakeSingleItemMetadataDbManager::typeMap(QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler)
+            {
+                QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>> result;
+                if(typeHandler)
+                {
+                    result.insert((int) typeHandler->type(), typeHandler);
+                }
+                return result;
+            }
+
+            FakeSingleItemMetadataDbManager::FakeSingleItemMetadataDbManager(
+                const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler) :
+                DummyMetadataDbManager(connName, typeMap(typeHandler), entryMap(entryId, typeHandler)) {}
+
+            FakeSingleItemMetadataDbManager::FakeSingleItemMetadataDbManager(
+                const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler, bool openByDefault):
+                DummyMetadataDbManager(connName, typeMap(typeHandler), entryMap(entryId, typeHandler), openByDefault) {}
+
+            FakeSingleItemMetadataDbManager::~FakeSingleItemMetadataDbManager() {}
+
+            bool FakeSingleItemMetadataDbManager::allowRemove(void) const
+            {
+                return false;
+            }
+
+            bool FakeSingleItemMetadataDbManager::allowRemoveEntries(void) const
+            {
+                return false;
+            }
+
+            bool FakeSingleItemMetadataDbManager::allowRemoveAll(void) const
+            {
+                return false;
+            }
         }
     }
 }

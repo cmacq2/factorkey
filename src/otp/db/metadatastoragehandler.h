@@ -57,6 +57,8 @@ namespace otp
                 static MetadataStorageHandler * build(otp::storage::OTPTokenType type, const QStringList& params, const MappingFunction& mapper, const SchemaFunction& schema);
 
             protected:
+                QSet<QString> diff(const QSet<QString>& newKeys) const;
+                QSet<QString> diff(const QSet<QString>& origKeys, const QSet<QString>& newKeys) const;
 
                 virtual bool query(const QString& sql, const QString& entryId, QHash<QString,QVariant>& params, MetadataDbManager * db) const;
                 virtual bool execute(const QString& sql, const QString& entryId, const QHash<QString,QVariant>& params, const QHash<QString,QString>& mapping, MetadataDbManager * db) const;
@@ -70,8 +72,8 @@ namespace otp
                 MetadataStorageHandler(otp::storage::OTPTokenType type,
                                        const QHash<QString,QString>& tables,
                                        const QSet<QString>& schema,
-                                       const QHash<QString,QString> columnsToParams,
-                                       const QHash<QString,QString> paramsToTables);
+                                       const QHash<QString,QString>& columnsToParams,
+                                       const QHash<QString,QString>& paramsToTables);
             private:
                 const otp::storage::OTPTokenType m_type;
             private:

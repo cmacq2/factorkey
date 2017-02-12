@@ -110,8 +110,8 @@ namespace otp
             MetadataStorageHandler::MetadataStorageHandler(otp::storage::OTPTokenType type,
                                                            const QHash<QString,QString>& tables,
                                                            const QSet<QString>& schema,
-                                                           const QHash<QString,QString> columnsToParams,
-                                                           const QHash<QString,QString> paramsToTables): m_type(type), m_tables(tables), m_schema(schema), m_columnsToParams(columnsToParams), m_paramsToTables(paramsToTables) {}
+                                                           const QHash<QString,QString>& columnsToParams,
+                                                           const QHash<QString,QString>& paramsToTables): m_type(type), m_tables(tables), m_schema(schema), m_columnsToParams(columnsToParams), m_paramsToTables(paramsToTables) {}
             MetadataStorageHandler::~MetadataStorageHandler() {}
 
             const QSet<QString>& MetadataStorageHandler::schema(void) const
@@ -397,10 +397,15 @@ namespace otp
                 return false;
             }
 
-            bool MetadataStorageHandler::pruneMetaData(const QString& entryId, const QSet<QString>& newKeys, const QSet<QString>& tablesToNullify, MetadataDbManager * db) const
+            QSet<QString> MetadataStorageHandler::diff(const QSet<QString>& newKeys) const
             {
-                QSet<QString> origKeys = keys();
-                QMutableSetIterator<QString> iter(origKeys);
+                return diff(keys(), newKeys);
+            }
+
+            QSet<QString> MetadataStorageHandler::diff(const QSet<QString>& origKeys, const QSet<QString>& newKeys) const
+            {
+                QSet<QString> result(origKeys);
+                QMutableSetIterator<QString> iter(result);
                 while(iter.hasNext())
                 {
                     const QString key = iter.next();
@@ -409,12 +414,19 @@ namespace otp
                         iter.remove();
                     }
                 }
+                return result;
+            }
 
-                const std::function<QString(const QString&)> sql([this,&tablesToNullify,&origKeys](const QString& table) -> QString
+            bool MetadataStorageHandler::pruneMetaData(const QString& entryId, const QSet<QString>& newKeys, const QSet<QString>& tablesToNullify, MetadataDbManager * db) const
+            {
+                const QSet<QString> origKeys = keys();
+                QSet<QString> toPrune = diff(origKeys, newKeys);
+
+                const std::function<QString(const QString&)> sql([this,&tablesToNullify,&toPrune](const QString& table) -> QString
                 {
-                    return tablesToNullify.contains(table) ? nullifySql(table, origKeys) : deleteSql(table);
+                    return tablesToNullify.contains(table) ? nullifySql(table, toPrune) : deleteSql(table);
                 });
-                return origKeys.isEmpty() || execute(entryId, origKeys, sql, db);
+                return toPrune.isEmpty() || execute(entryId, origKeys, sql, db);
             }
 
             bool MetadataStorageHandler::resetMetaData(const QString& entryId, const QSet<QString>& params, MetadataDbManager * db) const
