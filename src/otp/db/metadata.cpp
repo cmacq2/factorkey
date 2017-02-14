@@ -71,9 +71,16 @@ namespace otp
             {
                 if(haveType() && m_typeHandler && m_typeHandler->isParamNameValid(param)) {
                     QVariant v;
-                    if(m_dataRead.contains(param))
+                    if(m_dataWrite.contains(param))
                     {
-                        v = m_dataRead.value(param);
+                        v = m_dataWrite.value(param);
+                    }
+                    else
+                    {
+                        if(m_dataRead.contains(param))
+                        {
+                            v = m_dataRead.value(param);
+                        }
                     }
                     value = v;
                     return true;
