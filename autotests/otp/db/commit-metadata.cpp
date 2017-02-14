@@ -10,15 +10,15 @@
 
 #include <QCryptographicHash>
 
-class PollMetadataTest: public QObject
+class CommitMetadataTest: public QObject
 {
     Q_OBJECT
 private Q_SLOTS:
-    void testPolling(void);
-    void testPolling_data(void);
+    void testCommitting(void);
+    void testCommitting_data(void);
 };
 
-void PollMetadataTest::testPolling(void)
+void CommitMetadataTest::testCommitting(void)
 {
     QFETCH(QString, entryId);
     QFETCH(QString, message);
@@ -31,9 +31,6 @@ void PollMetadataTest::testPolling(void)
     QHash<QString,QVariant> metadata;
     QHash<QString,QString> paramToTables;
 
-    metadata.insert(otp::parameters::hashing::ALGORITHM, QVariant(hash));
-    metadata.insert(otp::parameters::key::ENCODING, QVariant(keyEncoding));
-    metadata.insert(otp::dummy::parameters::MESSAGE, QVariant(message));
     metadata.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant(tokenType));
     paramToTables.insert(otp::parameters::hashing::ALGORITHM, dummyTable);
     paramToTables.insert(otp::parameters::key::ENCODING, otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE);
@@ -46,10 +43,27 @@ void PollMetadataTest::testPolling(void)
     QVERIFY2(uut.exists(), "The entry should be considered to exist.");
     QVERIFY2(uut.poll(), "Fetching metadata with poll should succeed.");
 
-    test::storage::db::checkType(uut, (otp::storage::OTPTokenType) tokenType, "Reading token type should succeed");
-    test::storage::db::checkInt(uut, otp::parameters::hashing::ALGORITHM, hash, "Reading the hash algorithm parameter should succeed");
-    test::storage::db::checkInt(uut, otp::parameters::key::ENCODING, keyEncoding, "Reading the key encoding/type parameter should succeed");
-    test::storage::db::checkString(uut, otp::dummy::parameters::MESSAGE, message, "Reading the message parameter should succeed");
+    const QVariant hashValue(hash);
+    QVERIFY2(uut.writeParam(otp::parameters::hashing::ALGORITHM, hashValue), "Writing hash algorithm should succeed");
+
+    const QVariant encodingValue(keyEncoding);
+    QVERIFY2(uut.writeParam(otp::parameters::key::ENCODING, encodingValue), "Writing the key encoding/type should succeed");
+
+    QVERIFY2(metadata.contains(otp::parameters::hashing::ALGORITHM) == false, "Original metadata storage should not reflect changes to hash algoirthm prior to commit()");
+    QVERIFY2(metadata.contains(otp::parameters::key::ENCODING) == false, "Original metadata storage should not reflect changes to key encoding/type prior to commit()");
+
+    QVERIFY2(uut.commit(), "Comitting should succeed");
+
+    QVERIFY2(metadata.contains(otp::parameters::hashing::ALGORITHM) == true, "Original metadata storage should reflect changes to hash algoirthm after commit()");
+    QVERIFY2(metadata.contains(otp::parameters::key::ENCODING) == true, "Original metadata storage should reflect changes to key encoding/type after commit()");
+
+    const auto storedHash = metadata.value(otp::parameters::hashing::ALGORITHM);
+    QCOMPARE(storedHash.type(), QVariant::Int);
+    QCOMPARE(storedHash.toInt(), hashValue.toInt());
+
+    const auto storedEncoding = metadata.value(otp::parameters::key::ENCODING);
+    QCOMPARE(storedEncoding.type(), QVariant::Int);
+    QCOMPARE(storedEncoding.toInt(), encodingValue.toInt());
 }
 
 static void result(const QString& caseName,
@@ -62,7 +76,7 @@ static void result(const QString& caseName,
     QTest::newRow(qPrintable(caseName)) << entryId << message << ((int) tokenType) << ((int) hash) << ((int) keyEncoding);
 }
 
-void PollMetadataTest::testPolling_data(void)
+void CommitMetadataTest::testCommitting_data(void)
 {
     QTest::addColumn<QString>("entryId");
     QTest::addColumn<QString>("message");
@@ -78,6 +92,6 @@ void PollMetadataTest::testPolling_data(void)
            otp::generator::EncodingType::Text);
 }
 
-QTEST_APPLESS_MAIN(PollMetadataTest)
+QTEST_APPLESS_MAIN(CommitMetadataTest)
 
-#include "poll-metadata.moc"
+#include "commit-metadata.moc"
