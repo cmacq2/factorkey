@@ -2,6 +2,7 @@
 #define FACTORKEY_AUTOTESTS_TEST_UTILS_METADATA_H
 
 #include <functional>
+#include <QDateTime>
 #include <QString>
 #include "otp/db/metadata.h"
 
@@ -16,6 +17,7 @@ namespace test
                                                                                       QHash<QString,QVariant>& metadata,
                                                                                       QHash<QString,QString>& paramToTables);
 
+            void checkDateTime(const otp::storage::db::Metadata& uut, const QString& paramName, const QDateTime& expectedValue, const char * msg);
             void checkType(const otp::storage::db::Metadata& uut, const otp::storage::OTPTokenType expectedType, const char * msg);
             void checkString(const otp::storage::db::Metadata& uut, const QString& paramName, const QString& expectedValue, const char * msg);
             void checkInt(const otp::storage::db::Metadata& uut, const QString& paramName, const int expectedValue, const char * msg);

@@ -27,7 +27,6 @@ namespace otp
                     return true;
                 }
 
-
                 if(m_typeHandler && m_dbManager)
                 {
                     /*
@@ -61,6 +60,8 @@ namespace otp
                 {
                     m_dataRead = data;
                     m_typeRead = t;
+                    m_typeWrite = t;
+                    m_dataWrite.clear();
                     m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(t));
                     return true;
                 }
@@ -69,7 +70,7 @@ namespace otp
 
             bool Metadata::readParam(const QString& param, QVariant& value) const
             {
-                if(haveType() && m_typeHandler && m_typeHandler->isParamNameValid(param)) {
+                if(m_typeHandler && m_typeHandler->isParamNameValid(param)) {
                     QVariant v;
                     if(m_dataWrite.contains(param))
                     {
@@ -90,7 +91,7 @@ namespace otp
 
             bool Metadata::writeParam(const QString& param, const QVariant& value)
             {
-                if(haveType() && m_typeHandler && m_typeHandler->isParamNameValid(param))
+                if(m_typeHandler && m_typeHandler->isParamNameValid(param))
                 {
                     m_dataWrite.insert(param, value);
                     return true;
@@ -100,6 +101,11 @@ namespace otp
 
             bool Metadata::readTokenType(otp::storage::OTPTokenType& type) const
             {
+                if(typeWritten())
+                {
+                    type = m_typeWrite;
+                    return true;
+                }
                 if(haveType())
                 {
                     type = m_typeRead;
@@ -110,25 +116,17 @@ namespace otp
 
             bool Metadata::establishTokenType(otp::storage::OTPTokenType& type)
             {
-                if(haveType())
+                QVariant v;
+                if(m_dbManager && m_dbManager->readType(m_entryId, v) && !v.isNull())
                 {
-                    type = m_typeRead;
-                    return true;
-                }
-                else
-                {
-                    QVariant v;
-                    if(m_dbManager && m_dbManager->readType(m_entryId, v) && !v.isNull())
+                    m_typeRead = v.value<enum otp::storage::OTPTokenType>();
+                    if(createHandler(m_typeRead))
                     {
-                        m_typeRead = v.value<enum otp::storage::OTPTokenType>();
-                        if(createHandler(m_typeRead))
-                        {
-                            type = m_typeRead;
-                            return true;
-                        }
+                        type = m_typeRead;
+                        return true;
                     }
-                    return false;
                 }
+                return false;
             }
 
             bool Metadata::containsType(const QHash<QString,QVariant>& data) const

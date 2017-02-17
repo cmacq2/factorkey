@@ -54,9 +54,12 @@ namespace stubs
             class FakeSingleItemMetadataDbManager: public DummyMetadataDbManager
             {
             public:
+                static QHash<QString, enum otp::storage::OTPTokenType> entryMap(const QString& entryId, const otp::storage::OTPTokenType& type);
                 static QHash<QString, enum otp::storage::OTPTokenType> entryMap(const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
                 static QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>> typeMap(QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
             public:
+                FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers, const otp::storage::OTPTokenType& initialType);
+                FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QHash<int, QSharedPointer<otp::storage::db::MetadataStorageHandler>>& typeHandlers, const otp::storage::OTPTokenType& initialType, bool openByDefault);
                 FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler);
                 FakeSingleItemMetadataDbManager(const QString& connName, const QString& entryId, QSharedPointer<otp::storage::db::MetadataStorageHandler>& typeHandler, bool openByDefault);
                 virtual ~FakeSingleItemMetadataDbManager();

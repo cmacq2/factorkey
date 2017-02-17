@@ -28,6 +28,14 @@ namespace test
                 QCOMPARE(typeRead, expectedType);
             }
 
+            void checkDateTime(const otp::storage::db::Metadata& uut, const QString& paramName, const QDateTime& expectedValue, const char * msg)
+            {
+                QVariant paramValue;
+                QVERIFY2(uut.readParam(paramName, paramValue), msg);
+                QCOMPARE(paramValue.type(), QVariant::DateTime);
+                QCOMPARE(paramValue.toDateTime(), expectedValue);
+            }
+
             void checkString(const otp::storage::db::Metadata& uut, const QString& paramName, const QString& expectedValue, const char * msg)
             {
                 QVariant paramValue;

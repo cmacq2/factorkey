@@ -1,4 +1,5 @@
 #include "dummy-metadatastoragehandler.h"
+#include <QtDebug>
 
 namespace stubs
 {
@@ -145,6 +146,12 @@ namespace stubs
                         if(!newKeys.contains(k))
                         {
                             const auto& t = tableForParam(k);
+
+                            /*
+                             * The following construction does nothing if the key should be removed or null'ed but the toNull set is wrong.
+                             * This is deliberate, because there is either an error with tablesToNullify or with the toNull set in that case.
+                             * Such an error should not remain 'invisible', therefore by doing nothing in that case careful scrutiny of the metadata afterwards may reveal it.
+                             */
                             if(tablesToNullify.contains(t))
                             {
                                 if(toNull.contains(k))
@@ -217,7 +224,7 @@ namespace stubs
                 const auto& ks = metadata.keys().toSet();
                 if(allowSaveMetaData() && validate(entryId, ks))
                 {
-                    for(const auto& k: metadata.keys())
+                    for(const auto& k: ks)
                     {
                         m_metadata->insert(k, metadata.value(k));
                     }

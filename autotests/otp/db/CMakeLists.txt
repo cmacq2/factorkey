@@ -42,3 +42,9 @@ add_executable(write-metadata write-metadata.cpp
     ${SharedParameters_UUT_SRCS} ${DummyParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS} ${SKeyParameters_UUT_SRCS} ${SteamParameters_UUT_SRCS}
     ${MetadataDB_UUT_SRCS} ${MetadataDB_STUB_SRCS} ${storage_UUT_SRCS} ${MetadataTestUtil_UUT_SRCS})
 target_link_libraries(write-metadata Qt5::Core Qt5::Sql Qt5::Test)
+
+add_test(convert-metadata convert-metadata)
+add_executable(convert-metadata convert-metadata.cpp
+    ${SharedParameters_UUT_SRCS} ${DummyParameters_UUT_SRCS} ${oath_parameters_UUT_SRCS} ${SKeyParameters_UUT_SRCS} ${SteamParameters_UUT_SRCS}
+    ${MetadataDB_UUT_SRCS} ${MetadataDB_STUB_SRCS} ${storage_UUT_SRCS} ${MetadataTestUtil_UUT_SRCS})
+target_link_libraries(convert-metadata Qt5::Core Qt5::Sql Qt5::Test)
