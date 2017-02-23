@@ -1,6 +1,7 @@
 #include "metadata-test-utils.h"
 #include "autotests/mock/db/dummy-metadatastoragehandler.h"
 #include "autotests/mock/db/dummy-metadb.h"
+#include "autotests/mock/db/memory-metadb.h"
 
 #include <QTest>
 
@@ -51,6 +52,7 @@ namespace test
                 QCOMPARE(paramValue.type(), QVariant::Int);
                 QCOMPARE(paramValue.toInt(), expectedValue);
             }
+
         }
     }
 }

@@ -6,3 +6,7 @@ set_public_target_object_vars(MetadataDBSanityTest Qt5::Core Qt5::Test Qt5::Sql)
 set(MetadataTestUtils_SRCS metadata-test-utils.cpp)
 add_library(MetadataTestUtils OBJECT ${MetadataTestUtils_SRCS})
 set_public_target_object_vars(MetadataTestUtils Qt5::Core Qt5::Test Qt5::Sql)
+
+set(MemoryMetadataTestUtils_SRCS memory-metadata-test-utils.cpp)
+add_library(MemoryMetadataTestUtils OBJECT ${MemoryMetadataTestUtils_SRCS})
+set_public_target_object_vars(MemoryMetadataTestUtils Qt5::Core Qt5::Test Qt5::Sql)

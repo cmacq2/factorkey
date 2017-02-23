@@ -24,7 +24,7 @@ namespace otp
             const QString MetadataStorageHandler::OTP_ENTRY_TABLE = OTP_ENTRY_TABLE_NAME;
             const QString MetadataStorageHandler::OTP_ENTRY_ID = OTP_ENTRY_ID_COLUMN;
             const QString MetadataStorageHandler::OTP_ENTRY_TYPE = OTP_ENTRY_TYPE_COLUMN;
-            const QString MetadataStorageHandler::OTP_ENTRY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%3` INTEGER NOT NULL, `%4` VARCHAR(255), `%5` VARCHAR(36), `%6` INTEGER NOT NULL);\n")).
+            const QString MetadataStorageHandler::OTP_ENTRY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%3` INTEGER NOT NULL, `%4` VARCHAR(255), `%5` VARCHAR(36), `%6` INTEGER);\n")).
                 arg(OTP_ENTRY_TABLE_NAME).
                 arg(OTP_ENTRY_ID_COLUMN).
                 arg(OTP_ENTRY_TYPE_COLUMN).
@@ -216,8 +216,10 @@ namespace otp
             {
                 const auto all = keys();
                 QSet<QString> tables;
-                int count = 0;
-                QString sql(QLatin1String(""));
+                int count = 1;
+
+                QString sql = QString(QLatin1String("SELECT * FROM `%1` AS s0")).arg(OTP_ENTRY_TABLE);
+                tables.insert(OTP_ENTRY_TABLE);
 
                 for(const QString k: all)
                 {
@@ -225,17 +227,13 @@ namespace otp
                     if(!tables.contains(tbl))
                     {
                         tables.insert(tbl);
-                        QString fmt = count > 0 ?
-                            QLatin1String(" JOIN (SELECT * FROM `%1` WHERE `%2` = :%2) AS s%3 ON `%2`"):
-                            QLatin1String("(SELECT * FROM `%1` WHERE `%2` = :%2) AS s%3");
-
-                        sql += fmt.arg(tbl).arg(OTP_ENTRY_ID).arg(count);
+                        QString fmt = QLatin1String(" LEFT JOIN `%1` AS s%3 ON s%3 . `%2` = s%4 . `%2`");
+                        sql += fmt.arg(tbl).arg(OTP_ENTRY_ID).arg(count).arg(count -1);
                         count ++;
                     }
                 }
 
-                sql += QLatin1String(";\n");
-
+                sql += QString(QLatin1String(" WHERE s0 . `%1` = :%1")).arg(OTP_ENTRY_ID);
                 return sql;
             }
 
@@ -277,7 +275,7 @@ namespace otp
             {
                 const auto columns = columnsInTable(table);
 
-                QString fmt = QLatin1String("INSERT INTO OR REPLACE INTO `%1` (`%2`");
+                QString fmt = QLatin1String("INSERT OR REPLACE INTO `%1` (`%2`");
                 QString sql = fmt.arg(table).arg(OTP_ENTRY_ID);
 
                 for(const auto p: columns)

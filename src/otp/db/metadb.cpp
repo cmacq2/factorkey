@@ -217,12 +217,12 @@ namespace otp
                 {
                     if(query.exec() && query.first())
                     {
-                        QVariant v = query.value(1);
-                        if(!v.isNull())
+                        QVariant v = query.value(0);
+                        if(!v.isNull() && v.type() == QVariant::LongLong)
                         {
                             value = v;
+                            return query.lastError().type() == QSqlError::NoError;
                         }
-                        return query.lastError().type() == QSqlError::NoError;
                     }
                     return false;
                 });
@@ -247,23 +247,23 @@ namespace otp
                     arg(MetadataStorageHandler::OTP_ENTRY_ID).
                     arg(MetadataStorageHandler::OTP_ENTRY_TABLE);
 
-                int count = 0;
-                bool ok = false;
+                qlonglong count = 0;
 
-                const std::function<bool(QSqlQuery&)> fn([&count,&ok](QSqlQuery& query) -> bool
+                const std::function<bool(QSqlQuery&)> fn([&count](QSqlQuery& query) -> bool
                 {
                     if(query.exec() && query.first())
                     {
-                        QVariant v = query.value(1);
-                        if(!v.isNull() && v.type() == QVariant::Int)
+                        QVariant v = query.value(0);
+                        if(!v.isNull() && v.type() == QVariant::LongLong)
                         {
-                           count = v.toInt(&ok);
+                            bool ok = false;
+                            count = v.toLongLong(&ok);
+                            return ok && query.lastError().type() == QSqlError::NoError;
                         }
-                        return query.lastError().type() == QSqlError::NoError;
                     }
                     return false;
                 });
-                return queryDb(sql, entry, this, fn) && ok && count > 0;
+                return queryDb(sql, entry, this, fn) && count > 0;
             }
 
             bool MetadataDbManager::entries(QStringList& entryList)
