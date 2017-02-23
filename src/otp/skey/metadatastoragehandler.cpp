@@ -13,7 +13,7 @@ namespace otp
         {
             namespace db
             {
-                const QString SKeyMetadataStorageHandler::SKEY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` VARCHAR(255), `%5` INTEGER NOT NULL, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
+                const QString SKeyMetadataStorageHandler::SKEY_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` VARCHAR(255), `%5` INTEGER, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(SKEY_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).

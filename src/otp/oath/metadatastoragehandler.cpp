@@ -81,7 +81,7 @@ namespace otp
                     return builder.registerType(hh);
                 }
 
-                const QString TOTPMetadataStorageHandler::TOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` INTEGER, `%5` VARCHAR(100), `%6` INTEGER, `%7` UNSIGNED BIGINT, `%8` INTEGER, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
+                const QString TOTPMetadataStorageHandler::TOTP_TABLE_SCHEMA = QString(QLatin1String("CREATE TABLE IF NOT EXISTS `%1` (`%2` VARCHAR(36) NOT NULL PRIMARY KEY, `%4` INTEGER, `%5` VARCHAR(100), `%6` INTEGER, `%7` BIGINT, `%8` INTEGER, FOREIGN KEY(`%2`) REFERENCES `%3` (`%2`) ON DELETE CASCADE ON UPDATE CASCADE);\n")).
                     arg(QLatin1String(TOTP_TABLE_NAME)).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_ID).
                     arg(otp::storage::db::MetadataStorageHandler::OTP_ENTRY_TABLE).
