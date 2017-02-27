@@ -1,7 +1,5 @@
 #include "metadata.h"
 
-Q_DECLARE_METATYPE(enum otp::storage::OTPTokenType)
-
 namespace otp
 {
     namespace storage
@@ -32,16 +30,23 @@ namespace otp
                     /*
                      * Construct a QHash representation of the full, desired state of the meta data.
                      */
-                    QHash<QString,QVariant> newParamState(m_dataWrite);
+                    QHash<QString,QVariant> newParamState;
+                    for(const auto k: m_dataWrite.keys())
+                    {
+                        if(m_typeHandler->isParamNameValid(k))
+                        {
+                            newParamState.insert(k, m_dataWrite.value(k));
+                        }
+                    }
                     for(const auto k: m_dataRead.keys())
                     {
-                        if(!newParamState.contains(k))
+                        if(!newParamState.contains(k) && m_typeHandler->isParamNameValid(k))
                         {
                             newParamState.insert(k, m_dataRead.value(k));
                         }
                     }
 
-                    if(m_typeHandler->saveMetaData(m_entryId, m_dataWrite, m_dbManager.data()))
+                    if(m_typeHandler->saveMetaData(m_entryId, newParamState, m_dbManager.data()))
                     {
                         m_dataRead = newParamState;
                         m_typeRead = m_typeWrite;
@@ -62,7 +67,7 @@ namespace otp
                     m_typeRead = t;
                     m_typeWrite = t;
                     m_dataWrite.clear();
-                    m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(t));
+                    m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant((qlonglong) t));
                     return true;
                 }
                 return false;
@@ -119,10 +124,10 @@ namespace otp
                 QVariant v;
                 if(m_dbManager && m_dbManager->readType(m_entryId, v) && !v.isNull())
                 {
-                    m_typeRead = v.value<enum otp::storage::OTPTokenType>();
-                    if(createHandler(m_typeRead))
+                    const auto result = (otp::storage::OTPTokenType) v.toLongLong();
+                    if(createHandler(result))
                     {
-                        type = m_typeRead;
+                        type = result;
                         return true;
                     }
                 }
@@ -148,7 +153,7 @@ namespace otp
                 }
                 if(m_typeHandler)
                 {
-                    m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
+                    m_dataRead.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant((qlonglong) type));
                     m_typeRead = type;
                     return true;
                 }
@@ -201,7 +206,7 @@ namespace otp
                             if(newHandler)
                             {
                                 result = convertHandler(newHandler);
-                                m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
+                                m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant((qlonglong) type));
                                 m_typeWrite = type;
                             }
                         }
@@ -209,7 +214,7 @@ namespace otp
                 }
                 else {
                     if(createHandler(type)) {
-                        m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant::fromValue(type));
+                        m_dataWrite.insert(otp::storage::Storage::OTP_TOKEN_TYPE, QVariant((qlonglong) type));
                         m_typeWrite = type;
                         result = true;
                     }
