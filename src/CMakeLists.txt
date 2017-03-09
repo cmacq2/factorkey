@@ -1,6 +1,7 @@
 
 add_subdirectory(otp)
 add_subdirectory(app)
+add_subdirectory(qml)
 
 if(DEFINED FACTORKEY_WITH_KWALLET AND "${FACTORKEY_WITH_KWALLET}")
     add_subdirectory(wallet)
