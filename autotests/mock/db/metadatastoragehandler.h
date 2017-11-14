@@ -3,7 +3,7 @@
 
 #include "otp/db/metadatastoragehandler.h"
 #include "otp/db/metadb.h"
-#include "autotests/lib/googlemock.h"
+#include "autotests/lib/trompeloeil.h"
 
 namespace mock
 {
@@ -16,35 +16,15 @@ namespace mock
             public:
                 MockMetadataStorageHandler(otp::storage::OTPTokenType type);
                 virtual ~MockMetadataStorageHandler();
-                MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
-                MOCK_CONST_METHOD0(schema, const QSet<QString>&());
-                MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(fetchMetaData, bool(const QString&, QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD4(pruneMetaData, bool(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(deleteMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(resetMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD0(keys, QSet<QString>());
-                MOCK_CONST_METHOD1(isParamNameValid, bool(const QString&));
-            };
-
-            class DelegatingMockMetadataStorageHandler: public otp::storage::db::MetadataStorageHandler
-            {
-            public:
-                DelegatingMockMetadataStorageHandler(otp::storage::OTPTokenType type);
-                virtual ~DelegatingMockMetadataStorageHandler();
-                MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType());
-                MOCK_CONST_METHOD0(schema, const QSet<QString>&());
-                MOCK_CONST_METHOD3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(fetchMetaData, bool(const QString&, QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD4(pruneMetaData, bool(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(deleteMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD3(resetMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
-                MOCK_CONST_METHOD0(keys, QSet<QString>());
-                MOCK_CONST_METHOD1(isParamNameValid, bool(const QString&));
-            private:
-                bool delegateToFake(const QSharedPointer<otp::storage::db::MetadataStorageHandler> fake);
-            private:
-                QSharedPointer<otp::storage::db::MetadataStorageHandler> m_fake;
+                MAKE_CONST_MOCK0(type, otp::storage::OTPTokenType());
+                MAKE_CONST_MOCK0(schema, const QSet<QString>&());
+                MAKE_CONST_MOCK3(saveMetaData, bool(const QString&, const QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MAKE_CONST_MOCK3(fetchMetaData, bool(const QString&, QHash<QString,QVariant>&, otp::storage::db::MetadataDbManager *));
+                MAKE_CONST_MOCK4(pruneMetaData, bool(const QString&, const QSet<QString>&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MAKE_CONST_MOCK3(deleteMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MAKE_CONST_MOCK3(resetMetaData, bool(const QString&, const QSet<QString>&, otp::storage::db::MetadataDbManager *));
+                MAKE_CONST_MOCK0(keys, QSet<QString>());
+                MAKE_CONST_MOCK1(isParamNameValid, bool(const QString&));
             };
         }
     }

@@ -155,27 +155,5 @@ namespace mock
     {
         MockStoragePrivate::MockStoragePrivate() {}
         MockStoragePrivate::~MockStoragePrivate() {}
-        DelegatingMockStoragePrivate::DelegatingMockStoragePrivate() {}
-        DelegatingMockStoragePrivate::~DelegatingMockStoragePrivate() {}
-
-        bool DelegatingMockStoragePrivate::delegateToFake(const QSharedPointer<otp::storage::StoragePrivate> fake)
-        {
-            if(fake)
-            {
-                m_fake = fake;
-                ON_CALL(*this, entryId()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::entryId));
-                ON_CALL(*this, type()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::type));
-                ON_CALL(*this, exists()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::exists));
-                ON_CALL(*this, commit()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::commit));
-                ON_CALL(*this, poll()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::poll));
-                ON_CALL(*this, readParam(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::readParam));
-                ON_CALL(*this, writeParam(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writeParam));
-                ON_CALL(*this, writeTokenType(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writeTokenType));
-                ON_CALL(*this, readTokenType(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::readTokenType));
-                ON_CALL(*this, readPassword(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::readPassword));
-                ON_CALL(*this, writePassword(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StoragePrivate::writePassword));
-            }
-            return fake;
-        }
     }
 }

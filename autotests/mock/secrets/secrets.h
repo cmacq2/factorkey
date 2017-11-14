@@ -5,12 +5,9 @@
 #include <QSharedPointer>
 
 #include "otp/secrets/secrets.h"
-#include "autotests/lib/googlemock.h"
+#include "autotests/lib/trompeloeil.h"
 
 #include <QHash>
-
-using ::testing::_;
-using ::testing::Invoke;
 
 namespace stubs
 {
@@ -80,26 +77,11 @@ namespace mock
         public:
             MockSecretsAPIProvider();
             virtual ~MockSecretsAPIProvider();
-            MOCK_METHOD2(ask, bool(const QString&, const otp::secrets::SecretsAPIProvider::SecretAnswer));
-            MOCK_METHOD3(tell, bool(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm));
-            MOCK_METHOD0(open, bool(void));
-            MOCK_METHOD0(close, bool(void));
-            MOCK_CONST_METHOD0(isOpened, bool(void));
-        };
-
-        class DelegatingMockSecretsAPIProvider: public otp::secrets::SecretsAPIProvider
-        {
-        public:
-            DelegatingMockSecretsAPIProvider();
-            virtual ~DelegatingMockSecretsAPIProvider();
-            MOCK_METHOD2(ask, bool(const QString&, const otp::secrets::SecretsAPIProvider::SecretAnswer));
-            MOCK_METHOD3(tell, bool(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm));
-            MOCK_METHOD0(open, bool(void));
-            MOCK_METHOD0(close, bool(void));
-            MOCK_CONST_METHOD0(isOpened, bool(void));
-            bool delegateToFake(const QSharedPointer<otp::secrets::SecretsAPIProvider> fake);
-        private:
-            QSharedPointer<SecretsAPIProvider> m_fake;
+            MAKE_MOCK2(ask, bool(const QString&, const otp::secrets::SecretsAPIProvider::SecretAnswer), override);
+            MAKE_MOCK3(tell, bool(const QString& entryId, const QString& secret, const otp::secrets::SecretsAPIProvider::SecretConfirmation confirm), override);
+            MAKE_MOCK0(open, bool(void), override);
+            MAKE_MOCK0(close, bool(void), override);
+            MAKE_CONST_MOCK0(isOpened, bool(void), override);
         };
     }
 }

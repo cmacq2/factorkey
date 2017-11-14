@@ -1,6 +1,5 @@
 #include "storageprovider.h"
 
-
 namespace stubs
 {
     namespace storage
@@ -134,22 +133,5 @@ namespace mock
     {
         MockStorageProviderPrivate::MockStorageProviderPrivate() {}
         MockStorageProviderPrivate::~MockStorageProviderPrivate() {}
-        DelegatingMockStorageProviderPrivate::DelegatingMockStorageProviderPrivate() {}
-        DelegatingMockStorageProviderPrivate::~DelegatingMockStorageProviderPrivate() {}
-
-        bool DelegatingMockStorageProviderPrivate::delegateToFake(const QSharedPointer<otp::storage::StorageProviderPrivate> fake)
-        {
-            if(fake)
-            {
-                m_fake = fake;
-                ON_CALL(*this, open()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::open));
-                ON_CALL(*this, close()).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::close));
-                ON_CALL(*this, contains(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::contains));
-                ON_CALL(*this, entries(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::entries));
-                ON_CALL(*this, lookup(_)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::lookup));
-                ON_CALL(*this, create(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::storage::StorageProviderPrivate::create));
-            }
-            return fake;
-        }
     }
 }

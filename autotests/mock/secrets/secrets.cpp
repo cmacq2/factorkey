@@ -165,27 +165,11 @@ namespace stubs
     }
 }
 
-
 namespace mock
 {
     namespace secrets
     {
         MockSecretsAPIProvider::MockSecretsAPIProvider() {}
         MockSecretsAPIProvider::~MockSecretsAPIProvider() {}
-        DelegatingMockSecretsAPIProvider::DelegatingMockSecretsAPIProvider() {}
-        DelegatingMockSecretsAPIProvider::~DelegatingMockSecretsAPIProvider() {}
-
-        bool DelegatingMockSecretsAPIProvider::delegateToFake(const QSharedPointer<otp::secrets::SecretsAPIProvider> fake)
-        {
-            if(fake)
-            {
-                ON_CALL(*this, ask(_, _)).WillByDefault(Invoke(m_fake.data(), &otp::secrets::SecretsAPIProvider::ask));
-                ON_CALL(*this, tell(_, _,  _)).WillByDefault(Invoke(m_fake.data(), &otp::secrets::SecretsAPIProvider::tell));
-                ON_CALL(*this, open()).WillByDefault(Invoke(m_fake.data(), &otp::secrets::SecretsAPIProvider::open));
-                ON_CALL(*this, close()).WillByDefault(Invoke(m_fake.data(), &otp::secrets::SecretsAPIProvider::close));
-                ON_CALL(*this, isOpened()).WillByDefault(Invoke(m_fake.data(), &otp::secrets::SecretsAPIProvider::isOpened));
-            }
-            return fake;
-        }
     }
 }

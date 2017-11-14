@@ -25,7 +25,7 @@ Factorkey requires Qt 5, therefore if QtKeychain is used it must be the Qt5Keych
 
 ### Git Submodules
 Additionally the following dependencies are pulled in via git submodules:
- * Google Test, Mock (googletest)
+ * Trompeloeil
 
 ## Build
 Obtain necessary git submodules with:

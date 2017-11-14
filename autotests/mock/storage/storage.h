@@ -4,10 +4,7 @@
 #include <QSharedPointer>
 
 #include "otp/storage/storage_p.h"
-#include "autotests/lib/googlemock.h"
-
-using ::testing::_;
-using ::testing::Invoke;
+#include "autotests/lib/trompeloeil.h"
 
 namespace stubs
 {
@@ -60,43 +57,20 @@ namespace mock
         public:
             MockStoragePrivate();
             virtual ~MockStoragePrivate();
-            MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));
-            MOCK_CONST_METHOD1(readPassword, bool(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret));
-            MOCK_CONST_METHOD1(readTokenType, bool(otp::storage::OTPTokenType& type));
+            MAKE_CONST_MOCK2(readParam, bool(const QString& param, QVariant& value), override);
+            MAKE_CONST_MOCK1(readPassword, bool(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret), override);
+            MAKE_CONST_MOCK1(readTokenType, bool(otp::storage::OTPTokenType& type), override);
 
-            MOCK_METHOD2(writePassword, bool(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation));
-            MOCK_METHOD1(writeTokenType, bool(const otp::storage::OTPTokenType& type));
-            MOCK_METHOD2(writeParam, bool(const QString& param, const QVariant& value));
+            MAKE_MOCK2(writePassword, bool(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation), override);
+            MAKE_MOCK1(writeTokenType, bool(const otp::storage::OTPTokenType& type), override);
+            MAKE_MOCK2(writeParam, bool(const QString& param, const QVariant& value), override);
 
-            MOCK_CONST_METHOD0(entryId, QString(void));
-            MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType(void));
+            MAKE_CONST_MOCK0(entryId, QString(void), override);
+            MAKE_CONST_MOCK0(type, otp::storage::OTPTokenType(void), override);
 
-            MOCK_CONST_METHOD0(exists, bool(void));
-            MOCK_METHOD0(commit, bool(void));
-            MOCK_METHOD0(poll, bool(void));
-        };
-
-        class DelegatingMockStoragePrivate: public otp::storage::StoragePrivate
-        {
-        public:
-            DelegatingMockStoragePrivate();
-            virtual ~DelegatingMockStoragePrivate();
-            MOCK_CONST_METHOD0(entryId, QString(void));
-            MOCK_CONST_METHOD0(type, otp::storage::OTPTokenType(void));
-            MOCK_CONST_METHOD2(readParam, bool(const QString& param, QVariant& value));
-            MOCK_CONST_METHOD1(readPassword, bool(const otp::secrets::SecretsAPIProvider::SecretAnswer& secret));
-            MOCK_CONST_METHOD0(exists, bool(void));
-            MOCK_CONST_METHOD1(readTokenType, bool(otp::storage::OTPTokenType& type));
-
-            MOCK_METHOD2(writePassword, bool(const QString& password, const otp::secrets::SecretsAPIProvider::SecretConfirmation& confirmation));
-            MOCK_METHOD1(writeTokenType, bool(const otp::storage::OTPTokenType& type));
-            MOCK_METHOD2(writeParam, bool(const QString& param, const QVariant& value));
-            MOCK_METHOD0(commit, bool(void));
-            MOCK_METHOD0(poll, bool(void));
-
-            bool delegateToFake(const QSharedPointer<otp::storage::StoragePrivate> fake);
-        private:
-            QSharedPointer<otp::storage::StoragePrivate> m_fake;
+            MAKE_CONST_MOCK0(exists, bool(void), override);
+            MAKE_MOCK0(commit, bool(void), override);
+            MAKE_MOCK0(poll, bool(void), override);
         };
     }
 }

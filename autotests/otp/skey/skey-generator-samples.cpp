@@ -1,6 +1,7 @@
 
 #include "otp/skey/generator.h"
 #include "autotests/mock/storage/storage.h"
+#include "autotests/lib/trompeloeil.h"
 #include "otp/skey/parameters.h"
 #include "otp/parameters.h"
 
@@ -32,13 +33,16 @@ private Q_SLOTS:
     void testWordsSamples_data(void);
 private:
     void setupColumns(void);
-    void testGenerator(otp::skey::generator::SKeyEncodingType tokenFormat, const QVariant& dictionaryValue = QVariant());
+    void testGenerator(otp::skey::generator::SKeyEncodingType tokenFormat, const QVariant dictionaryValue = QVariant());
 };
 
-void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingType tokenFormat, const QVariant& dictionaryValue)
+void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingType tokenFormat, const QVariant dictionaryValue)
 {
     QFETCH(QString, secret);
     QFETCH(QString, challenge);
+
+    std::vector<autotests::integration::ExpectationViolation> violations;
+    const auto old = autotests::integration::setup(violations);
 
     QHash<QString, QVariant> map;
     map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Text);
@@ -46,45 +50,39 @@ void SKeyGeneratorSamplesTest::testGenerator(otp::skey::generator::SKeyEncodingT
     map.insert(otp::skey::parameters::DICTIONARY, dictionaryValue);
     map.insert(otp::skey::parameters::ENCODING, (int) tokenFormat);
 
-    QObject * parent = new QObject();
+    SKeyStoragePrivate stub(secret, map);
 
-    QSharedPointer<SKeyStoragePrivate> stub(new SKeyStoragePrivate(secret, map));
-    auto mock = new mock::storage::DelegatingMockStoragePrivate();
-    mock->delegateToFake(stub);
+    auto mock = new mock::storage::MockStoragePrivate();
 
-    EXPECT_CALL(*mock, type()).Times(1);
+    REQUIRE_CALL(*mock, type()).TIMES(1).LR_RETURN(stub.type());
+    REQUIRE_CALL(*mock, readPassword(trompeloeil::_)).TIMES(1).LR_RETURN(stub.readPassword(_1));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::parameters::key::ENCODING), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1, _2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::parameters::key::CHARSET), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1, _2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::skey::parameters::ENCODING), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1,_2));
 
-    EXPECT_CALL(*mock, readPassword(testing::_)).Times(1);
+    // cannot set the 'real' expectation inside an if() statement
+    // because the destructor gets called at the end of the scope (effectively, removing it again)
+    const auto ugly = tokenFormat == otp::skey::generator::SKeyEncodingType::Words
+        ? NAMED_REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::skey::parameters::DICTIONARY), trompeloeil::_)).TIMES(1).RETURN(stub.readParam(_1,_2))
+        : NAMED_FORBID_CALL(*mock, readParam(trompeloeil::eq(otp::skey::parameters::DICTIONARY), trompeloeil::_));
 
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::ENCODING), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::CHARSET), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::skey::parameters::ENCODING), testing::_)).Times(1);
+    QScopedPointer<otp::storage::Storage> storage(new otp::storage::Storage(mock));
+    QScopedPointer<otp::skey::generator::SKeyTokenParameters> params(otp::skey::generator::SKeyTokenParameters::from(storage.data()));
+    QScopedPointer<otp::generator::TokenGenerator> generator(params->generator());
 
-    if(tokenFormat == otp::skey::generator::SKeyEncodingType::Words)
+    try {
+        QString token;
+        QVERIFY2(params->setChallenge(challenge), "The challenge should be accepted");
+        QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
+        QTEST(token, "rfc-test-vector");
+    }
+    catch(autotests::integration::ExpectationViolationException& ev)
     {
-        EXPECT_CALL(*mock, readParam(testing::Eq(otp::skey::parameters::DICTIONARY), testing::_)).Times(1);
+        const auto msg = ev.report();
+        QFAIL(msg.data());
     }
 
-    EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writePassword(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*mock, poll()).Times(0);
-    EXPECT_CALL(*mock, exists()).Times(0);
-    EXPECT_CALL(*mock, commit()).Times(0);
-
-    auto storage = new otp::storage::Storage(mock, parent);
-    auto params = otp::skey::generator::SKeyTokenParameters::from(storage, parent);
-    auto generator = params->generator(parent);
-
-    QString token;
-    QVERIFY2(params->setChallenge(challenge), "The challenge should be accepted");
-    QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
-    QTEST(token, "rfc-test-vector");
-
-    QVERIFY2(testing::Mock::VerifyAndClearExpectations(mock), "Interactions with the mock should match expectations");
-
-    delete parent;
+    QVERIFY2(autotests::integration::verifyExpectations(violations), "Interactions with the mock should match expectations");
 }
 
 static void result(const QString& challenge, const QString& secret, const QString& rfcTestVector)

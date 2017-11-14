@@ -5,10 +5,7 @@
 #include <QSharedPointer>
 
 #include "otp/storage/storage_p.h"
-#include "autotests/lib/googlemock.h"
-
-using ::testing::_;
-using ::testing::Invoke;
+#include "autotests/lib/trompeloeil.h"
 
 namespace stubs
 {
@@ -55,29 +52,12 @@ namespace mock
         public:
             MockStorageProviderPrivate();
             virtual ~MockStorageProviderPrivate();
-            MOCK_METHOD0(open, bool(void));
-            MOCK_METHOD0(close, bool(void));
-            MOCK_METHOD1(contains, bool(const QString& entry));
-            MOCK_METHOD1(entries, bool(QStringList&));
-            MOCK_METHOD1(lookup, otp::storage::Storage * (const QString& entry));
-            MOCK_METHOD2(create, otp::storage::Storage * (const QString& entry, otp::storage::OTPTokenType type));
-        };
-
-        class DelegatingMockStorageProviderPrivate: public otp::storage::StorageProviderPrivate
-        {
-        public:
-            DelegatingMockStorageProviderPrivate();
-            virtual ~DelegatingMockStorageProviderPrivate();
-            MOCK_METHOD0(open, bool(void));
-            MOCK_METHOD0(close, bool(void));
-            MOCK_METHOD1(contains, bool(const QString& entry));
-            MOCK_METHOD1(entries, bool(QStringList&));
-            MOCK_METHOD1(lookup, otp::storage::Storage * (const QString& entry));
-            MOCK_METHOD2(create, otp::storage::Storage * (const QString& entry, otp::storage::OTPTokenType type));
-
-            bool delegateToFake(const QSharedPointer<otp::storage::StorageProviderPrivate> fake);
-        private:
-            QSharedPointer<otp::storage::StorageProviderPrivate> m_fake;
+            MAKE_MOCK0(open, bool(void), override);
+            MAKE_MOCK0(close, bool(void), override);
+            MAKE_MOCK1(contains, bool(const QString& entry), override);
+            MAKE_MOCK1(entries, bool(QStringList&), override);
+            MAKE_MOCK1(lookup, otp::storage::Storage * (const QString& entry), override);
+            MAKE_MOCK2(create, otp::storage::Storage * (const QString& entry, otp::storage::OTPTokenType type), override);
         };
     }
 }

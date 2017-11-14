@@ -3,6 +3,7 @@
 #include "otp/oath/oath.h"
 #include "otp/base32/base32.h"
 #include "autotests/mock/storage/storage.h"
+#include "autotests/lib/trompeloeil.h"
 #include "otp/oath/parameters.h"
 #include "otp/parameters.h"
 
@@ -37,6 +38,9 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     QFETCH(QString, secret);
     QFETCH(int, timeSteps);
 
+    std::vector<autotests::integration::ExpectationViolation> violations;
+    const auto old = autotests::integration::setup(violations);
+
     QHash<QString, QVariant> map;
     map.insert(otp::parameters::key::ENCODING, (int) otp::generator::EncodingType::Base32);
     map.insert(otp::parameters::hashing::ALGORITHM, QVariant());
@@ -45,42 +49,34 @@ void TOTPGeneratorSamplesTest::testDefaults(void)
     map.insert(otp::oath::parameters::totp::EPOCH, QVariant());
     map.insert(otp::oath::parameters::totp::TIMESTEP, QVariant());
 
-    QObject * parent = new QObject();
+    TOTPStoragePrivate stub(secret, map);
+    auto mock = new mock::storage::MockStoragePrivate();
 
-    QSharedPointer<TOTPStoragePrivate> stub(new TOTPStoragePrivate(secret, map));
-    auto mock = new mock::storage::DelegatingMockStoragePrivate();
-    mock->delegateToFake(stub);
+    REQUIRE_CALL(*mock, type()).TIMES(1).LR_RETURN(stub.type());
+    REQUIRE_CALL(*mock, readPassword(trompeloeil::_)).TIMES(1).LR_RETURN(stub.readPassword(_1));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::oath::parameters::totp::EPOCH), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1, _2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::oath::parameters::totp::TIMESTEP), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1, _2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::parameters::key::ENCODING), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1, _2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::parameters::hashing::ALGORITHM), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1,_2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::oath::parameters::generic::LOCALE), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1,_2));
+    REQUIRE_CALL(*mock, readParam(trompeloeil::eq(otp::oath::parameters::generic::LENGTH), trompeloeil::_)).TIMES(1).LR_RETURN(stub.readParam(_1,_2));
 
-    EXPECT_CALL(*mock, type()).Times(1);
+    QScopedPointer<otp::storage::Storage> storage(new otp::storage::Storage(mock));
+    QScopedPointer< otp::oath::generator::TOTPTokenParameters> params( otp::oath::generator::TOTPTokenParameters::from(storage.data()));
+    QScopedPointer<otp::generator::TokenGenerator> generator(params->generator(timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC));
 
-    EXPECT_CALL(*mock, readPassword(testing::_)).Times(1);
+    try {
+        QString token;
+        QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
+        QTEST(token, "rfc-test-vector");
+    }
+    catch(autotests::integration::ExpectationViolationException& ev)
+    {
+        const auto msg = ev.report();
+        QFAIL(msg.data());
+    }
 
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::totp::EPOCH), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::totp::TIMESTEP), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::key::ENCODING), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::parameters::hashing::ALGORITHM), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LOCALE), testing::_)).Times(1);
-    EXPECT_CALL(*mock, readParam(testing::Eq(otp::oath::parameters::generic::LENGTH), testing::_)).Times(1);
-
-    EXPECT_CALL(*mock, writeParam(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*mock, readTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writeTokenType(testing::_)).Times(0);
-    EXPECT_CALL(*mock, writePassword(testing::_, testing::_)).Times(0);
-    EXPECT_CALL(*mock, poll()).Times(0);
-    EXPECT_CALL(*mock, exists()).Times(0);
-    EXPECT_CALL(*mock, commit()).Times(0);
-
-    auto storage = new otp::storage::Storage(mock, parent);
-    auto params = otp::oath::generator::TOTPTokenParameters::from(storage, parent);
-    auto generator = params->generator(timeSteps * otp::oath::DEFAULT_TIMESTEP_MSEC, parent);
-
-    QString token;
-    QVERIFY2(generator->generateToken(token), "Generating the token should succeed");
-    QTEST(token, "rfc-test-vector");
-
-    QVERIFY2(testing::Mock::VerifyAndClearExpectations(mock), "Interactions with the mock should match expectations");
-
-    delete parent;
+    QVERIFY2(autotests::integration::verifyExpectations(violations), "Interactions with the mock should match expectations");
 }
 
 static void result(int k, const QString& secret, const char * expected)

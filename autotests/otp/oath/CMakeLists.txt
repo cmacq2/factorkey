@@ -28,19 +28,23 @@ set(oath_generator_UUT_SRCS $<TARGET_OBJECTS:OATH_GENERATOR>)
 set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
 set(util_UUT_SRCS $<TARGET_OBJECTS:Util>)
 
+set(mocking_SUPPORT_SRCS $<TARGET_OBJECTS:MockingFrameworkIntegration>)
+
 add_test(hotp-generator-samples hotp-generator-samples)
 add_executable(hotp-generator-samples hotp-generator-samples.cpp
     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-    ${util_UUT_SRCS} ${storage_MOCK_SRCS})
-target_link_libraries(hotp-generator-samples Qt5::Core Qt5::Test gtest gmock)
+    ${util_UUT_SRCS} ${storage_MOCK_SRCS} ${mocking_SUPPORT_SRCS})
+target_link_libraries(hotp-generator-samples Qt5::Core Qt5::Test trompeloeil)
+KDE_TARGET_ENABLE_EXCEPTIONS(hotp-generator-samples PRIVATE)
 
 add_test(totp-generator-samples totp-generator-samples)
 add_executable(totp-generator-samples totp-generator-samples.cpp
     ${oath_UUT_SRCS} ${base32_UUT_SRCS} ${oath_token_UUT_SRCS} ${token_UUT_SRCS}
     ${generator_UUT_SRCS} ${oath_generator_UUT_SRCS} ${storage_UUT_SRCS}
-    ${util_UUT_SRCS} ${storage_MOCK_SRCS})
-target_link_libraries(totp-generator-samples Qt5::Core Qt5::Test gtest gmock)
+    ${util_UUT_SRCS} ${storage_MOCK_SRCS} ${mocking_SUPPORT_SRCS})
+target_link_libraries(totp-generator-samples Qt5::Core Qt5::Test trompeloeil)
+KDE_TARGET_ENABLE_EXCEPTIONS(totp-generator-samples PRIVATE)
 
 set(SharedParameters_UUT_SRCS $<TARGET_OBJECTS:SharedParameters>)
 set(oath_parameters_UUT_SRCS $<TARGET_OBJECTS:OATHParameters>)

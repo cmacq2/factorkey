@@ -1,2 +1,7 @@
 
-add_subdirectory(googletest)
+add_subdirectory(trompeloeil)
+
+set(MockingFrameworkIntegration_SRCS trompeloeil.cpp)
+add_library(MockingFrameworkIntegration OBJECT ${MockingFrameworkIntegration_SRCS})
+set_public_target_object_vars(MockingFrameworkIntegration Qt5::Core Qt5::Test trompeloeil)
+KDE_TARGET_ENABLE_EXCEPTIONS(MockingFrameworkIntegration PUBLIC)

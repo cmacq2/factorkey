@@ -1,3 +1,3 @@
-[submodule "autotests/lib/googletest"]
-	path = autotests/lib/googletest
-	url = git@github.com:google/googletest.git
+[submodule "trompe-l-oeil"]
+	path = autotests/lib/trompeloeil
+	url = git@github.com:/rollbear/trompeloeil.git

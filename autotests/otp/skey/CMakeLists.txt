@@ -42,12 +42,15 @@ set(skey_generator_UUT_SRCS $<TARGET_OBJECTS:SKeyGenerator>)
 set(storage_UUT_SRCS $<TARGET_OBJECTS:Storage>)
 set(util_UUT_SRCS $<TARGET_OBJECTS:Util>)
 
+set(mocking_SUPPORT_SRCS $<TARGET_OBJECTS:MockingFrameworkIntegration>)
+
 add_test(skey-generator-samples skey-generator-samples)
 add_executable(skey-generator-samples skey-generator-samples.cpp
-     ${skey_UUT_SRCS} ${base32_UUT_SRCS} ${skey_token_UUT_SRCS} ${token_UUT_SRCS}
-     ${generator_UUT_SRCS} ${skey_generator_UUT_SRCS} ${storage_UUT_SRCS}
-     ${util_UUT_SRCS} ${storage_MOCK_SRCS})
-target_link_libraries(skey-generator-samples Qt5::Core Qt5::Test gtest gmock)
+    ${skey_UUT_SRCS} ${base32_UUT_SRCS} ${skey_token_UUT_SRCS} ${token_UUT_SRCS}
+    ${generator_UUT_SRCS} ${skey_generator_UUT_SRCS} ${storage_UUT_SRCS}
+    ${util_UUT_SRCS} ${storage_MOCK_SRCS} ${mocking_SUPPORT_SRCS})
+target_link_libraries(skey-generator-samples Qt5::Core Qt5::Test trompeloeil)
+KDE_TARGET_ENABLE_EXCEPTIONS(skey-generator-samples PRIVATE)
 
 set(skey_metadatastorage_UUT_SRCS $<TARGET_OBJECTS:SKey_MetaDB>)
 set(MetadataDB_UUT_SRCS $<TARGET_OBJECTS:MetadataDB>)
