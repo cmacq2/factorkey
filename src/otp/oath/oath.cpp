@@ -15,9 +15,35 @@ namespace otp
             /*
              * It's unclear how TOTP should work when the 'epoch' is in the future
              * as compared to the current date/time in UTC.
-             * With the current approach, the counter is underflowed deliberately.
+             * With the current approach, the counter is 'underflowed' deliberately.
              */
-            quint64 counter = currentMSec - epoch;
+            quint64 counter = 0ULL;
+            if(epoch > currentMSec)
+            {
+                if(epoch > 0) // risk of overflow
+                {
+                    counter = (quint64) epoch;
+                    counter = currentMSec >= 0 ? (counter - currentMSec) : counter + ((quint64) (0LL - currentMSec));
+                }
+                else
+                {
+                    counter = epoch - currentMSec;
+                }
+
+                counter = 0xffffffffffffffffU - counter + 1;
+            }
+            else
+            {
+                if(currentMSec > 0) // risk of overflow
+                {
+                    counter = (quint64) currentMSec;
+                    counter = epoch >= 0 ? (counter - epoch) : counter + ((quint64) (0LL - epoch));
+                }
+                else
+                {
+                    counter = currentMSec - epoch;
+                }
+            }
             return counter / (timeStepMSec == 0 ? DEFAULT_TIMESTEP_MSEC : timeStepMSec);
         }
 

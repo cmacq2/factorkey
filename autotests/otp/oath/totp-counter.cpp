@@ -40,7 +40,11 @@ void TOTPCounterTest::testSample_data(void)
     result("single step after default epoch", corpus[3], 1U);
     result("few ms + step after default epoch", corpus[4], 1U);
 
+    QTest::newRow(qPrintable(QLatin1String("nearly maximum value"))) << (qint64) 0x8000000000000001 << (qint64) 0x7fffffffffffffff << (quint64) 1U << (quint64) 0xfffffffffffffffeU;
     QTest::newRow(qPrintable(QLatin1String("maximum value"))) << (qint64) 0x8000000000000000 << (qint64) 0x7fffffffffffffff << (quint64) 1U << (quint64) 0xffffffffffffffffU;
+    QTest::newRow(qPrintable(QLatin1String("'underflowing' minimum value (1)"))) << (qint64) 0x7fffffffffffffff << (qint64) -0x8000000000000000 << (quint64) 1U << (quint64) 1U;
+    QTest::newRow(qPrintable(QLatin1String("'underflowing' balanced value (0)"))) << (qint64) 0x7fffffffffffffff << (qint64) -0x8000000000000001 << (quint64) 1U << (quint64) 0U;
+    QTest::newRow(qPrintable(QLatin1String("'underflowing' maximum value (-1)"))) << (qint64) 0x2 << (qint64) 0x1 << (quint64) 1U << (quint64) 0xffffffffffffffffU;
 }
 
 void TOTPCounterTest::testSample(void)
