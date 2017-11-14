@@ -238,7 +238,7 @@ namespace otp
             quint32 result = 0U;
             for(int i = 0; i < 4; ++i)
             {
-                result |= ((quint32) (c1[i] & 0xFF)) << ((7 - i) * 8);
+                result |= ((quint32) (c1[i] & 0xFF)) << ((3 - i) * 8);
             }
             return result;
         }
