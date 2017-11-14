@@ -34,7 +34,8 @@ void SKeyChallengeParsingTest::testInvalidHashSamples(void)
 void SKeyChallengeParsingTest::testInvalidHashSamples_data(void)
 {
     QTest::addColumn<QString>("challenge");
-    static const char * challenges[]
+    static const int corpus_length = 13;
+    static const char * challenges[corpus_length]
     {
         "otp-sha256 0 validseed",
         "otp-sha512 1 validseed",
@@ -50,7 +51,7 @@ void SKeyChallengeParsingTest::testInvalidHashSamples_data(void)
         "otp_sha 12 validseed",
         "otp-sha 13 validseed"
     };
-    for(int i = 0; i < 14; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         QTest::newRow(qPrintable(challenge)) << challenge;
@@ -66,11 +67,12 @@ void SKeyChallengeParsingTest::testInvalidSeedSamples(void)
 void SKeyChallengeParsingTest::testInvalidSeedSamples_data(void)
 {
     QTest::addColumn<QString>("challenge");
-    static const char * challenges[]
+    static const int corpus_length = 1;
+    static const char * challenges[corpus_length]
     {
         "otp-sha 0 broken seed"
     };
-    for(int i = 0; i < 1; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         QTest::newRow(qPrintable(challenge)) << challenge;
@@ -85,7 +87,8 @@ void SKeyChallengeParsingTest::testInvalidRoundsSamples(void)
 void SKeyChallengeParsingTest::testInvalidRoundsSamples_data(void)
 {
     QTest::addColumn<QString>("challenge");
-    static const char * challenges[]
+    static const int corpus_length = 11;
+    static const char * challenges[corpus_length]
     {
         "otp-sha1 A validseed0",
         "otp-sha1 - validseed1",
@@ -99,7 +102,7 @@ void SKeyChallengeParsingTest::testInvalidRoundsSamples_data(void)
         "otp-sha1 4_5 validseed9",
         "otp-sha1 3.5 validseed10"
     };
-    for(int i = 0; i < 11; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         QTest::newRow(qPrintable(challenge)) << challenge;
@@ -150,7 +153,8 @@ void SKeyChallengeParsingTest::testValidMd4Samples_data(void)
     QTest::addColumn<QString>("challenge");
     QTest::addColumn<QString>("expectedSeed");
     QTest::addColumn<quint64>("expectedRounds");
-    static const char * challenges[7]
+    static const int corpus_length = 7;
+    static const char * challenges[corpus_length]
     {
         "otp-md4 0 0rounds",
         "otp-md4 1 seed",
@@ -160,12 +164,12 @@ void SKeyChallengeParsingTest::testValidMd4Samples_data(void)
         "otp-md4 5 1",
         "otp-md4 6 HandleOverlyLongSeeds"
     };
-    static const char * seeds[7]
+    static const char * seeds[corpus_length]
     {
         "0rounds", "seed", "SEED", "handle\tbroken", "!@#$%", "1", "HandleOverlyLongSeeds"
     };
 
-    for(int i = 0; i < 7; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         const QString seed =  QLatin1String(seeds[i]);
@@ -178,7 +182,8 @@ void SKeyChallengeParsingTest::testValidMd5Samples_data(void)
     QTest::addColumn<QString>("challenge");
     QTest::addColumn<QString>("expectedSeed");
     QTest::addColumn<quint64>("expectedRounds");
-    static const char * challenges[7]
+    static const int corpus_length = 7;
+    static const char * challenges[corpus_length]
     {
         "otp-md5 0 0rounds",
         "otp-md5 1 seed",
@@ -188,12 +193,12 @@ void SKeyChallengeParsingTest::testValidMd5Samples_data(void)
         "otp-md5 5 1",
         "otp-md5 6 HandleOverlyLongSeeds"
     };
-    static const char * seeds[7]
+    static const char * seeds[corpus_length]
     {
         "0rounds", "seed", "SEED", "handle\tbroken", "!@#$%", "1", "HandleOverlyLongSeeds"
     };
 
-    for(int i = 0; i < 7; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         const QString seed =  QLatin1String(seeds[i]);
@@ -206,7 +211,8 @@ void SKeyChallengeParsingTest::testValidSha1Samples_data(void)
     QTest::addColumn<QString>("challenge");
     QTest::addColumn<QString>("expectedSeed");
     QTest::addColumn<quint64>("expectedRounds");
-    static const char * challenges[7]
+    static const int corpus_length = 7;
+    static const char * challenges[corpus_length]
     {
         "otp-sha1 0 0rounds",
         "otp-sha1 1 seed",
@@ -216,12 +222,12 @@ void SKeyChallengeParsingTest::testValidSha1Samples_data(void)
         "otp-sha1 5 1",
         "otp-sha1 6 HandleOverlyLongSeeds"
     };
-    static const char * seeds[7]
+    static const char * seeds[corpus_length]
     {
         "0rounds", "seed", "SEED", "handle\tbroken", "!@#$%", "1", "HandleOverlyLongSeeds"
     };
 
-    for(int i = 0; i < 7; ++i)
+    for(int i = 0; i < corpus_length; ++i)
     {
         const QString challenge = QLatin1String(challenges[i]);
         const QString seed =  QLatin1String(seeds[i]);
