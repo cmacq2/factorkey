@@ -79,4 +79,3 @@ namespace sanity
     }
 }
 
-#include "metadatastoragehandler-sanity.moc"
