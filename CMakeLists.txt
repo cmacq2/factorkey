@@ -39,7 +39,7 @@ set(KF5_DEP_VERSION "5.1.0") # handled by release scripts
 
 find_package(Qt5 ${REQUIRED_QT_VERSION} REQUIRED COMPONENTS Core Sql CONFIG)
 include(KDEInstallDirs)
-include(KDEFrameworkCompilerSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
 
 set(CMAKE_CXX_STANDARD 14)
 
