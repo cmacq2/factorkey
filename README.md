@@ -20,8 +20,8 @@ Factorkey depends on:
  * Qt5 Test
  * Extra Cmake Modules (ECM)
 
-### Note on KWallet and Qt5Keychain
-Factorkey requires Qt 5, therefore if QtKeychain is used it must be the Qt5Keychain version. Debian users please note: the packaged version of QtKeychain is a Qt 4 version, you will need to compile Qt5Keychain manually and point `cmake` to it using `-DCMAKE_PREFIX_PATH`.
+### Note on QtKeychain
+Factorkey requires Qt 5, therefore if QtKeychain is used it must be the Qt5Keychain version.
 
 ### Git Submodules
 Additionally the following dependencies are pulled in via git submodules:
