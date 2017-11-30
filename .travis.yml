@@ -1,0 +1,17 @@
+
+sudo: required
+
+notifications:
+    email:
+        on_success: change
+        on_failure: change
+
+script: ./docker/travis-ci.sh
+
+env:
+ - image=cmacq2/factorkey-build-env:clang-6.0_qt5keychain-dev
+ - image=cmacq2/factorkey-build-env:clang-6.0_libkf5wallet-dev
+ - image=cmacq2/factorkey-build-env:clang-6.0_qt5keychain-dev_libkf5wallet-dev
+ - image=cmacq2/factorkey-build-env:g..-7_qt5keychain-dev
+ - image=cmacq2/factorkey-build-env:g..-7_libkf5wallet-dev
+ - image=cmacq2/factorkey-build-env:g..-7_qt5keychain-dev_libkf5wallet-dev
