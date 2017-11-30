@@ -1,0 +1,9 @@
+#
+# Auto generated docker file for build env: g++-7 qt5keychain-dev libkf5wallet-dev
+#
+FROM cmacq2/factorkey-build-env:base
+RUN apt-get update -qq && apt-get install -qq -y --no-install-recommends \
+    g++-7 qt5keychain-dev libkf5wallet-dev
+
+CMD ["-DWITH_QT_KEYCHAIN=1", "-DWITH_KWALLET=1"]
+ENV CC="gcc-7" CXX="g++-7"

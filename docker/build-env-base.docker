@@ -1,0 +1,28 @@
+FROM debian:sid-slim
+
+ENV LANG=C.UTF-8 \
+    LANGUAGE=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+RUN apt-get update -qq \
+    && apt-get install -qq -y --no-install-recommends \
+        locales \
+        cmake \
+        extra-cmake-modules \
+        ninja-build \
+        gettext \
+        qt5-default \
+        qtbase5-dev \
+        qtbase5-dev-tools \
+        libqt5sql5 \
+        libqt5sql5-sqlite \
+        libkf5i18n-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && /usr/sbin/locale-gen C.UTF-8 \
+    && /usr/sbin/update-locale LANG=C.UTF-8 \
+    && mkdir -p /factorkey/src \
+    && mkdir -p /factorkey/build \
+    && mkdir -p /factorkey/dist
+
+COPY entrypoint.sh /build-factorkey.sh
+ENTRYPOINT ["/build-factorkey.sh"]
